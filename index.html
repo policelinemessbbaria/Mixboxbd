@@ -1083,7 +1083,7 @@ src="https://www.facebook.com/tr?id=1526489362525698&ev=PageView&noscript=1"
     // VERCEL/NETLIFY HOSTING HELPER (POLYFILL FOR GOOGLE.SCRIPT.RUN)
     // ============================================================
     // নিচে আপনার Google Apps Script-এর বর্তমান Web App URL-টি বসিয়ে দিন:
-    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzh9RTR5-UpgHg9bqAD2o0C_6_hfpLTPX-5ru_lmkBtvcTnNGEyTTTcEpxIoPpr3U6T/exec"; 
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwPBjo3W0UZtqk_sACcccHwifSqAYvqYQ8QiiBQ6obhCb2wjXLpFW-KSbwxD5iWm-VA/exec"; 
 
     if (typeof google === 'undefined' || !google.script) {
         window.google = {
@@ -1536,7 +1536,7 @@ function instantScrollFix() {
 <!-- পরের ভাগ (Part 3) এই লাইনের ঠিক নিচে পেস্ট করুন -->
 <!-- Part 2: JavaScript Logic (Data Loading, Orders, Auth, Cart & Translation Fixes) -->
         // ============================================================
-        // SMART DATA LOADING & VERSION CONTROL (UPDATED & FIXED)
+        // SMART DATA LOADING & VERSION CONTROL (UPDATED)
         // ============================================================
         function loadInitialData() {
             // ==========================================
@@ -1584,7 +1584,7 @@ function instantScrollFix() {
                     initFilterOptions();
                     initPopupSystem();
 
-                    return; // Stop execution, don't fetch from server
+                    return; 
                 } catch (e) {
                     console.error("Cache parse error, falling back to server", e);
                     localStorage.removeItem('cached_app_data');
@@ -1599,15 +1599,9 @@ function instantScrollFix() {
                 .then(response => response.json())
                 .then(res => {
                     if (res.success) {
-                        // ==========================================
-                        // CRITICAL FIX: CHECK SERVER VERSION
-                        // ==========================================
-                        const serverVersion = res.data.serverVersion;
-                        
                         // Save to LocalStorage
                         localStorage.setItem('cached_app_data', JSON.stringify(res.data));
-                        localStorage.setItem('local_data_version', serverVersion); // Save the ACTUAL version ID
-                        // ==========================================
+                        localStorage.setItem('local_data_version', res.data.serverTime); // Using serverTime as version identifier loosely or add version field in API
 
                         // Update App State
                         appData.settings = res.data.settings;
@@ -1635,34 +1629,11 @@ function instantScrollFix() {
                         updateOrderSummary();
                         updateUIText();
 
-                        // ==========================================
-                        // MISSING: SILENT POINTS REFRESH (LIVE DATA)
-                        // ==========================================
-                        // লগইন করা থাকলে পয়েন্ট ব্যাকগ্রাউন্ডে আপডেট করা
-                        if (appData.user) {
-                            google.script.run
-                                .withSuccessHandler((pointsRes) => {
-                                    if (pointsRes.success) {
-                                        appData.user.currentpoints = pointsRes.currentpoints;
-                                        appData.user.pointsexpirydate = pointsRes.pointsexpirydate;
-                                        localStorage.setItem('user', JSON.stringify(appData.user));
-                                        const badge = document.getElementById('accountPtsBadge');
-                                        if(badge) badge.innerText = appData.user.currentpoints;
-                                    }
-                                })
-                                .withFailureHandler((err) => {
-                                    console.error("Silent points refresh failed:", err);
-                                })
-                                .getLatestUserPoints(appData.user.userid);
-                        }
-                        // ==========================================
-
                         initFilterOptions();
                         initPopupSystem();
 
-                        // UX: Toast notification if this was an update (Version Mismatch)
-                        // শুধুমাত্র যখন আগে কোনো ভার্সন ছিল এবং নতুন ভার্সন আসল, তখনই নোটিফিকেশন দেখাবে
-                        if (localVersion && localVersion !== serverVersion) {
+                        // UX: Toast notification if this was an update
+                        if (localVersion && localVersion !== res.data.serverTime) {
                             const Toast = Swal.mixin({
                                 toast: true,
                                 position: 'top-end',
@@ -1672,7 +1643,7 @@ function instantScrollFix() {
                             });
                             Toast.fire({
                                 icon: 'success',
-                                title: 'Data Refreshed!'
+                                title: 'Refreshed'
                             });
                         }
                     } else {
@@ -1683,6 +1654,30 @@ function instantScrollFix() {
                     console.error(err);
                     Swal.fire('Connection Error', 'Could not load data.', 'error');
                 });
+        }
+
+        // ==========================================
+        // NEW HELPER: UPDATE DOM ELEMENTS DYNAMICALLY
+        // ==========================================
+        function updateDOMWithSettings(settings) {
+            if(!settings) return;
+            // 1. Title
+            document.title = settings.sitename || 'E-commerce Store';
+            
+            // 2. Logo
+            const logoEl = document.getElementById('siteLogo');
+            if(logoEl && settings.sitelogo) {
+                logoEl.src = settings.sitelogo;
+            }
+
+            // 3. CSS Variables (Colors)
+            const root = document.documentElement;
+            if(settings.themecolor) {
+                root.style.setProperty('--primary-color', settings.themecolor);
+            }
+            if(settings.bgcolor) {
+                root.style.setProperty('--bg-color', settings.bgcolor);
+            }
         }
 
         // ================= HELPER FUNCTIONS =================
