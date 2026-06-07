@@ -254,6 +254,54 @@ src="https://www.facebook.com/tr?id=1526489362525698&ev=PageView&noscript=1"
       gtag('config', '<?= gaId ?>');
     </script>
     <? } ?>
+        <script>
+        // নিচে আপনার Apps Script থেকে পাওয়া Web App URL টি দিন
+        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw8YHRjerw7QSTEpD8k4kUkqakiqNfmA5q8eHgjzZglFaSvgCAgyacPK_ZOZrnHE3sg/exec";
+
+        if (typeof google === 'undefined') {
+            window.google = {
+                script: {
+                    run: new Proxy({}, {
+                        get: function(target, prop) {
+                            if (prop === 'withSuccessHandler') {
+                                return function(callback) {
+                                    target._successHandler = callback;
+                                    return new Proxy(target, this);
+                                };
+                            }
+                            if (prop === 'withFailureHandler') {
+                                return function(callback) {
+                                    target._failureHandler = callback;
+                                    return new Proxy(target, this);
+                                };
+                            }
+                            return function(...args) {
+                                const payload = { f: prop, a: args };
+                                fetch(GAS_WEB_APP_URL, {
+                                    method: 'POST',
+                                    // text/plain ব্যবহার করা হয়েছে CORS Error এড়ানোর জন্য
+                                    body: JSON.stringify(payload),
+                                    headers: { 'Content-Type': 'text/plain;charset=utf-8' } 
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data && data.success === false && data.error) {
+                                        if (target._failureHandler) target._failureHandler(data.error);
+                                    } else {
+                                        if (target._successHandler) target._successHandler(data);
+                                    }
+                                })
+                                .catch(err => {
+                                    if (target._failureHandler) target._failureHandler(err);
+                                    console.error("GAS Fetch Error:", err);
+                                });
+                            };
+                        }
+                    })
+                }
+            };
+        }
+    </script>
 </head>
 <body class="bg-background text-gray-800 font-sans antialiased">
 
@@ -1067,69 +1115,6 @@ src="https://www.facebook.com/tr?id=1526489362525698&ev=PageView&noscript=1"
     </template>
 <!-- Part 1 End. Paste Part 2 below the line <script> (inside script tag, after I18N object) -->
 <script>
-    // ============================================================
-    // VERCEL/NETLIFY HOSTING HELPER (POLYFILL FOR GOOGLE.SCRIPT.RUN)
-    // ============================================================
-    // নিচে আপনার Google Apps Script-এর বর্তমান Web App URL-টি বসিয়ে দিন:
-    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyQRLYCyiP-_5-oZJpKQbWAG2urKNyn9uJwAf3aNZzZ5MTgH6BhGGI6IuXSiIa093Sf/exec"; 
-
-    if (typeof google === 'undefined' || !google.script) {
-        window.google = {
-            script: {
-                run: (() => {
-                    let successHandler = (res) => console.log("Success:", res);
-                    let failureHandler = (err) => console.error("Failure:", err);
-
-                    const handlerChain = {
-                        withSuccessHandler: function(callback) {
-                            successHandler = callback;
-                            return this;
-                        },
-                        withFailureHandler: function(callback) {
-                            failureHandler = callback;
-                            return this;
-                        }
-                    };
-
-                    return new Proxy(handlerChain, {
-                        get: function(target, prop) {
-                            if (prop in target) {
-                                return target[prop];
-                            }
-
-                            return function(...args) {
-                                // Vercel থেকে Apps Script-এ ডাটা পাঠানোর জন্য Fetch API
-                                fetch(GAS_WEB_APP_URL, {
-                                    method: 'POST',
-                                    mode: 'cors',
-                                    headers: {
-                                        'Content-Type': 'text/plain;charset=utf-8'
-                                    },
-                                    body: JSON.stringify({
-                                        functionName: prop,
-                                        arguments: args
-                                    })
-                                })
-                                .then(response => response.json())
-                                .then(res => {
-                                    if (res && res.success === false && res.error) {
-                                        failureHandler(res.error);
-                                    } else {
-                                        successHandler(res);
-                                    }
-                                })
-                                .catch(err => {
-                                    failureHandler(err.message || err);
-                                });
-                            };
-                        }
-                    });
-                })()
-            }
-        };
-    }
-    
-    // আপনার বাকি সব জাভাস্ক্রিপ্ট কোড (যেমন: loadProducts, checkLogin ইত্যাদি) এর নিচ থেকে শুরু হবে...
         // ============================================================
         // UNIVERSAL VERSION SYNC LOGIC (NEW ARCHITECTURE)
         // ============================================================
@@ -6035,4 +6020,3 @@ async function trackCAPI(eventName, customData, productId) {
     </script>
 </body>
 </html>
-// meta all server side tracking 
