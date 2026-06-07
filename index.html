@@ -1073,11 +1073,11 @@ src="https://www.facebook.com/tr?id=1526489362525698&ev=PageView&noscript=1"
         
         // 1. Server Version from Backend (Injected via Code.gs)
         const serverVersion = "<?= serverVersion ?>";
-            // ============================================================
-    // GITHUB PAGES HOSTING HELPER (POLYFILL FOR GOOGLE.SCRIPT.RUN)
     // ============================================================
-    // নিচে আপনার নতুন Google Apps Script-এর Web App URL-টি বসিয়ে দিন:
-    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxSI6qgUo-IVeDuYYWR5UFohbEOL2ebwKCGA_o5I1TOe5OLzrS28QgWJl1g91IBjxv9/exec"; 
+    // VERCEL/NETLIFY HOSTING HELPER (POLYFILL FOR GOOGLE.SCRIPT.RUN)
+    // ============================================================
+    // নিচে আপনার Google Apps Script-এর বর্তমান Web App URL-টি বসিয়ে দিন:
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx3equA-0NgDcFgsvCgUj4JQKLvVYwN3acg995obA8YijLg1SOnwqGIWpluAUF1JhQb/exec"; 
 
     if (typeof google === 'undefined' || !google.script) {
         window.google = {
@@ -1088,23 +1088,33 @@ src="https://www.facebook.com/tr?id=1526489362525698&ev=PageView&noscript=1"
 
                     const handlerChain = {
                         withSuccessHandler: function(callback) {
-                            successHandler = callback; return this;
+                            successHandler = callback;
+                            return this;
                         },
                         withFailureHandler: function(callback) {
-                            failureHandler = callback; return this;
+                            failureHandler = callback;
+                            return this;
                         }
                     };
 
                     return new Proxy(handlerChain, {
                         get: function(target, prop) {
-                            if (prop in target) return target[prop];
+                            if (prop in target) {
+                                return target[prop];
+                            }
 
                             return function(...args) {
+                                // Vercel থেকে Apps Script-এ ডাটা পাঠানোর জন্য Fetch API
                                 fetch(GAS_WEB_APP_URL, {
                                     method: 'POST',
                                     mode: 'cors',
-                                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                                    body: JSON.stringify({ functionName: prop, arguments: args })
+                                    headers: {
+                                        'Content-Type': 'text/plain;charset=utf-8'
+                                    },
+                                    body: JSON.stringify({
+                                        functionName: prop,
+                                        arguments: args
+                                    })
                                 })
                                 .then(response => response.json())
                                 .then(res => {
@@ -1114,7 +1124,9 @@ src="https://www.facebook.com/tr?id=1526489362525698&ev=PageView&noscript=1"
                                         successHandler(res);
                                     }
                                 })
-                                .catch(err => failureHandler(err.message || err));
+                                .catch(err => {
+                                    failureHandler(err.message || err);
+                                });
                             };
                         }
                     });
@@ -1122,7 +1134,8 @@ src="https://www.facebook.com/tr?id=1526489362525698&ev=PageView&noscript=1"
             }
         };
     }
-    // ============================================================
+    
+    // আপনার বাকি সব জাভাস্ক্রিপ্ট কোড (যেমন: loadProducts, checkLogin ইত্যাদি) এর নিচ থেকে শুরু হবে...
 
 
         // ============================================================
