@@ -3602,13 +3602,14 @@ function addToCart(product, qty = 1) {
         items: [{ item_id: product.id, item_name: product.name, variant: selectedVariantData, quantity: qty }]
     });
     // === NEW: FACEBOOK PIXEL EVENT ===
+    const currentEventId = generateEventId(); // একবারই আইডি তৈরি করুন
+
     fbq('track', 'AddToCart', {
         content_name: product.name,
-        content_category: product.category, // ক্যাটাগরি যোগ করা হয়েছে
-        value: finalPrice * qty, // মোট দাম (Quantity গুণ দাম)
+        content_category: product.category,
+        value: finalPrice * qty,
         currency: 'BDT'
-    });
-        // ... কার্ট লজিক শেষ হওয়ার পর ...
+    }, { eventID: currentEventId }); // পিক্সেলে আইডি পাস করুন
 
     // সার্ভার-সাইড ট্র্যাকিং (CAPI)
     trackCAPI('AddToCart', {
@@ -3618,7 +3619,7 @@ function addToCart(product, qty = 1) {
         content_type: 'product',
         value: finalPrice * qty,
         currency: 'BDT'
-    }, product.id);
+    }, currentEventId); // CAPI তে একই আইডি পাস করুন
     // =========================
     updateCartBadge();
     updateOrderSummary();
@@ -4407,13 +4408,14 @@ function loadProductDetails(id) {
     addToCartBtn.onclick = () => addToCart(p, qty);
     stickyBuyNowBtn.onclick = () => buyNow(p, qty);
     // === NEW: FACEBOOK PIXEL EVENT (ViewContent) ===
+    const viewEventId = generateEventId(); // একবারই আইডি তৈরি করুন
+
     fbq('track', 'ViewContent', {
-        content_name: p.name,           // প্রোডাক্টের নাম
-        content_category: p.category,    // ক্যাটাগরি
-        value: parseFloat(p.discountprice || p.price), // বর্তমান ডিসকাউন্ট প্রাইস অথবা রেগুলার প্রাইস
+        content_name: p.name,           
+        content_category: p.category,    
+        value: parseFloat(p.discountprice || p.price), 
         currency: 'BDT'
-    });
-        // ... প্রোডাক্ট ডিটেইল লোড হওয়ার পর ...
+    }, { eventID: viewEventId }); // পিক্সেলে আইডি পাস করুন
 
     // সার্ভার-সাইড ট্র্যাকিং (CAPI)
     if(p) {
@@ -4424,7 +4426,7 @@ function loadProductDetails(id) {
             content_type: 'product',
             value: parseFloat(p.discountprice || p.price),
             currency: 'BDT'
-        }, p.id);
+        }, viewEventId); // CAPI তে একই আইডি পাস করুন
     }
     // ===========================
     loadRelatedProducts(p.category, p.id);
@@ -4599,9 +4601,9 @@ function placeOrder() {
         if (res.success) {
             // === FACEBOOK PIXEL EVENT (Purchase) ===
             fbq('track', 'Purchase', {
-                value: totalOrderValue, // মোট টাকা
+                value: totalOrderValue, 
                 currency: 'BDT'
-            });
+            }, { eventID: res.orderId }); // এখানে eventID হিসেবে orderId পাস করুন
             // ============================================
 
             // কার্ট এবং অন্যান্য স্টেট ক্লিয়ার করা
@@ -6014,7 +6016,6 @@ async function trackCAPI(eventName, customData, productId) {
     const clientUserAgent = navigator.userAgent;
     const fbc = getFbcCookie();
     const fbp = getFbpCookie();
-    const eventId = generateEventId();
     
     // NEW: Direct fetch call instead of google.script.run polyfill for specific server-side tracking
     // Backend doPost expects { functionName: '...', arguments: [...] }
