@@ -6052,48 +6052,6 @@ async function trackCAPI(eventName, customData, productId) {
         console.error("CAPI Fetch Error:", err);
     }
 }
-    try {
-        const response = await fetch(GAS_WEB_APP_URL, {
-            method: 'POST',
-            mode: 'cors',
-            headers: {
-                'Content-Type': 'text/plain;charset=utf-8' // Match backend expectation
-            },
-            body: JSON.stringify(payload)
-        });
-        console.log("CAPI Fired via Fetch:", eventName);
-    } catch (err) {
-        console.error("CAPI Fetch Error:", err);
-    }
-}
-
-// ১. স্লাশ (/) URL কে হ্যাশ (#) এ রূপান্তর করার পলিফিল ট্রিক
-(function() {
-    const path = window.location.pathname;
-    
-    // কেউ যদি সরাসরি স্লাশ দিয়ে প্রোডাক্ট পেজে ঢোকে (যেমন: /product/123)
-    if (path.startsWith('/product/')) {
-        const productId = path.split('/product/')[1];
-        if (productId && !window.location.hash) {
-            // ব্যাকগ্রাউন্ডে আপনার কোডের চেনা হ্যাশ সেট করা
-            window.location.hash = '#product?id=' + productId;
-        }
-    }
-    
-    // ২. ব্রাউজারের ইউআরএল সুন্দর রাখার ট্রিক (যাতে কাস্টমার ও গুগল বট স্লাশ-ই দেখে)
-    window.addEventListener('hashchange', function() {
-        if (window.location.hash.startsWith('#product?id=')) {
-            const id = window.location.hash.split('=')[1];
-            if (id) {
-                // ইউআরএল এর চেহারা বদলে /product/id বানিয়ে রাখা
-                const newPath = '/product/' + id;
-                if (window.location.pathname !== newPath) {
-                    window.history.replaceState(null, null, newPath);
-                }
-            }
-        }
-    });
-})();
     </script>
 </body>
 </html>
