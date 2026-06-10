@@ -1,0 +1,21 @@
+{
+  "short_name": "ফোনবুক",
+  "name": "ডিজিটাল পুলিশ ফোনবুক",
+  "icons": [
+    {
+      "src": "https://img.icons8.com/color/192/police-badge.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "https://img.icons8.com/color/512/police-badge.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "./index.html",
+  "background_color": "#f4f7f6",
+  "theme_color": "#006a4e",
+  "display": "standalone",
+  "orientation": "portrait"
+}
