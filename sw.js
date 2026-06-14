@@ -1,4 +1,4 @@
-const CACHE_NAME = 'police-phonebook-v1';
+const CACHE_NAME = 'police-phonebook-v2';
 const ASSETS = [
   './',
   './index.html',
