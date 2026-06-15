@@ -1182,6 +1182,7 @@ src="https://www.facebook.com/tr?id=1526489362525698&ev=PageView&noscript=1"
         // ============================================================
         // GLOBAL STATE & APP DATA
         // ============================================================
+        let previousHash = '';
         let appData = {
             settings: {},
             categories: [],
@@ -1810,33 +1811,9 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-// ================= ROUTING =================
+        // ================= ROUTING =================
 function setupEventListeners() {
-    
-    // 👑 নতুন পরিবর্তন: হ্যাস চেঞ্জ (ব্যাক বাটন/পেজ চেঞ্জ) হলে ১ পলকের জন্য স্কেলিটন দেখাবে
-    window.addEventListener('hashchange', () => {
-        const skeleton = document.getElementById('skeletonLoader');
-        const appContainer = document.getElementById('app');
-        
-        if (skeleton && appContainer) {
-            // ১. মুহূর্তের মধ্যে মেইন অ্যাপ হাইড করে স্কেলিটনটি সামনে আনা
-            appContainer.classList.add('hidden');
-            skeleton.classList.remove('hidden');
-            
-            // ২. মাত্র ২০০ মিলিসেকেন্ড (০.২ সেকেন্ড) পর ওটা সরিয়ে আসল পেজ দেখানো
-            setTimeout(() => {
-                skeleton.classList.add('hidden');
-                appContainer.classList.remove('hidden');
-            }, 200); 
-        }
-        
-        // আপনার আগের রুট লোড করার ফাংশনটি এখানে কল হবে
-        loadRoute(window.location.hash);
-    });
-
-    // -----------------------------------------------------------------
-    // নিচের সার্চ ইনপুটের বাকি কোডগুলো একদম আগের মতোই অপরিবর্তিত থাকবে
-    // -----------------------------------------------------------------
+    window.addEventListener('hashchange', () => loadRoute(window.location.hash));
     const searchInput = document.getElementById('searchInput');
     
     if(searchInput) {
@@ -1873,7 +1850,6 @@ function setupEventListeners() {
         });
     }
 }
-
 
 function navigateTo(route) {
     // ==========================================
@@ -1934,7 +1910,29 @@ function navigateTo(route) {
             const [route, queryString] = hash.replace('#', '').split('?');
             const params = new URLSearchParams(queryString);
             const content = document.getElementById('content');
+                // স্কেলেটন লোডার পুনরায় দেখানোর নতুন লজিক
+    const skeleton = document.getElementById('skeletonLoader');
+    const appContainer = document.getElementById('app');
+
+    // চেক করা হচ্ছে ইউজার প্রোডাক্ট ডিটেইলস পেজ (product) থেকে হোম বা ক্যাটাগরি লিস্টে ফিরছেন কিনা
+    if (previousHash.includes('product') && 
+        (route === 'home' || route === 'categories' || route === 'categoryProducts' || hash.startsWith('#home') || hash.startsWith('#categories'))) {
+        
+        if (skeleton) {
+            // স্কেলেটন লোডারটি সাময়িকভাবে দৃশ্যমান করুন
+            skeleton.classList.remove('hidden');
             
+            // ৪০০ মিলিসেকেন্ড পর স্কেলেটনটি লুকিয়ে মেইন অ্যাপটি দেখান (এটি ট্রানজিশন মসৃণ করবে)
+            setTimeout(() => {
+                skeleton.classList.add('hidden');
+                if (appContainer) appContainer.classList.remove('hidden');
+            }, 400); // আপনার প্রয়োজন অনুযায়ী ৪০০ টাইমটি বাড়িয়ে-কমিয়ে নিতে পারেন
+        }
+    }
+
+    // বর্তমান হ্যাশটিকে পরবর্তী নেভিগেশনের জন্য previousHash হিসেবে সংরক্ষণ করুন
+    previousHash = hash;
+    // নতুন লজিক শেষ
             // ==========================================================
             // FIX FOR SLOW NAVIGATION: UPDATE UI FIRST
             // ==========================================================
