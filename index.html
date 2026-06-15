@@ -1810,9 +1810,33 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        // ================= ROUTING =================
+// ================= ROUTING =================
 function setupEventListeners() {
-    window.addEventListener('hashchange', () => loadRoute(window.location.hash));
+    
+    // 👑 নতুন পরিবর্তন: হ্যাস চেঞ্জ (ব্যাক বাটন/পেজ চেঞ্জ) হলে ১ পলকের জন্য স্কেলিটন দেখাবে
+    window.addEventListener('hashchange', () => {
+        const skeleton = document.getElementById('skeletonLoader');
+        const appContainer = document.getElementById('app');
+        
+        if (skeleton && appContainer) {
+            // ১. মুহূর্তের মধ্যে মেইন অ্যাপ হাইড করে স্কেলিটনটি সামনে আনা
+            appContainer.classList.add('hidden');
+            skeleton.classList.remove('hidden');
+            
+            // ২. মাত্র ২০০ মিলিসেকেন্ড (০.২ সেকেন্ড) পর ওটা সরিয়ে আসল পেজ দেখানো
+            setTimeout(() => {
+                skeleton.classList.add('hidden');
+                appContainer.classList.remove('hidden');
+            }, 200); 
+        }
+        
+        // আপনার আগের রুট লোড করার ফাংশনটি এখানে কল হবে
+        loadRoute(window.location.hash);
+    });
+
+    // -----------------------------------------------------------------
+    // নিচের সার্চ ইনপুটের বাকি কোডগুলো একদম আগের মতোই অপরিবর্তিত থাকবে
+    // -----------------------------------------------------------------
     const searchInput = document.getElementById('searchInput');
     
     if(searchInput) {
@@ -1849,6 +1873,7 @@ function setupEventListeners() {
         });
     }
 }
+
 
 function navigateTo(route) {
     // ==========================================
