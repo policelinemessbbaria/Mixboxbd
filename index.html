@@ -262,6 +262,25 @@ src="https://www.facebook.com/tr?id=1526489362525698&ev=PageView&noscript=1"
     color: var(--primary);   /* প্রাইমারি কালার */
     font-weight: bold;
 }
+/* ==========================================
+   FIX: ROUTE TRANSITION WHITE FLASH (For Right Swipe Glitch)
+   ========================================== */
+.route-flash-active {
+    /* অ্যানিমেশনটি চালু করা হচ্ছে */
+    animation: routeFlashAnim 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes routeFlashAnim {
+    0% {
+        background-color: #ffffff; /* শুরুতেই সম্পূর্ণ সাদা */
+    }
+    40% {
+        background-color: #ffffff; /* একটু সময় সাদা রাখা (ব্ল্যাঙ্কেট এফেক্ট) */
+    }
+    100% {
+        background-color: var(--bg-color); /* স্মুথলি আসল ব্যাকগ্রাউন্ডে ফেরা */
+    }
+}
     </style>
     
     <!-- GA4 -->
@@ -1904,23 +1923,39 @@ function navigateTo(route) {
     window.location.hash = route;
 }
 
-        function loadRoute(hash) {
-            instantScrollFix();
-            const [route, queryString] = hash.replace('#', '').split('?');
-            const params = new URLSearchParams(queryString);
-            const content = document.getElementById('content');
-            
-            // ==========================================================
-            // FIX FOR SLOW NAVIGATION: UPDATE UI FIRST
-            // ==========================================================
-            // বাটনের কালার পরিবর্তন দ্রুত দেখানোর জন্য 
-            // DOM ক্লিয়ার আগেই updateNavActive কল করা হচ্ছে।
-            // এতে ব্যবহারকারী তাৎক্ষণেই ফিডব্যাক পাবেন।
-            updateNavActive(route);
-            // ==========================================================
+function loadRoute(hash) {
+    instantScrollFix();
+    
+    // ==========================================================
+    // FIX: RIGHT SWIPE WHITE FLASH LOGIC
+    // পেজ চেঞ্জ হওয়ার সাথে সাথে সাদা ফ্ল্যাশ ট্রিগার করা হচ্ছে
+    // যাতে পেছনের পেজের গ্লিচ দেখা না যায়।
+    // ==========================================================
+    const appEl = document.getElementById('app');
+    if (appEl) {
+        // আগের অ্যানিমেশন রিসেট করা (যাতে রি-ট্রিগার হয়)
+        appEl.classList.remove('route-flash-active');
+        // ব্রাউজারকে রি-পেইন্ট করতে বাধ্য করা (Reflow)
+        void appEl.offsetWidth; 
+        // নতুন ফ্ল্যাশ ক্লাস যোগ করা
+        appEl.classList.add('route-flash-active');
+    }
+    // ==========================================================
 
-            content.innerHTML = '';
-            stopSlider();
+    const [route, queryString] = hash.replace('#', '').split('?');
+    const params = new URLSearchParams(queryString);
+    const content = document.getElementById('content');
+    
+    // ==========================================================
+    // FIX FOR SLOW NAVIGATION: UPDATE UI FIRST
+    // ==========================================================
+    updateNavActive(route);
+    // ==========================================================
+
+    content.innerHTML = ''; 
+    stopSlider();
+    
+    // ... বাকি কোড আগের মতোই থাকবে ...
 
             // ==========================================
             // OPTIMIZED: ONLY CHECK SESSIONSTORAGE IF HOME
