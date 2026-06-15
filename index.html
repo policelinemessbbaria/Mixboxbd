@@ -6086,22 +6086,28 @@ async function trackCAPI(eventName, customData, productId) {
         console.error("CAPI Fetch Error:", err);
     }
 }
-// ডানদিকের সোয়াইপ ব্যাক বাটন গ্লিচ ফিক্স
+// আপনার আইডিয়া অনুযায়ী হোয়াইট ইফেক্ট (Glitch Fix)
 window.addEventListener('hashchange', function() {
-    // যখনই ইউজার ব্যাক করবে বা পেজ চেঞ্জ হবে, এক পলক মেইন অ্যাপকে হাইড করে টপে স্ক্রোল করানো
     const appEl = document.getElementById('app');
     if (appEl) {
-        appEl.style.opacity = '0'; // গ্লিচটি যেন চোখে না পড়ে তাই সাময়িক অদৃশ্য করা
-        window.scrollTo(0, 0); // জোরপূর্বক স্ক্রোল একদম ওপরে নিয়ে যাওয়া
+        // ১. পেজ চেঞ্জ হওয়ার সাথে সাথে একটি সাদা আবরণ বা হোয়াইট ইফেক্ট তৈরি করা
+        appEl.style.transition = 'none'; 
+        appEl.style.opacity = '0'; // কন্টেন্টগুলোকে মুহূর্তে অদৃশ্য করে দেওয়া
+        appEl.style.backgroundColor = '#ffffff'; // ব্যাকগ্রাউন্ড সম্পূর্ণ সাদা করে দেওয়া
         
+        // ২. জোরপূর্বক স্ক্রল পজিশন একদম টপে (০) নিয়ে যাওয়া
+        window.scrollTo(0, 0); 
+        
+        // ৩. মাত্র ৩০ মিলি-সেকেন্ড পর স্মুথলি নতুন পেজের কন্টেন্ট ফুটিয়ে তোলা
         setTimeout(() => {
             window.scrollTo(0, 0);
-            appEl.style.opacity = '1'; // আবার দৃশ্যমান করা
-        }, 50); // ৫০ মিলি-সেকেন্ডের ভেতর স্মুথলি ব্যাক হবে
+            appEl.style.transition = 'opacity 0.2s ease-in-out'; // সুন্দর একটু স্মুথ ইফেক্ট
+            appEl.style.opacity = '1'; 
+        }, 30);
     }
 });
 
-// অতিরিক্ত সতর্কতা: প্রোডাক্ট পেজে যাওয়ার সময় কারেন্ট স্ক্রোল পজিশন রিসেট করা
+// প্রোডাক্ট পেজ ওপেন করার সময়ও যেন স্ক্রোল পজিশন আগেই রিসেট হয়ে যায়
 const originalNavigateTo = window.navigateTo;
 if (typeof originalNavigateTo === 'function') {
     window.navigateTo = function(hash) {
