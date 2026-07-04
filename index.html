@@ -1128,7 +1128,7 @@ src="https://www.facebook.com/tr?id=1526489362525698&ev=PageView&noscript=1"
     // VERCEL/NETLIFY HOSTING HELPER (POLYFILL FOR GOOGLE.SCRIPT.RUN)
     // ============================================================
     // নিচে আপনার Google Apps Script-এর বর্তমান Web App URL-টি বসিয়ে দিন:
-    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbycmvob2rguKqwld1Lojc7DBqWXwdXMaQs1Q26yplqotcPaxzVnecf053O0RSAhSyJ0WA/exec"; 
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx9oKWVzHfDxHMKjJq3l5CE9_J2cSeIcF7gE0QNDPjYeKXgVsMhq5z0MFBVe_NK1UsQcA/exec"; 
 
     if (typeof google === 'undefined' || !google.script) {
         window.google = {
@@ -1223,6 +1223,21 @@ src="https://www.facebook.com/tr?id=1526489362525698&ev=PageView&noscript=1"
         const trackCache = {};
         let cachedPointsResult = null;
         let searchTimeout;
+        // ==========================================
+// SUPER CACHE BUSTER (FORCE REFRESH SYSTEM)
+// ==========================================
+(function() {
+// চেক করবে URL-এ ?flush_cache আছে কিনা
+if (window.location.search.includes('flush_cache')) {
+// ব্রাউজারের সব ক্যাশ মুছে ফেলা হচ্ছে
+localStorage.removeItem('cached_app_data');
+localStorage.removeItem('local_data_version');
+
+// URL থেকে ?flush_cache শব্দটি মুছে দিয়ে পেজ রিলোড করা হচ্ছে
+const cleanUrl = window.location.pathname + window.location.hash;
+window.location.replace(cleanUrl);
+}
+})();
 // ============================================================
 // সেকশন ১: গ্লোবাল ভেরিয়েবল এবং লোডার (একসাথে রাখুন)
 // ============================================================
