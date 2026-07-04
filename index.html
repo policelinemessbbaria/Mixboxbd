@@ -1128,7 +1128,7 @@ src="https://www.facebook.com/tr?id=1526489362525698&ev=PageView&noscript=1"
     // VERCEL/NETLIFY HOSTING HELPER (POLYFILL FOR GOOGLE.SCRIPT.RUN)
     // ============================================================
     // নিচে আপনার Google Apps Script-এর বর্তমান Web App URL-টি বসিয়ে দিন:
-    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx9oKWVzHfDxHMKjJq3l5CE9_J2cSeIcF7gE0QNDPjYeKXgVsMhq5z0MFBVe_NK1UsQcA/exec"; 
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw3Ze-uYNM7vvieGQyrwERUD8iDtf4_GrzQEEqBSx6lvFz9GFOm77H5qXQdrvMkJt7EjA/exec"; 
 
     if (typeof google === 'undefined' || !google.script) {
         window.google = {
@@ -1640,7 +1640,12 @@ function instantScrollFix() {
                     if (!localVersion || localVersion !== serverVersion || !cachedDataStr) {
                         console.log("%c[Server Fetch] New version detected! Fetching fresh data...", "color: blue; font-weight: bold;");
                         
-                        fetch(GAS_WEB_APP_URL + '?action=getInitialData')
+                        // flush_cache থাকলে ব্যাকএন্ডকে জোর করে ক্যাশ ভাঙতে বলবে
+                        const fetchUrl = window.location.search.includes('flush_cache')
+                        ? `${GAS_WEB_APP_URL}?action=getInitialData&force=true`
+                        : `${GAS_WEB_APP_URL}?action=getInitialData`;
+                        
+                        fetch(fetchUrl)
                             .then(response => response.json())
                             .then(res => {
                                 if (res.success) {
