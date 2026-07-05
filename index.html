@@ -4100,20 +4100,26 @@ function buyNow(product, qty = 1) {
             else if (url) window.open(url, '_blank');
         }
 
-                function loadTopCategories() {
+                        function loadTopCategories() {
         const container = document.getElementById('topCategories');
         if (!container) return;
         
-        // ==========================================
-        // FIX: istop = 'yes' অনুযায়ী ফিল্টার করা হচ্ছে
-        // ==========================================
+        // ১. শুধুমাত্র সেই ক্যাটাগরিগুলো ফিল্টার করা হচ্ছে যেগুলোর istop = 'yes'
         const topCats = appData.categories.filter(c => c.istop === 'yes');
-        const uniqueTopMainCats = [...new Set(topCats.map(c => c.categoryname.split(' > ')[0]))];
-        const displayCats = uniqueTopMainCats.slice(0, 4).map(mainName => {
-        return topCats.find(c => c.categoryname === mainName || c.categoryname.startsWith(mainName + ' > '));
-        }).filter(c => c);
         
-        container.innerHTML = displayCats.map(c => {
+        // ২. ইউনিক মেইন ক্যাটাগরি নাম বের করা (যদি Sub-category থাকে)
+        const uniqueMainCats = [...new Set(topCats.map(c => c.categoryname.split(' > ')[0]))];
+        
+        // ৩. আবার ম্যাপ করে অবজেক্টে ফিরে আসা (ছবির জন্য)
+        const cats = uniqueMainCats.map(mainName => topCats.find(c => c.categoryname.startsWith(mainName + ' > ') || c.categoryname === mainName)).filter(c => c);
+        
+        // ৪. UI তে দেখানো (সর্বোচ্চ ৪টি দেখাবে, আপনি চাইলে ৪ এর জায়গায় ৮ লিখতে পারেন)
+        if (cats.length === 0) {
+        container.innerHTML = '<p class="text-gray-400 text-xs text-center col-span-8">No top categories set.</p>';
+        return;
+        }
+        
+        container.innerHTML = cats.slice(0, 4).map(c => {
         const displayName = c.categoryname.split(' > ')[0];
         return `
         <div onclick="navigateTo('#category?name=${encodeURIComponent(displayName)}')" class="text-center cursor-pointer group">
@@ -4124,12 +4130,6 @@ function buyNow(product, qty = 1) {
         </div>
         `;
         }).join('');
-        
-        // যদি "yes" করা ক্যাটাগরি একটিও না থাকে, তবে নিচের সেকশনটি লুকিয়ে রাখবে
-        const topSection = document.getElementById('topCategoriesSection');
-        if(topSection) {
-        topSection.style.display = displayCats.length > 0 ? '' : 'none';
-        }
         }
 
         function loadFeaturedProducts() {
