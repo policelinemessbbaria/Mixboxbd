@@ -3979,25 +3979,6 @@ function buyNow(product, qty = 1) {
         items: [{ item_id: product.id, item_name: product.name, variant: selectedVariantData, quantity: qty }]
     });
 
-    // ==========================================
-    // নতুন কোড: BUY NOW CAPI TRACKING
-    // ==========================================
-    const checkoutEventId = generateEventId(); // ইউনিক আইডি তৈরি
-    fbq('track', 'InitiateCheckout', {
-        content_ids: [String(product.id)],
-        content_type: 'product',
-        value: finalPrice * qty,
-        currency: 'BDT'
-    }, { eventID: checkoutEventId }); 
-
-    trackCAPI('InitiateCheckout', {
-        content_ids: [String(product.id)],
-        content_type: 'product',
-        value: finalPrice * qty,
-        currency: 'BDT'
-    }, checkoutEventId); 
-    // ==========================================
-
     navigateTo('#cart');
 }
 
@@ -6201,24 +6182,27 @@ function generateEventId() {
     return 'evt_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
 }
 
-// ==========================================
-// FIXED: FETCH API VERSION FOR CAPI (WITH AD-ONLY QUOTA SAVE LOGIC)
-// ==========================================
 async function trackCAPI(eventName, customData, eventId) {
     
     // ==========================================
-    // মেজিক লজিক: ইউজার কি ফেসবুক অ্যাড থেকে এসেছেন?
+    // টায়ার ১: LOW PRIORITY (শুধু ব্রাউজার পিক্সেলে থাকবে)
+    // কারণ: পরিমাণ অনেক বেশি (৩০০০+), রিটার্গেটিং ভ্যালু কম
     // ==========================================
-    const fbc = getFbcCookie();
-    
-    if (!fbc) {
-        // fbc কুকি না থাকলে মানে ইউজার সরাসরি বা গুগল থেকে এসেছে (অর্গানিক)।
-        // তাই সার্ভার কোটা নষ্ট না করে শুধু ব্রাউজার পিক্সেলেই রেখে দিচ্ছি।
-        console.log("%c[CAPI Skipped] Organic Traffic (No fbc cookie)", "color: gray; font-style: italic;");
+    if (eventName === 'ViewContent' || eventName === 'PageView') {
+        console.log("%c[CAPI Skipped] Low priority event.", "color: gray;", eventName);
         return; 
     }
-    // ==========================================
 
+    // ==========================================
+    // টায়ার ২: MEDIUM & HIGH PRIORITY (সবসময় সার্ভারে যাবে)
+    // কারণ: AddToCart ও Purchase এর পরিমাণ কম (১০০-২০০), রিটার্গেটিং ভ্যালু অনেক বেশি
+    // অ্যাডব্লকার থাকলেও এরা সার্ভারে যাবে কারণ Fetch API ব্লক করে না
+    // ==========================================
+    // (আমরা আর fbc কুকি চেক করছি না, সরাসরি পাঠিয়ে দিচ্ছি)
+    
+    // ==========================================
+    // IP এবং পেলোড তৈরি
+    // ==========================================
     let clientIp = null;
     try {
         const ipResponse = await fetch('https://api.ipify.org?format=json');
@@ -6229,6 +6213,7 @@ async function trackCAPI(eventName, customData, eventId) {
     }
 
     const clientUserAgent = navigator.userAgent;
+    const fbc = getFbcCookie(); 
     const fbp = getFbpCookie();
     
     const payload = {
@@ -6240,10 +6225,10 @@ async function trackCAPI(eventName, customData, eventId) {
             appData.user?.mobilenumber || null,
             clientIp,
             clientUserAgent,
-            fbc, // এখানে fbc পাঠাচ্ছে কারণ উপরে চেক করে নিশ্চিত হয়েছি এটি আছে
+            fbc, 
             fbp,
             eventId, 
-            null // testEventCode
+            null
         ]
     };
 
@@ -6254,8 +6239,7 @@ async function trackCAPI(eventName, customData, eventId) {
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify(payload)
         });
-        // সফল হলে নীল রঙে কনসোলে দেখাবে
-        console.log("%c[CAPI Fired] Ad Traffic", "color: blue; font-weight: bold;", eventName, "| ID:", eventId);
+        console.log("%c[CAPI Fired]", "color: green; font-weight: bold;", eventName);
     } catch (err) {
         console.error("CAPI Fetch Error:", err);
     }
