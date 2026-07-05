@@ -542,7 +542,7 @@ src="https://www.facebook.com/tr?id=1526489362525698&ev=PageView&noscript=1"
                     <div class="h-[1px] bg-gray-800 flex-1"></div>
                 </div>
                 
-                <div id="topCategories" class="grid grid-cols-4 gap-3"></div>
+                <div id="topCategories" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 justify-items-center"></div>
             </section>
 
             <!-- Featured Section -->
@@ -4079,31 +4079,43 @@ function buyNow(product, qty = 1) {
             else if (url) window.open(url, '_blank');
         }
 
-        function loadTopCategories() {
-            const container = document.getElementById('topCategories');
-            if (!container) return;
-            
-            // ==========================================
-            // UPDATED: EXTRACT UNIQUE MAIN CATEGORIES
-            // ==========================================
-            const allMainCats = appData.categories.map(c => c.categoryname.split(' > ')[0]);
-            const uniqueMainCats = [...new Set(allMainCats)];
-            
-            // Map back to category objects to get images (using first match)
-            const cats = uniqueMainCats.map(mainName => appData.categories.find(c => c.categoryname === mainName || c.categoryname.startsWith(mainName + ' > '))).filter(c => c);
-            
-            container.innerHTML = cats.slice(0, 4).map(c => {
-                const displayName = c.categoryname.split(' > ')[0];
-                return `
-                <div onclick="navigateTo('#category?name=${encodeURIComponent(displayName)}')" class="text-center cursor-pointer group">
-                    <div class="aspect-square rounded-xl overflow-hidden mb-2 border border-gray-100 group-hover:border-primary/30 transition">
-                        <img src="${c.categoryimageurl}" class="w-full h-full object-cover transform group-hover:scale-110 transition" loading="lazy">
-                    </div>
-                    <p class="text-xs font-bold text-gray-700 truncate">${displayName}</p>
-                </div>
-                `;
-            }).join('');
-        }
+function loadTopCategories() {
+    const container = document.getElementById('topCategories');
+    if (!container) return;
+    
+    // ==========================================
+    // FIX: শুধুমাত্র সেই ক্যাটাগরিগুলো ফিল্টার করা হচ্ছে যেগুলোর istop 'yes'
+    // ==========================================
+    const topCats = appData.categories.filter(c => c.istop === 'yes');
+    
+    if (topCats.length === 0) {
+        container.innerHTML = '<p class="col-span-4 text-center text-gray-400 text-xs">No top categories set</p>';
+        return;
+    }
+
+    // ইউনিক মেইন ক্যাটাগরি বের করা (যেমন: "Fashion > Men" থেকে "Fashion")
+    const allMainCats = topCats.map(c => c.categoryname.split(' > ')[0]);
+    const uniqueMainCats = [...new Set(allMainCats)];
+    
+    // ইউনিক নাম থেকে আবার পুরো অবজেক্ট বানানো (ছবির জন্য)
+    const cats = uniqueMainCats.map(mainName => 
+        topCats.find(c => c.categoryname === mainName || c.categoryname.startsWith(mainName + ' > '))
+    ).filter(c => c);
+    // ==========================================
+
+    // লিমিট (slice) সরিয়ে দেওয়া হয়েছে। যতগুলোই থাকক সব দেখাবে।
+    container.innerHTML = cats.map(c => {
+        const displayName = c.categoryname.split(' > ')[0];
+        return `
+        <div onclick="navigateTo('#category?name=${encodeURIComponent(displayName)}')" class="text-center cursor-pointer group">
+            <div class="aspect-square rounded-xl overflow-hidden mb-2 border border-gray-100 group-hover:border-primary/30 transition">
+                <img src="${c.categoryimageurl}" class="w-full h-full object-cover transform group-hover:scale-110 transition" loading="lazy">
+            </div>
+            <p class="text-xs font-bold text-gray-700 truncate">${displayName}</p>
+        </div>
+        `;
+    }).join('');
+}
 
         function loadFeaturedProducts() {
             const container = document.getElementById('featuredProductsList');
