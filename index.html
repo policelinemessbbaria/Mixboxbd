@@ -542,7 +542,7 @@ src="https://www.facebook.com/tr?id=1526489362525698&ev=PageView&noscript=1"
                     <div class="h-[1px] bg-gray-800 flex-1"></div>
                 </div>
                 
-                <div id="topCategories" class="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-3 justify-items-center"></div>
+                <div id="topCategories" class="grid grid-cols-4 gap-3"></div>
             </section>
 
             <!-- Featured Section -->
@@ -1128,7 +1128,7 @@ src="https://www.facebook.com/tr?id=1526489362525698&ev=PageView&noscript=1"
     // VERCEL/NETLIFY HOSTING HELPER (POLYFILL FOR GOOGLE.SCRIPT.RUN)
     // ============================================================
     // নিচে আপনার Google Apps Script-এর বর্তমান Web App URL-টি বসিয়ে দিন:
-    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbywlhwVYz2Cd3WPiv-a9Y2iU0LLX1ZWnsQuWYOlhJ1-9sFYJla7iG0pb8Eb8E2tJqcG5w/exec"; 
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxRQdm84yDOGgGZSyyb0T4-SeFECqhtfyiO-lCEBRZIS4-B6_tCUf_94RpeKnRslY8r4Q/exec"; 
 
     if (typeof google === 'undefined' || !google.script) {
         window.google = {
@@ -4079,43 +4079,51 @@ function buyNow(product, qty = 1) {
             else if (url) window.open(url, '_blank');
         }
 
-function loadTopCategories() {
-    const container = document.getElementById('topCategories');
-    if (!container) return;
-    
-    // ==========================================
-    // FIX: শুধুমাত্র সেই ক্যাটাগরিগুলো ফিল্টার করা হচ্ছে যেগুলোর istop 'yes'
-    // ==========================================
-    const topCats = appData.categories.filter(c => c.istop === 'yes');
-    
-    if (topCats.length === 0) {
-        container.innerHTML = '<p class="col-span-4 text-center text-gray-400 text-xs">No top categories set</p>';
-        return;
-    }
-
-    // ইউনিক মেইন ক্যাটাগরি বের করা (যেমন: "Fashion > Men" থেকে "Fashion")
-    const allMainCats = topCats.map(c => c.categoryname.split(' > ')[0]);
-    const uniqueMainCats = [...new Set(allMainCats)];
-    
-    // ইউনিক নাম থেকে আবার পুরো অবজেক্ট বানানো (ছবির জন্য)
-    const cats = uniqueMainCats.map(mainName => 
-        topCats.find(c => c.categoryname === mainName || c.categoryname.startsWith(mainName + ' > '))
-    ).filter(c => c);
-    // ==========================================
-
-    // লিমিট (slice) সরিয়ে দেওয়া হয়েছে। যতগুলোই থাকক সব দেখাবে।
-    container.innerHTML = cats.map(c => {
-        const displayName = c.categoryname.split(' > ')[0];
-        return `
-        <div onclick="navigateTo('#category?name=${encodeURIComponent(displayName)}')" class="text-center cursor-pointer group">
-            <div class="aspect-square rounded-xl overflow-hidden mb-2 border border-gray-100 group-hover:border-primary/30 transition">
-                <img src="${c.categoryimageurl}" class="w-full h-full object-cover transform group-hover:scale-110 transition" loading="lazy">
-            </div>
-            <p class="text-xs font-bold text-gray-700 truncate">${displayName}</p>
-        </div>
-        `;
-    }).join('');
-}
+        function loadTopCategories() {
+            const container = document.getElementById('topCategories');
+            if (!container) return;
+            
+            // ==========================================
+            // ১. শুধুমাত্র "istop = yes" থাকা ক্যাটাগরিগুলো ফিল্টার করা হচ্ছে
+            // ==========================================
+            const topCats = appData.categories.filter(c => c.istop === 'yes');
+            
+            // ২. ইউনিক মেইন ক্যাটাগরি বের করা (যেমন: "Electronics > Mobile" থেকে "Electronics")
+            const allMainCats = topCats.map(c => c.categoryname.split(' > ')[0]);
+            const uniqueMainCats = [...new Set(allMainCats)];
+            
+            // ৩. ইমেজ পাওয়ার জন্য অবজেক্টে ম্যাপ করা
+            const cats = uniqueMainCats.map(mainName => topCats.find(c => c.categoryname === mainName || c.categoryname.startsWith(mainName + ' > '))).filter(c => c);
+            
+            // ৪. HTML তৈরি করা (আগের মতোই, তবে slice(0, 4) রিমুভ করা হয়েছে)
+            let html = cats.map(c => {
+                const displayName = c.categoryname.split(' > ')[0];
+                return `
+                <div onclick="navigateTo('#category?name=${encodeURIComponent(displayName)}')" class="text-center cursor-pointer group">
+                    <div class="aspect-square rounded-xl overflow-hidden mb-2 border border-gray-100 group-hover:border-primary/30 transition">
+                        <img src="${c.categoryimageurl}" class="w-full h-full object-cover transform group-hover:scale-110 transition" loading="lazy">
+                    </div>
+                    <p class="text-xs font-bold text-gray-700 truncate">${displayName}</p>
+                </div>
+                `;
+            }).join('');
+            
+            // ==========================================
+            // ৫. মাঝে বরাবর এলাইনমেন্ট লজিক (Centering Last Row)
+            // যদি মোট ক্যাটাগরির সংখ্যা ৪ এর চেয়ে কম হয় অথবা ৪ দিয়ে ভাগ না যায়, 
+            // তবে বাকি ঘরগুলো অদৃশ্য (invisible) ডিভ দিয়ে ফিল করে দেওয়া হবে।
+            // এতে করে ক্যাটাগরিগুলো গ্রিডের মাঝখানে চলে আসবে।
+            // ==========================================
+            const remainder = cats.length % 4;
+            if (remainder > 0) {
+                const emptySpaces = 4 - remainder;
+                for (let i = 0; i < emptySpaces; i++) {
+                    html += `<div class="invisible"></div>`;
+                }
+            }
+            
+            container.innerHTML = html;
+        }
 
         function loadFeaturedProducts() {
             const container = document.getElementById('featuredProductsList');
@@ -5541,7 +5549,7 @@ function searchProducts(query) {
                     
                     <div class="border-t border-gray-800 pt-6 text-center text-sm text-white font-bold">
                         &copy; ${year} ${s.sitename}. All rights reserved.
-                        <br>Developed by Safabox Team
+                        <br>Developed by safaboxbd team
                     </div>
                 </div>
             </footer>`;
