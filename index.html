@@ -1811,7 +1811,7 @@ document.addEventListener('DOMContentLoaded', () => {
             instantScrollFix(); 
             loadInitialData();
             setupEventListeners();
-            
+                if (appData.user && appData.user.userid) silentPointsRefresh();
             document.addEventListener('click', function(event) {
                 const searchBar = document.getElementById('searchBar');
                 const searchIcon = document.querySelector('button[onclick="toggleSearch()"]');
@@ -4613,6 +4613,7 @@ function loadCheckoutPage() {
             }
             
             if(appData.user && appData.user.currentpoints > 0) {
+                silentPointsRefresh();
                 if(toggle) toggle.disabled = false;
                 const ptsVal = (Number(appData.user.currentpoints) || 0) * (Number(appData.settings.pointvalue) || 1);
                 const maxD = Number(appData.settings.maxpointdiscountlimit);
@@ -4852,6 +4853,7 @@ function placeOrder() {
                 
                 const badge = document.getElementById('accountPtsBadge');
                 if(badge) badge.innerText = appData.user.currentpoints || 0;
+                silentPointsRefresh();
             }
         }
 
@@ -4960,6 +4962,81 @@ function handleSessionError() {
         }
     });
 }
+// ==========================================
+// SMART SILENT POINTS REFRESH (HYBRID THROTTLE)
+// ==========================================
+function silentPointsRefresh() {
+    if (!appData.user || !appData.user.userid) return;
+    
+    // ১. আগের সিঙ্কের সময় চেক করা (localStorage ব্যবহার করছি, কারণ এটা ট্যাব বন্ধ হলেও থাকে)
+    let lastSyncTime = 0;
+    try {
+        const saved = localStorage.getItem('lastPointsSyncTime');
+        if (saved) lastSyncTime = parseInt(saved);
+    } catch (e) {}
+    
+    const timeSinceLastSync = Date.now() - lastSyncTime;
+    
+    // ২. থ্রটল টাইম: ২৪ ঘণ্টা = ৮৬৪০০০০০ মিলিসেকেন্ড
+    const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
+    
+    // ৩. যদি ২৪ ঘণ্টা পার হয়নি, তাহলে কল ব্লক করো
+    if (lastSyncTime > 0 && timeSinceLastSync < TWENTY_FOUR_HOURS_MS) {
+        // সার্ভারে যাচ্ছে না, ক্যাশ থেকেই চলবে
+        return; 
+    }
+    
+    // ৪. ২৪ ঘণ্টা পার হয়েছে বা প্রথমবার → সার্ভারে যাচ্ছে
+    google.script.run
+        .withSuccessHandler(res => {
+            if (res.success) {
+                const oldPoints = Number(appData.user.currentpoints) || 0;
+                const newPoints = Number(res.currentpoints) || 0;
+                const newExpiry = res.pointsexpirydate || '';
+                
+                // পয়েন্টস পরিবর্তন হলে আপডেট করবে
+                if (oldPoints !== newPoints || appData.user.pointsexpirydate !== newExpiry) {
+                    appData.user.currentpoints = newPoints;
+                    appData.user.pointsexpirydate = newExpiry;
+                    localStorage.setItem('user', JSON.stringify(appData.user));
+                    
+                    // UI আপডেট
+                    const badge = document.getElementById('accountPtsBadge');
+                    if (badge) badge.innerText = newPoints;
+                    
+                    const toggle = document.getElementById('ptsToggle');
+                    const savingsLabel = document.getElementById('ptsSavingsLabel');
+                    if (toggle && savingsLabel) {
+                        if (newPoints > 0) {
+                            toggle.disabled = false;
+                            const ptsVal = newPoints * (Number(appData.settings.pointvalue) || 1);
+                            const maxD = Number(appData.settings.maxpointdiscountlimit) || 500;
+                            savingsLabel.innerText = `Save up to ৳${Math.min(ptsVal, maxD).toFixed(0)}`;
+                        } else {
+                            toggle.disabled = true;
+                            toggle.checked = false;
+                            savingsLabel.innerText = 'No Points';
+                        }
+                    }
+                    
+                    console.log(`Points updated: ${oldPoints} → ${newPoints}`);
+                }
+                
+                // ৫. নতুন সময় সেভ করো
+                try {
+                    localStorage.setItem('lastPointsSyncTime', Date.now().toString());
+                } catch (e) {}
+            }
+        })
+        .withFailureHandler(err => {
+            // এরর হলেও সময় সেভ করে দিবো, যাতে বারবার ট্রাই করে স্লো না হয়
+            try {
+                localStorage.setItem('lastPointsSyncTime', Date.now().toString());
+            } catch (e) {}
+            console.warn("Points sync failed:", err);
+        })
+        .getLatestUserPoints(appData.user.userid);
+}
         function performLogin() {
             const id = document.getElementById('loginIdentifier').value.trim();
             const pass = document.getElementById('loginPassword').value.trim();
@@ -4978,6 +5055,7 @@ function handleSessionError() {
                     // ==========================================
                     
                     localStorage.setItem('user', JSON.stringify(res.user)); 
+                    silentPointsRefresh();
                     navigateTo('#account'); 
                 }
                 else { Swal.fire('Error', res.error, 'error'); }
@@ -5549,7 +5627,7 @@ function searchProducts(query) {
                     
                     <div class="border-t border-gray-800 pt-6 text-center text-sm text-white font-bold">
                         &copy; ${year} ${s.sitename}. All rights reserved.
-                        <br>Developed by SafaBoxbd Team
+                        <br>Developed by Safa Team
                     </div>
                 </div>
             </footer>`;
