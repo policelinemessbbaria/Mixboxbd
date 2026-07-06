@@ -2883,9 +2883,8 @@ function loadAllProductsSection(pageNum) {
     
     let pool = [];
     if (isFirstPage) {
-        pool = allNonFeatured; // পেজ ১: সব নন-ফিচার্ড
+        pool = allNonFeatured;
     } else {
-        // পেজ ২+: পেজিনেশন অনুযায়ী
         const startIdx = 10 + ((pageNum - 2) * 30);
         pool = allNonFeatured.slice(startIdx, startIdx + 30);
     }
@@ -2893,8 +2892,20 @@ function loadAllProductsSection(pageNum) {
     // ==========================================
     // ধাপ ২: ব্যানার এবং প্রোডাক্ট গ্রুপিং
     // ==========================================
-    const bannerCategories = appData.categories.filter(c => c.inlinebanner && c.inlinebanner.trim() !== '' && (c.inlinebanner.startsWith('http://') || c.inlinebanner.startsWith('https://')));
     const maxPerBanner = isFirstPage ? 4 : 6;
+
+    // ব্যানার ফিল্টার: আগে যেগুলো দেখানো হয়েছে সেগুলো বাদ
+    let bannerCategories = appData.categories.filter(c => {
+        if (!c.inlinebanner || c.inlinebanner.trim() === '') return false;
+        if (!c.inlinebanner.startsWith('http://') && !c.inlinebanner.startsWith('https://')) return false;
+        
+        const mainCat = c.categoryname.split(' > ')[0];
+        
+        // আগে দেখানো হয়ে থাকলে বাদ
+        if (appData.usedBanners && appData.usedBanners.has(mainCat)) return false;
+        
+        return true;
+    });
 
     let bannerGroups = [];
     let usedIds = new Set();
@@ -2916,7 +2927,17 @@ function loadAllProductsSection(pageNum) {
         }
     });
 
-    // নরমাল প্রোডাক্ট = পুল - ব্যানার প্রোডাক্ট
+    // ==========================================
+    // ধাপ ২.৫: ব্যবহৃত ব্যানার ট্র্যাক করা
+    // ==========================================
+    if (!appData.usedBanners) {
+        appData.usedBanners = new Set();
+    }
+    bannerGroups.forEach(group => {
+        appData.usedBanners.add(group.category);
+    });
+
+    // নরমাল প্রোডাক্ট
     let normalProducts = pool.filter(p => !usedIds.has(p.id));
 
     // ==========================================
@@ -2926,25 +2947,23 @@ function loadAllProductsSection(pageNum) {
     if (!container) return;
 
     let html = '';
-    const fixedLimit = isFirstPage ? 2 : 0; // পেজ ১-এ ২টি ফিক্সড, অন্য পেজে ০
+    const fixedLimit = isFirstPage ? 2 : 0;
     let fixedCount = 0;
 
-    // --- ফিক্সড প্রোডাক্ট (শুধুমাত্র নরমাল প্রোডাক্ট থেকে) ---
+    // --- ফিক্সড প্রোডাক্ট ---
     if (fixedLimit > 0) {
         for (let i = 0; i < normalProducts.length && fixedCount < fixedLimit; i++) {
             html += createProductCard(normalProducts[i]);
-            usedIds.add(normalProducts[i].id); // ট্র্যাক করা হচ্ছে যাতে পরে আবার না আসে
+            usedIds.add(normalProducts[i].id);
             fixedCount++;
         }
-        // ফিক্সড প্রোডাক্ট বাদ দিয়ে নরমাল আপডেট
         normalProducts = normalProducts.filter(p => !usedIds.has(p.id));
     }
 
-    // --- ব্যানার গ্রুপ এবং তাদের প্রোডাক্ট ---
+    // --- ব্যানার গ্রুপ ---
     bannerGroups.forEach(group => {
         const productsToShow = group.products.slice(0, maxPerBanner);
         
-        // ব্যানার HTML (ক্লিকেবল - ক্যাটাগরি পেজে যাবে)
         html += `
             <div class="col-span-2 w-full my-2">
                 <div class="w-full rounded-xl overflow-hidden border border-gray-100 bg-gray-50 shadow-sm cursor-pointer hover:shadow-md transition-shadow" 
@@ -2958,7 +2977,6 @@ function loadAllProductsSection(pageNum) {
             </div>
         `;
         
-        // ব্যানারের ঠিক নিচে প্রোডাক্টগুলো
         productsToShow.forEach(p => {
             html += createProductCard(p);
         });
@@ -2973,7 +2991,7 @@ function loadAllProductsSection(pageNum) {
     container.className = 'grid grid-cols-2 gap-3'; 
 
     // ==========================================
-    // ধাপ ৪: ইউআই আপডেট (হিরো ও ফিচার্ড হাইড/শো)
+    // ধাপ ৪: ইউআই আপডেট
     // ==========================================
     const heroSection = document.getElementById('homeHeroSection');
     const featuredSection = document.getElementById('featuredProducts');
@@ -2993,7 +3011,7 @@ function loadAllProductsSection(pageNum) {
     }
 
     // ==========================================
-    // ধাপ ৫: পেজিনেশন কন্ট্রোল
+    // ধাপ ৫: পেজিনেশন
     // ==========================================
     const totalProducts = allNonFeatured.length;
     renderPaginationControls(pageNum, totalProducts);
