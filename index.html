@@ -1668,18 +1668,6 @@ function instantScrollFix() {
                                         syncCartWithLivePrices();
                                         initFilterOptions();
                                         
-                                        // ব্যবহারকারীকে সফল আপডেটের একটি ছোট মেসেজ দেওয়া
-                                        const Toast = Swal.mixin({
-                                            toast: true,
-                                            position: 'top-end',
-                                            showConfirmButton: false,
-                                            timer: 3000,
-                                            timerProgressBar: true
-                                        });
-                                        Toast.fire({
-                                            icon: 'success',
-                                            title: 'Data Automatically Updated!'
-                                        });
                                     }
                                 }
                             })
@@ -5642,7 +5630,7 @@ function searchProducts(query) {
                     
                     <div class="border-t border-gray-800 pt-6 text-center text-sm text-white font-bold">
                         &copy; ${year} ${s.sitename}. All rights reserved.
-                        <br>Developed by SafaBoxbd Team
+                        <br>Developed by safaboxbd team
                     </div>
                 </div>
             </footer>`;
