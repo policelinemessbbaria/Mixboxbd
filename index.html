@@ -1128,7 +1128,7 @@ src="https://www.facebook.com/tr?id=1526489362525698&ev=PageView&noscript=1"
     // VERCEL/NETLIFY HOSTING HELPER (POLYFILL FOR GOOGLE.SCRIPT.RUN)
     // ============================================================
     // নিচে আপনার Google Apps Script-এর বর্তমান Web App URL-টি বসিয়ে দিন:
-    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxStuSwMphKuda7bnEdiuw-gSU6Vqs0b3NSWX1XxWFrVWW5gF8_IRkVprHKiPDvqLTwyQ/exec"; 
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzL4ayBnG-6MVtRv-lbHCS7cO4Bumm57kIHt7NVvhiVzUj0YHF_h49Ac8EpzVsnLJH1/exec"; 
 
     if (typeof google === 'undefined' || !google.script) {
         window.google = {
@@ -2867,16 +2867,11 @@ function incrementTrackAttempt() {
             // Update Global State for the current page
             appData.allProductsCurrentPage = pageNum;
             
-            // ==================================================
-            // CRITICAL FIX FOR PART 3: SAVE TO SESSIONSTORAGE (WITH TRY-CATCH)
-            // ==================================================
-            // প্রতিবার পেজ চেঞ্জ হলে SessionStorage-এ সেভ করা হবে
             try {
                 sessionStorage.setItem('homePageNum', pageNum);
             } catch (e) {
                 console.warn("Failed to save page number to sessionStorage:", e);
             }
-            // ==================================================
             
             const featuredProds = appData.products.slice(0, 6);
             const featuredIds = featuredProds.map(p => p.id);
@@ -2898,8 +2893,57 @@ function incrementTrackAttempt() {
             const container = document.getElementById('homeAllProductsList');
             
             if(container) {
-                container.innerHTML = visibleProducts.map(p => createProductCard(p)).join('');
-                container.className = 'grid grid-cols-2 gap-3';
+                // পেজ অনুযায়ী ফ্রিকোয়েন্সি (পেজ ১ = ৪টি, বাকি পেজ = ৬টি)
+                const bannerFrequency = (pageNum === 1) ? 4 : 6;
+
+                let html = '';
+                // প্রতিটি ক্যাটাগরির জন্য আলাদাভাবে গুনতে হবে কয়টা প্রোডাক্ট দেখানো হলো
+                let categoryProductCount = {}; 
+
+                visibleProducts.forEach((p, index) => {
+                    // প্রোডাক্টের মেইন ক্যাটাগরি বের করা (যেমন: "Men > Shirt" থেকে "Men")
+                    const mainCat = p.category ? p.category.split(' > ')[0] : null;
+
+                    if (mainCat) {
+                        // কাউন্টার শুরু করা
+                        if (!categoryProductCount[mainCat]) categoryProductCount[mainCat] = 0;
+                        categoryProductCount[mainCat]++;
+
+                        // চেক করা ফ্রিকোয়েন্সি পূরণ হয়েছে কিনা (৪ বা ৬)
+                        if (categoryProductCount[mainCat] === bannerFrequency) {
+                            
+                            // গুগল শিট থেকে ওই ক্যাটাগরির ডাটা খোঁজা
+                            const catData = appData.categories.find(c => c.categoryname === mainCat);
+                            
+                            // D কলামের ডাটা (যার নাম আমরা inlinebanner রেখেছি) থাকছে কিনা চেক করা
+                            const bannerUrl = catData ? (catData.inlinebanner || '') : '';
+
+                            // যদি ছবির লিংক পাওয়া যায়, তাহলে ব্যানার বসানো হবে
+                            if (bannerUrl.trim() !== '') {
+                                html += `
+                                    <div class="col-span-2 w-full">
+                                        <div class="w-full rounded-xl overflow-hidden border border-gray-100">
+                                            <!-- h-auto ব্যবহার করায় ছবির আসল অনুপাত (Aspect Ratio) বজায় থাকবে, টেনে লম্বা হবে না -->
+                                            <img src="${bannerUrl}" 
+                                                 class="w-full h-auto object-cover" 
+                                                 loading="lazy"
+                                                 alt="${mainCat}">
+                                        </div>
+                                    </div>
+                                `;
+                            }
+
+                            // কাউন্টার রিসেট করে দেওয়া যাতে ঐ ক্যাটাগরির পরের ৪/৬টি প্রোডাক্টের পর আবার আসতে পারে
+                            categoryProductCount[mainCat] = 0;
+                        }
+                    }
+
+                    // সাধারণ প্রোডাক্ট কার্ড বসানো
+                    html += createProductCard(p);
+                });
+
+                container.innerHTML = html;
+                container.className = 'grid grid-cols-2 gap-3'; 
             }
 
             const heroSection = document.getElementById('homeHeroSection');
@@ -5630,7 +5674,7 @@ function searchProducts(query) {
                     
                     <div class="border-t border-gray-800 pt-6 text-center text-sm text-white font-bold">
                         &copy; ${year} ${s.sitename}. All rights reserved.
-                        <br>Developed by safaboxbd team
+                        <br>Developed by SafaBoxbd Team
                     </div>
                 </div>
             </footer>`;
