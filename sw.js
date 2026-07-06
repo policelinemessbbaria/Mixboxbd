@@ -1,4 +1,4 @@
-const CACHE_NAME = 'MixBoxbd-1'; // ভার্সন চেঞ্জ করেছি (v1 থেকে v2)
+const CACHE_NAME = 'MixBoxbd-2'; // ভার্সন চেঞ্জ করেছি (v1 থেকে v2)
 
 const ASSETS = [
   './',
