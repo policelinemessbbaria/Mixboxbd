@@ -2876,24 +2876,24 @@ function generateAllPagesLayout() {
     const allProducts = appData.products || [];
     if (allProducts.length === 0) return;
 
-    // ১ থেকে 6 নম্বর প্রোডাক্ট ফিচার্ড (আলাদা থাকবে)
+    // ১ থেকে ৬ নম্বর প্রোডাক্ট ফিচার্ড (আলাদা থাকবে)
     const featuredProds = allProducts.slice(0, 6);
     // ৭ ও ৮ নম্বর প্রোডাক্ট অল প্রোডাক্ট সেকশনের শুরুতে ফিক্সড থাকবে
     const fixedProds = allProducts.slice(6, 8);
     // ৯ নম্বর থেকে বাকি সব প্রোডাক্ট ডাইনামিক পুলে যাবে
     const dynamicPool = allProducts.slice(8);
 
-    // অ্যাক্টিভ ব্যানার ক্যাটাগরিগুলো ফিল্টার করা
+    // অ্যাক্টিভ ব্যানার ক্যাটাগরিগুলো ফিল্টার করা (শিটের ক্রমানুসারে থাকবে)
     const bannerCats = (appData.categories || []).filter(c => 
         c.inlinebanner && 
         c.inlinebanner.trim() !== '' && 
         (c.inlinebanner.startsWith('http://') || c.inlinebanner.startsWith('https://'))
     );
 
-    // ব্যানারগুলোকে ইউনিক অবজেক্ট হিসেবে অ্যারেতে রাখা (যাতে কোনো ওভাররাইট বা লিংক এক না হয়)
+    // ব্যানারগুলোকে ইউনিক অবজেক্ট হিসেবে অ্যারেতে রাখা (এখানে কোনো shuffle হবে না, শিটের সিরিয়াল ঠিক থাকবে)
     let activeBanners = bannerCats.map(cat => {
         return {
-            category: cat.categoryname, // সম্পূর্ণ ক্যাটাগরি নাম (যেন লিংক আলাদা হয়)
+            category: cat.categoryname, 
             bannerUrl: cat.inlinebanner,
             products: []
         };
@@ -2929,13 +2929,12 @@ function generateAllPagesLayout() {
     // যেসব ব্যানারে কোনো প্রোডাক্ট নেই সেগুলো বাদ দেওয়া
     activeBanners = activeBanners.filter(b => b.products.length > 0);
 
-    // প্রতিটি ব্যানার ক্যাটাগরির ভেতরের প্রোডাক্টগুলো এলোমেলো করা
+    // শর্ত মোতাবেক: ব্যানারের ভেতরের প্রোডাক্টগুলো এলোমেলো করা
     activeBanners.forEach(banner => {
         shuffleArray(banner.products);
     });
 
-    // ব্যানারগুলোর নিজেদের বসার সিরিয়ালও এলোমেলো (Randomize) করা
-    shuffleArray(activeBanners);
+    // !!! নোট: ব্যানারগুলোর নিজেদের সিরিয়াল এলোমেলো করার লাইনটি (shuffleArray) এখান থেকে সম্পূর্ণ ফেলে দেওয়া হয়েছে !!!
 
     const pages = {};
     let currentPage = 1;
@@ -2943,7 +2942,7 @@ function generateAllPagesLayout() {
 
     // পেজ ১-এর অল প্রোডাক্ট সেকশনের শুরুতে ২টি ফিক্সড প্রোডাক্ট বসানো
     pages[1].fixedProducts = fixedProds;
-    let currentCount = 2; // অল প্রোডাক্ট সেকশনে অলরেডি ২টি প্রোডাক্ট বসেছে
+    let currentCount = 2; 
     
     let bannerIdx = 0;
 
@@ -2953,7 +2952,6 @@ function generateAllPagesLayout() {
         let maxPerBanner = (currentPage === 1) ? 4 : 6;
         let availableSlots = pageLimit - currentCount;
 
-        // যদি বর্তমান পেজের প্রোডাক্ট লিমিট শেষ হয়ে যায়, তবে পরের পেজে যাও
         if (availableSlots <= 0) {
             currentPage++;
             pages[currentPage] = { fixedProducts: [], bannerGroups: [], normalProducts: [] };
@@ -2964,30 +2962,26 @@ function generateAllPagesLayout() {
         let banner = activeBanners[bannerIdx];
         let takeCount = Math.min(banner.products.length, maxPerBanner);
 
-        // যদি ব্যানারের প্রোডাক্টগুলো বর্তমান পেজের বাকি খালি স্লটে ধরে যায়
         if (takeCount <= availableSlots) {
             let bannerProds = banner.products.slice(0, takeCount);
             let excessProds = banner.products.slice(takeCount);
 
-            // অতিরিক্ত প্রোডাক্টগুলো নরমাল পুলে পাঠিয়ে দেওয়া
             excessProds.forEach(p => normalPool.push(p));
 
             pages[currentPage].bannerGroups.push({
-                category: banner.category, // সম্পূর্ণ ইউনিক ক্যাটাগরি নাম যাচ্ছে
+                category: banner.category, 
                 bannerUrl: banner.bannerUrl,
                 products: bannerProds
             });
 
             currentCount += takeCount;
-            bannerIdx++; // এই ব্যানারের কাজ শেষ, পরের ব্যানারে যাও
+            bannerIdx++; 
         } else {
-            // যদি ব্যানারটি এই পেজের বাকি স্লটে সম্পূর্ণ না ধরে, তবে পেজের বাকি অংশ নরমাল প্রোডাক্ট দিয়ে পূরণ করো
             shuffleArray(normalPool);
             while (currentCount < pageLimit && normalPool.length > 0) {
                 pages[currentPage].normalProducts.push(normalPool.shift());
                 currentCount++;
             }
-            // পরবর্তী পেজ তৈরি করা এবং এই ব্যানারটি পরের পেজের শুরুতে ট্রাই করা
             currentPage++;
             pages[currentPage] = { fixedProducts: [], bannerGroups: [], normalProducts: [] };
             currentCount = 0;
@@ -3016,8 +3010,8 @@ function loadAllProductsSection(pageNum, shouldScrollToTop = true) {
     appData.allProductsCurrentPage = pageNum;
     try { sessionStorage.setItem('homePageNum', pageNum); } catch (e) {}
 
-    // পেজ ১ অথবা প্রথমবার রেন্ডার হলে সম্পূর্ণ ডাটা লেআউট তৈরি হবে
-    if (pageNum === 1 || !appData.computedPages) {
+    // ফিক্স: পেজ ১-এ ক্লিক করলেও বারবার রিলোড হবে না। শুধুমাত্র প্রথমবার বা ডাটা না থাকলে লেআউট জেনারেট হবে।
+    if (!appData.computedPages) {
         generateAllPagesLayout();
     }
 
@@ -3027,7 +3021,7 @@ function loadAllProductsSection(pageNum, shouldScrollToTop = true) {
 
     let html = '';
 
-    // ক. ফিক্সড প্রোডাক্ট রেন্ডার (শুধুমাত্র পেজ ১-এর শুরুতে আসবে, কোনো ব্যানার ছাড়া)
+    // ক. ফিক্সড প্রোডাক্ট রেন্ডার
     if (pageData.fixedProducts && pageData.fixedProducts.length > 0) {
         pageData.fixedProducts.forEach(p => {
             html += createProductCard(p);
@@ -3051,7 +3045,6 @@ function loadAllProductsSection(pageNum, shouldScrollToTop = true) {
                 html += createProductCard(p);
             });
 
-            // ১ বা ৩টি প্রোডাক্ট থাকলে পাশের জায়গা খালি (Blank) রাখার ট্রিক
             if (group.products.length % 2 !== 0) {
                 html += `<div class="w-full h-full pointer-events-none hidden md:block"></div>`;
             }
@@ -3088,7 +3081,6 @@ function loadAllProductsSection(pageNum, shouldScrollToTop = true) {
         if (titleRow) titleRow.classList.remove('hidden');
     }
 
-    // পেজিনেশন কন্ট্রোল ঠিক রাখতে ভার্চুয়াল আইটেম সংখ্যা পাঠানো
     const totalVirtualItems = 10 + ((appData.totalComputedPages - 1) * 30);
     renderPaginationControls(pageNum, totalVirtualItems);
     
@@ -3096,6 +3088,7 @@ function loadAllProductsSection(pageNum, shouldScrollToTop = true) {
         window.scrollTo(0, 0);
     }
 }
+
 
 function renderPaginationControls(currentPage, totalProducts) {
     const container = document.getElementById('homePaginationControls');
