@@ -2863,110 +2863,143 @@ function incrementTrackAttempt() {
         // ===============================================
 
         // ================= PAGINATION LOGIC =================
-        function loadAllProductsSection(pageNum) {
-            // Update Global State for the current page
-            appData.allProductsCurrentPage = pageNum;
-            
-            try {
-                sessionStorage.setItem('homePageNum', pageNum);
-            } catch (e) {
-                console.warn("Failed to save page number to sessionStorage:", e);
-            }
-            
-            const featuredProds = appData.products.slice(0, 6);
-            const featuredIds = featuredProds.map(p => p.id);
-            const allProds = appData.products.filter(p => !featuredIds.includes(p.id));
-            
-            const totalProducts = allProds.length;
-            
-            let startIdx, endIdx;
-            
-            if (pageNum === 1) {
-                startIdx = 0;
-                endIdx = 10;
-            } else {
-                startIdx = 10 + ((pageNum - 2) * 30);
-                endIdx = startIdx + 30;
-            }
+function loadAllProductsSection(pageNum) {
+    // Update Global State
+    appData.allProductsCurrentPage = pageNum;
+    try {
+        sessionStorage.setItem('homePageNum', pageNum);
+    } catch (e) {
+        console.warn("Failed to save page number to sessionStorage:", e);
+    }
+    
+    const featuredProds = appData.products.slice(0, 6);
+    const featuredIds = new Set(featuredProds.map(p => p.id));
+    
+    // ==========================================
+    // ধাপ ১: এই পেজের জন্য পুল অফ প্রোডাক্ট তৈরি
+    // ==========================================
+    const allNonFeatured = appData.products.filter(p => !featuredIds.has(p.id));
+    const isFirstPage = (pageNum === 1);
+    
+    let pool = [];
+    if (isFirstPage) {
+        pool = allNonFeatured; // পেজ ১: সব নন-ফিচার্ড
+    } else {
+        // পেজ ২+: পেজিনেশন অনুযায়ী
+        const startIdx = 10 + ((pageNum - 2) * 30);
+        pool = allNonFeatured.slice(startIdx, startIdx + 30);
+    }
 
-            const visibleProducts = allProds.slice(startIdx, endIdx);
-            const container = document.getElementById('homeAllProductsList');
-            
-            if(container) {
-                // পেজ অনুযায়ী ফ্রিকোয়েন্সি (পেজ ১ = ৪টি, বাকি পেজ = ৬টি)
-                const bannerFrequency = (pageNum === 1) ? 4 : 6;
+    // ==========================================
+    // ধাপ ২: ব্যানার এবং প্রোডাক্ট গ্রুপিং
+    // ==========================================
+    const bannerCategories = appData.categories.filter(c => c.inlinebanner && c.inlinebanner.trim() !== '' && (c.inlinebanner.startsWith('http://') || c.inlinebanner.startsWith('https://')));
+    const maxPerBanner = isFirstPage ? 4 : 6;
 
-                let html = '';
-                // প্রতিটি ক্যাটাগরির জন্য আলাদাভাবে গুনতে হবে কয়টা প্রোডাক্ট দেখানো হলো
-                let categoryProductCount = {}; 
-
-                visibleProducts.forEach((p, index) => {
-                    // প্রোডাক্টের মেইন ক্যাটাগরি বের করা (যেমন: "Men > Shirt" থেকে "Men")
-                    const mainCat = p.category ? p.category.split(' > ')[0] : null;
-
-                    if (mainCat) {
-                        // কাউন্টার শুরু করা
-                        if (!categoryProductCount[mainCat]) categoryProductCount[mainCat] = 0;
-                        categoryProductCount[mainCat]++;
-
-                        // চেক করা ফ্রিকোয়েন্সি পূরণ হয়েছে কিনা (৪ বা ৬)
-                        if (categoryProductCount[mainCat] === bannerFrequency) {
-                            
-                            // গুগল শিট থেকে ওই ক্যাটাগরির ডাটা খোঁজা
-                            const catData = appData.categories.find(c => c.categoryname === mainCat);
-                            
-                            // D কলামের ডাটা (যার নাম আমরা inlinebanner রেখেছি) থাকছে কিনা চেক করা
-                            const bannerUrl = catData ? (catData.inlinebanner || '') : '';
-
-                            // যদি ছবির লিংক পাওয়া যায়, তাহলে ব্যানার বসানো হবে
-                            if (bannerUrl.trim() !== '') {
-                                html += `
-                                    <div class="col-span-2 w-full">
-                                        <div class="w-full rounded-xl overflow-hidden border border-gray-100">
-                                            <!-- h-auto ব্যবহার করায় ছবির আসল অনুপাত (Aspect Ratio) বজায় থাকবে, টেনে লম্বা হবে না -->
-                                            <img src="${bannerUrl}" 
-                                                 class="w-full h-auto object-cover" 
-                                                 loading="lazy"
-                                                 alt="${mainCat}">
-                                        </div>
-                                    </div>
-                                `;
-                            }
-
-                            // কাউন্টার রিসেট করে দেওয়া যাতে ঐ ক্যাটাগরির পরের ৪/৬টি প্রোডাক্টের পর আবার আসতে পারে
-                            categoryProductCount[mainCat] = 0;
-                        }
-                    }
-
-                    // সাধারণ প্রোডাক্ট কার্ড বসানো
-                    html += createProductCard(p);
-                });
-
-                container.innerHTML = html;
-                container.className = 'grid grid-cols-2 gap-3'; 
-            }
-
-            const heroSection = document.getElementById('homeHeroSection');
-            const featuredSection = document.getElementById('featuredProducts');
-            const titleRow = document.getElementById('homeAllProductsTitleRow');
-            const pageLabel = document.getElementById('currentPageLabel');
-
-            if(pageLabel) pageLabel.innerText = pageNum;
-
-            if (pageNum > 1) {
-                if(heroSection) heroSection.style.display = 'none';
-                if(featuredSection) featuredSection.style.display = 'none'; 
-                if(titleRow) titleRow.classList.remove('hidden');
-            } else {
-                if(heroSection) heroSection.style.display = '';
-                if(featuredSection) featuredSection.style.display = ''; 
-                if(titleRow) titleRow.classList.remove('hidden');
-            }
-
-            renderPaginationControls(pageNum, totalProducts);
-            
-            window.scrollTo(0, 0);
+    let bannerGroups = [];
+    let usedIds = new Set();
+    
+    bannerCategories.forEach(cat => {
+        const mainCat = cat.categoryname.split(' > ')[0];
+        const catProducts = pool.filter(p => {
+            const pMainCat = p.category ? p.category.split(' > ')[0] : null;
+            return pMainCat === mainCat;
+        });
+        
+        if (catProducts.length > 0) {
+            bannerGroups.push({
+                category: mainCat,
+                bannerUrl: cat.inlinebanner,
+                products: catProducts
+            });
+            catProducts.forEach(p => usedIds.add(p.id));
         }
+    });
+
+    // নরমাল প্রোডাক্ট = পুল - ব্যানার প্রোডাক্ট
+    let normalProducts = pool.filter(p => !usedIds.has(p.id));
+
+    // ==========================================
+    // ধাপ ৩: HTML তৈরি
+    // ==========================================
+    const container = document.getElementById('homeAllProductsList');
+    if (!container) return;
+
+    let html = '';
+    const fixedLimit = isFirstPage ? 2 : 0; // পেজ ১-এ ২টি ফিক্সড, অন্য পেজে ০
+    let fixedCount = 0;
+
+    // --- ফিক্সড প্রোডাক্ট (শুধুমাত্র নরমাল প্রোডাক্ট থেকে) ---
+    if (fixedLimit > 0) {
+        for (let i = 0; i < normalProducts.length && fixedCount < fixedLimit; i++) {
+            html += createProductCard(normalProducts[i]);
+            usedIds.add(normalProducts[i].id); // ট্র্যাক করা হচ্ছে যাতে পরে আবার না আসে
+            fixedCount++;
+        }
+        // ফিক্সড প্রোডাক্ট বাদ দিয়ে নরমাল আপডেট
+        normalProducts = normalProducts.filter(p => !usedIds.has(p.id));
+    }
+
+    // --- ব্যানার গ্রুপ এবং তাদের প্রোডাক্ট ---
+    bannerGroups.forEach(group => {
+        const productsToShow = group.products.slice(0, maxPerBanner);
+        
+        // ব্যানার HTML (ক্লিকেবল - ক্যাটাগরি পেজে যাবে)
+        html += `
+            <div class="col-span-2 w-full my-2">
+                <div class="w-full rounded-xl overflow-hidden border border-gray-100 bg-gray-50 shadow-sm cursor-pointer hover:shadow-md transition-shadow" 
+                     onclick="event.stopPropagation(); navigateTo('#category?name=${encodeURIComponent(group.category)}')">
+                    <img src="${group.bannerUrl}" 
+                         class="w-full h-auto object-cover" 
+                         loading="lazy"
+                         onerror="this.parentElement.parentElement.style.display='none';"
+                         alt="${group.category}">
+                </div>
+            </div>
+        `;
+        
+        // ব্যানারের ঠিক নিচে প্রোডাক্টগুলো
+        productsToShow.forEach(p => {
+            html += createProductCard(p);
+        });
+    });
+
+    // --- বাকি নরমাল প্রোডাক্ট ---
+    normalProducts.forEach(p => {
+        html += createProductCard(p);
+    });
+
+    container.innerHTML = html;
+    container.className = 'grid grid-cols-2 gap-3'; 
+
+    // ==========================================
+    // ধাপ ৪: ইউআই আপডেট (হিরো ও ফিচার্ড হাইড/শো)
+    // ==========================================
+    const heroSection = document.getElementById('homeHeroSection');
+    const featuredSection = document.getElementById('featuredProducts');
+    const titleRow = document.getElementById('homeAllProductsTitleRow');
+    const pageLabel = document.getElementById('currentPageLabel');
+
+    if (pageLabel) pageLabel.innerText = pageNum;
+
+    if (pageNum > 1) {
+        if (heroSection) heroSection.style.display = 'none';
+        if (featuredSection) featuredSection.style.display = 'none'; 
+        if (titleRow) titleRow.classList.remove('hidden');
+    } else {
+        if (heroSection) heroSection.style.display = '';
+        if (featuredSection) featuredSection.style.display = ''; 
+        if (titleRow) titleRow.classList.remove('hidden');
+    }
+
+    // ==========================================
+    // ধাপ ৫: পেজিনেশন কন্ট্রোল
+    // ==========================================
+    const totalProducts = allNonFeatured.length;
+    renderPaginationControls(pageNum, totalProducts);
+    
+    window.scrollTo(0, 0);
+}
 
         function renderPaginationControls(currentPage, totalProducts) {
             const container = document.getElementById('homePaginationControls');
