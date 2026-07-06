@@ -2863,135 +2863,213 @@ function incrementTrackAttempt() {
         // ===============================================
 
         // ================= PAGINATION LOGIC =================
-function loadAllProductsSection(pageNum) {
-    // Update Global State
-    appData.allProductsCurrentPage = pageNum;
-    try {
-        sessionStorage.setItem('homePageNum', pageNum);
-    } catch (e) {
-        console.warn("Failed to save page number to sessionStorage:", e);
+// সাহায্যকারী ফাংশন: অ্যারে এলোমেলো (Shuffle) করার জন্য
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
     }
-    
-    const featuredProds = appData.products.slice(0, 6);
-    const featuredIds = new Set(featuredProds.map(p => p.id));
-    
-    // ==========================================
-    // ধাপ ১: এই পেজের জন্য পুল অফ প্রোডাক্ট তৈরি
-    // ==========================================
-    const allNonFeatured = appData.products.filter(p => !featuredIds.has(p.id));
-    const isFirstPage = (pageNum === 1);
-    
-    let pool = [];
-    if (isFirstPage) {
-        pool = allNonFeatured;
-    } else {
-        const startIdx = 10 + ((pageNum - 2) * 30);
-        pool = allNonFeatured.slice(startIdx, startIdx + 30);
-    }
+}
 
-    // ==========================================
-    // ধাপ ২: ব্যানার এবং প্রোডাক্ট গ্রুপিং
-    // ==========================================
-    const maxPerBanner = isFirstPage ? 4 : 6;
+// ১. সম্পূর্ণ প্রোডাক্ট লিস্টকে পেজ ভিত্তিক বিন্যাস (Layout) করার মেইন ফাংশন
+function generateAllPagesLayout() {
+    const allProducts = appData.products || [];
+    if (allProducts.length === 0) return;
 
-    // ব্যানার ফিল্টার: আগে যেগুলো দেখানো হয়েছে সেগুলো বাদ
-    let bannerCategories = appData.categories.filter(c => {
-        if (!c.inlinebanner || c.inlinebanner.trim() === '') return false;
-        if (!c.inlinebanner.startsWith('http://') && !c.inlinebanner.startsWith('https://')) return false;
-        
-        const mainCat = c.categoryname.split(' > ')[0];
-        
-        // আগে দেখানো হয়ে থাকলে বাদ
-        if (appData.usedBanners && appData.usedBanners.has(mainCat)) return false;
-        
-        return true;
+    // ১ থেকে 6 নম্বর প্রোডাক্ট ফিচার্ড (আলাদা থাকবে)
+    const featuredProds = allProducts.slice(0, 6);
+    // ৭ ও ৮ নম্বর প্রোডাক্ট অল প্রোডাক্ট সেকশনের শুরুতে ফিক্সড থাকবে
+    const fixedProds = allProducts.slice(6, 8);
+    // ৯ নম্বর থেকে বাকি সব প্রোডাক্ট ডাইনামিক পুলে যাবে
+    const dynamicPool = allProducts.slice(8);
+
+    // অ্যাক্টিভ ব্যানার ক্যাটাগরিগুলো ফিল্টার করা
+    const bannerCats = (appData.categories || []).filter(c => 
+        c.inlinebanner && 
+        c.inlinebanner.trim() !== '' && 
+        (c.inlinebanner.startsWith('http://') || c.inlinebanner.startsWith('https://'))
+    );
+
+    // ব্যানারগুলোকে ইউনিক অবজেক্ট হিসেবে অ্যারেতে রাখা (যাতে কোনো ওভাররাইট বা লিংক এক না হয়)
+    let activeBanners = bannerCats.map(cat => {
+        return {
+            category: cat.categoryname, // সম্পূর্ণ ক্যাটাগরি নাম (যেন লিংক আলাদা হয়)
+            bannerUrl: cat.inlinebanner,
+            products: []
+        };
     });
 
-    let bannerGroups = [];
-    let usedIds = new Set();
-    
-    bannerCategories.forEach(cat => {
-        const mainCat = cat.categoryname.split(' > ')[0];
-        const catProducts = pool.filter(p => {
-            const pMainCat = p.category ? p.category.split(' > ')[0] : null;
-            return pMainCat === mainCat;
-        });
-        
-        if (catProducts.length > 0) {
-            bannerGroups.push({
-                category: mainCat,
-                bannerUrl: cat.inlinebanner,
-                products: catProducts
-            });
-            catProducts.forEach(p => usedIds.add(p.id));
+    // প্রোডাক্টগুলোকে তাদের সঠিক ব্যানারে ভাগ করা
+    const normalPool = [];
+    dynamicPool.forEach(p => {
+        if (!p.category) {
+            normalPool.push(p);
+            return;
+        }
+
+        // প্রথমে একদম হুবহু মিল (Exact Match) বা সাব-ক্যাটাগরি মিল খোঁজা
+        let matchedBanner = activeBanners.find(b => 
+            p.category === b.category || p.category.startsWith(b.category + ' > ')
+        );
+
+        // যদি নিখুঁত মিল না পাওয়া যায়, তবে মেইন ক্যাটাগরি মিল খোঁজা
+        if (!matchedBanner) {
+            matchedBanner = activeBanners.find(b => 
+                p.category.split(' > ')[0] === b.category.split(' > ')[0]
+            );
+        }
+
+        if (matchedBanner) {
+            matchedBanner.products.push(p);
+        } else {
+            normalPool.push(p);
         }
     });
 
-    // ==========================================
-    // ধাপ ২.৫: ব্যবহৃত ব্যানার ট্র্যাক করা
-    // ==========================================
-    if (!appData.usedBanners) {
-        appData.usedBanners = new Set();
-    }
-    bannerGroups.forEach(group => {
-        appData.usedBanners.add(group.category);
+    // যেসব ব্যানারে কোনো প্রোডাক্ট নেই সেগুলো বাদ দেওয়া
+    activeBanners = activeBanners.filter(b => b.products.length > 0);
+
+    // প্রতিটি ব্যানার ক্যাটাগরির ভেতরের প্রোডাক্টগুলো এলোমেলো করা
+    activeBanners.forEach(banner => {
+        shuffleArray(banner.products);
     });
 
-    // নরমাল প্রোডাক্ট
-    let normalProducts = pool.filter(p => !usedIds.has(p.id));
+    // ব্যানারগুলোর নিজেদের বসার সিরিয়ালও এলোমেলো (Randomize) করা
+    shuffleArray(activeBanners);
 
-    // ==========================================
-    // ধাপ ৩: HTML তৈরি
-    // ==========================================
+    const pages = {};
+    let currentPage = 1;
+    pages[currentPage] = { fixedProducts: [], bannerGroups: [], normalProducts: [] };
+
+    // পেজ ১-এর অল প্রোডাক্ট সেকশনের শুরুতে ২টি ফিক্সড প্রোডাক্ট বসানো
+    pages[1].fixedProducts = fixedProds;
+    let currentCount = 2; // অল প্রোডাক্ট সেকশনে অলরেডি ২টি প্রোডাক্ট বসেছে
+    
+    let bannerIdx = 0;
+
+    // ব্যানারগুলো পেজ অনুযায়ী ডিস্ট্রিবিউট করা
+    while (bannerIdx < activeBanners.length) {
+        let pageLimit = (currentPage === 1) ? 10 : 30;
+        let maxPerBanner = (currentPage === 1) ? 4 : 6;
+        let availableSlots = pageLimit - currentCount;
+
+        // যদি বর্তমান পেজের প্রোডাক্ট লিমিট শেষ হয়ে যায়, তবে পরের পেজে যাও
+        if (availableSlots <= 0) {
+            currentPage++;
+            pages[currentPage] = { fixedProducts: [], bannerGroups: [], normalProducts: [] };
+            currentCount = 0;
+            continue;
+        }
+
+        let banner = activeBanners[bannerIdx];
+        let takeCount = Math.min(banner.products.length, maxPerBanner);
+
+        // যদি ব্যানারের প্রোডাক্টগুলো বর্তমান পেজের বাকি খালি স্লটে ধরে যায়
+        if (takeCount <= availableSlots) {
+            let bannerProds = banner.products.slice(0, takeCount);
+            let excessProds = banner.products.slice(takeCount);
+
+            // অতিরিক্ত প্রোডাক্টগুলো নরমাল পুলে পাঠিয়ে দেওয়া
+            excessProds.forEach(p => normalPool.push(p));
+
+            pages[currentPage].bannerGroups.push({
+                category: banner.category, // সম্পূর্ণ ইউনিক ক্যাটাগরি নাম যাচ্ছে
+                bannerUrl: banner.bannerUrl,
+                products: bannerProds
+            });
+
+            currentCount += takeCount;
+            bannerIdx++; // এই ব্যানারের কাজ শেষ, পরের ব্যানারে যাও
+        } else {
+            // যদি ব্যানারটি এই পেজের বাকি স্লটে সম্পূর্ণ না ধরে, তবে পেজের বাকি অংশ নরমাল প্রোডাক্ট দিয়ে পূরণ করো
+            shuffleArray(normalPool);
+            while (currentCount < pageLimit && normalPool.length > 0) {
+                pages[currentPage].normalProducts.push(normalPool.shift());
+                currentCount++;
+            }
+            // পরবর্তী পেজ তৈরি করা এবং এই ব্যানারটি পরের পেজের শুরুতে ট্রাই করা
+            currentPage++;
+            pages[currentPage] = { fixedProducts: [], bannerGroups: [], normalProducts: [] };
+            currentCount = 0;
+        }
+    }
+
+    // সমস্ত ব্যানার সাজানো শেষ হলে, বাকি থাকা সাধারণ প্রোডাক্টগুলো দিয়ে খালি স্লট পূরণ করা
+    shuffleArray(normalPool);
+    while (normalPool.length > 0) {
+        let pageLimit = (currentPage === 1) ? 10 : 30;
+        if (currentCount >= pageLimit) {
+            currentPage++;
+            pages[currentPage] = { fixedProducts: [], bannerGroups: [], normalProducts: [] };
+            currentCount = 0;
+        }
+        pages[currentPage].normalProducts.push(normalPool.shift());
+        currentCount++;
+    }
+
+    appData.computedPages = pages;
+    appData.totalComputedPages = currentPage;
+}
+
+// ২. ইউআই রেন্ডারিং ফাংশন
+function loadAllProductsSection(pageNum, shouldScrollToTop = true) {
+    appData.allProductsCurrentPage = pageNum;
+    try { sessionStorage.setItem('homePageNum', pageNum); } catch (e) {}
+
+    // পেজ ১ অথবা প্রথমবার রেন্ডার হলে সম্পূর্ণ ডাটা লেআউট তৈরি হবে
+    if (pageNum === 1 || !appData.computedPages) {
+        generateAllPagesLayout();
+    }
+
+    const pageData = appData.computedPages[pageNum] || { fixedProducts: [], bannerGroups: [], normalProducts: [] };
     const container = document.getElementById('homeAllProductsList');
     if (!container) return;
 
     let html = '';
-    const fixedLimit = isFirstPage ? 2 : 0;
-    let fixedCount = 0;
 
-    // --- ফিক্সড প্রোডাক্ট ---
-    if (fixedLimit > 0) {
-        for (let i = 0; i < normalProducts.length && fixedCount < fixedLimit; i++) {
-            html += createProductCard(normalProducts[i]);
-            usedIds.add(normalProducts[i].id);
-            fixedCount++;
-        }
-        normalProducts = normalProducts.filter(p => !usedIds.has(p.id));
-    }
-
-    // --- ব্যানার গ্রুপ ---
-    bannerGroups.forEach(group => {
-        const productsToShow = group.products.slice(0, maxPerBanner);
-        
-        html += `
-            <div class="col-span-2 w-full my-2">
-                <div class="w-full rounded-xl overflow-hidden border border-gray-100 bg-gray-50 shadow-sm cursor-pointer hover:shadow-md transition-shadow" 
-                     onclick="event.stopPropagation(); navigateTo('#category?name=${encodeURIComponent(group.category)}')">
-                    <img src="${group.bannerUrl}" 
-                         class="w-full h-auto object-cover" 
-                         loading="lazy"
-                         onerror="this.parentElement.parentElement.style.display='none';"
-                         alt="${group.category}">
-                </div>
-            </div>
-        `;
-        
-        productsToShow.forEach(p => {
+    // ক. ফিক্সড প্রোডাক্ট রেন্ডার (শুধুমাত্র পেজ ১-এর শুরুতে আসবে, কোনো ব্যানার ছাড়া)
+    if (pageData.fixedProducts && pageData.fixedProducts.length > 0) {
+        pageData.fixedProducts.forEach(p => {
             html += createProductCard(p);
         });
-    });
+    }
 
-    // --- বাকি নরমাল প্রোডাক্ট ---
-    normalProducts.forEach(p => {
-        html += createProductCard(p);
-    });
+    // খ. ব্যানার এবং তার আন্ডারে থাকা প্রোডাক্ট রেন্ডার
+    if (pageData.bannerGroups && pageData.bannerGroups.length > 0) {
+        pageData.bannerGroups.forEach(group => {
+            html += `
+                <div class="col-span-2 w-full my-2">
+                    <div class="w-full rounded-xl overflow-hidden border border-gray-100 bg-gray-50 shadow-sm cursor-pointer hover:shadow-md transition-shadow" 
+                         onclick="event.stopPropagation(); navigateTo('#category?name=${encodeURIComponent(group.category)}')">
+                        <img src="${group.bannerUrl}" class="w-full h-auto object-cover" loading="lazy"
+                             onerror="this.parentElement.parentElement.style.display='none';" alt="${group.category}">
+                    </div>
+                </div>
+            `;
+            
+            group.products.forEach(p => {
+                html += createProductCard(p);
+            });
+
+            // ১ বা ৩টি প্রোডাক্ট থাকলে পাশের জায়গা খালি (Blank) রাখার ট্রিক
+            if (group.products.length % 2 !== 0) {
+                html += `<div class="w-full h-full pointer-events-none hidden md:block"></div>`;
+            }
+        });
+    }
+
+    // গ. সাধারণ বা নরমাল প্রোডাক্ট রেন্ডার
+    if (pageData.normalProducts && pageData.normalProducts.length > 0) {
+        pageData.normalProducts.forEach(p => {
+            html += createProductCard(p);
+        });
+    }
 
     container.innerHTML = html;
-    container.className = 'grid grid-cols-2 gap-3'; 
+    container.className = 'grid grid-cols-2 gap-3';
 
     // ==========================================
-    // ধাপ ৪: ইউআই আপডেট
+    // ইউআই (UI) এবং সেকশন ভিজিবিলিটি আপডেট
     // ==========================================
     const heroSection = document.getElementById('homeHeroSection');
     const featuredSection = document.getElementById('featuredProducts');
@@ -2999,68 +3077,44 @@ function loadAllProductsSection(pageNum) {
     const pageLabel = document.getElementById('currentPageLabel');
 
     if (pageLabel) pageLabel.innerText = pageNum;
-
+    
     if (pageNum > 1) {
         if (heroSection) heroSection.style.display = 'none';
-        if (featuredSection) featuredSection.style.display = 'none'; 
+        if (featuredSection) featuredSection.style.display = 'none';
         if (titleRow) titleRow.classList.remove('hidden');
     } else {
         if (heroSection) heroSection.style.display = '';
-        if (featuredSection) featuredSection.style.display = ''; 
+        if (featuredSection) featuredSection.style.display = '';
         if (titleRow) titleRow.classList.remove('hidden');
     }
 
-    // ==========================================
-    // ধাপ ৫: পেজিনেশন
-    // ==========================================
-    const totalProducts = allNonFeatured.length;
-    renderPaginationControls(pageNum, totalProducts);
+    // পেজিনেশন কন্ট্রোল ঠিক রাখতে ভার্চুয়াল আইটেম সংখ্যা পাঠানো
+    const totalVirtualItems = 10 + ((appData.totalComputedPages - 1) * 30);
+    renderPaginationControls(pageNum, totalVirtualItems);
     
-    window.scrollTo(0, 0);
+    if (shouldScrollToTop) {
+        window.scrollTo(0, 0);
+    }
 }
 
-        function renderPaginationControls(currentPage, totalProducts) {
-            const container = document.getElementById('homePaginationControls');
-            if(!container) return;
+function renderPaginationControls(currentPage, totalProducts) {
+    const container = document.getElementById('homePaginationControls');
+    if (!container) return;
+    const remaining = totalProducts - 10;
+    let extraPages = remaining > 0 ? Math.ceil(remaining / 30) : 0;
+    const totalPages = 1 + extraPages;
+    if (totalPages <= 1) { container.innerHTML = ''; return; }
 
-            const remaining = totalProducts - 10;
-            let extraPages = 0;
-            if (remaining > 0) {
-                extraPages = Math.ceil(remaining / 30);
-            }
-            const totalPages = 1 + extraPages;
-
-            if (totalPages <= 1) {
-                container.innerHTML = '';
-                return;
-            }
-
-            let html = '';
-
-            html += `<button onclick="loadAllProductsSection(${currentPage - 1})" 
-                     ${currentPage === 1 ? 'disabled' : ''} 
-                     class="px-3 py-1 border rounded font-medium transition-colors 
-                     ${currentPage === 1 ? 'text-gray-300 cursor-not-allowed border-gray-200' : 'hover:bg-gray-50 text-gray-700'}">
-                     <i class="fas fa-chevron-left"></i>
-                     </button>`;
-
-            for (let i = 1; i <= totalPages; i++) {
-                if (i === currentPage) {
-                    html += `<button class="w-8 h-8 flex items-center justify-center rounded font-bold text-white bg-primary shadow-md">${i}</button>`;
-                } else {
-                    html += `<button onclick="loadAllProductsSection(${i})" class="w-8 h-8 flex items-center justify-center rounded font-medium text-gray-700 border hover:bg-gray-50 transition-colors">${i}</button>`;
-                }
-            }
-
-            html += `<button onclick="loadAllProductsSection(${currentPage + 1})" 
-                     ${currentPage === totalPages ? 'disabled' : ''} 
-                     class="px-3 py-1 border rounded font-medium transition-colors 
-                     ${currentPage === totalPages ? 'text-gray-300 cursor-not-allowed border-gray-200' : 'hover:bg-gray-50 text-gray-700'}">
-                     <i class="fas fa-chevron-right"></i>
-                     </button>`;
-
-            container.innerHTML = html;
-        }
+    let html = '';
+    html += `<button onclick="loadAllProductsSection(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''} class="px-3 py-1 border rounded font-medium transition-colors ${currentPage === 1 ? 'text-gray-300 cursor-not-allowed border-gray-200' : 'hover:bg-gray-50 text-gray-700'}"><i class="fas fa-chevron-left"></i></button>`;
+    for (let i = 1; i <= totalPages; i++) {
+        html += i === currentPage 
+            ? `<button class="w-8 h-8 flex items-center justify-center rounded font-bold text-white bg-primary shadow-md">${i}</button>` 
+            : `<button onclick="loadAllProductsSection(${i})" class="w-8 h-8 flex items-center justify-center rounded font-medium text-gray-700 border hover:bg-gray-50 transition-colors">${i}</button>`;
+    }
+    html += `<button onclick="loadAllProductsSection(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''} class="px-3 py-1 border rounded font-medium transition-colors ${currentPage === totalPages ? 'text-gray-300 cursor-not-allowed border-gray-200' : 'hover:bg-gray-50 text-gray-700'}"><i class="fas fa-chevron-right"></i></button>`;
+    container.innerHTML = html;
+}
 window.addEventListener('scroll', () => {
     const currentHash = window.location.hash;
 
@@ -4083,7 +4137,7 @@ function buyNow(product, qty = 1) {
             
             // FIX: Load the saved page number instead of always 1
             const savedPage = appData.allProductsCurrentPage || 1;
-            loadAllProductsSection(savedPage);
+            loadAllProductsSection(savedPage, false);
             
             document.getElementById('content').insertAdjacentHTML('beforeend', getFooterHTML());
 
