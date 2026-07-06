@@ -1128,7 +1128,7 @@ src="https://www.facebook.com/tr?id=1526489362525698&ev=PageView&noscript=1"
     // VERCEL/NETLIFY HOSTING HELPER (POLYFILL FOR GOOGLE.SCRIPT.RUN)
     // ============================================================
     // নিচে আপনার Google Apps Script-এর বর্তমান Web App URL-টি বসিয়ে দিন:
-    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwd6Y1cVEKILLZPsPnh4IE8c32CchS1v-CjPdDLbfwTPtOpQeVHAXLUfoHYlJ_QHaGNzg/exec"; 
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwXasGg-7N-GxL-UJz86PsDsc9AAkeF3sNSjeI0SCOKOfD2SJFi5EWs0q6WH_I19sWTKQ/exec"; 
 
     if (typeof google === 'undefined' || !google.script) {
         window.google = {
@@ -4084,15 +4084,19 @@ function buyNow(product, qty = 1) {
             if (!container) return;
             
             // ==========================================
-            // UPDATED: EXTRACT UNIQUE MAIN CATEGORIES
+            // ১. শুধুমাত্র "istop = yes" থাকা ক্যাটাগরিগুলো ফিল্টার করা হচ্ছে
             // ==========================================
-            const allMainCats = appData.categories.map(c => c.categoryname.split(' > ')[0]);
+            const topCats = appData.categories.filter(c => c.istop === 'yes');
+            
+            // ২. ইউনিক মেইন ক্যাটাগরি বের করা (যেমন: "Electronics > Mobile" থেকে "Electronics")
+            const allMainCats = topCats.map(c => c.categoryname.split(' > ')[0]);
             const uniqueMainCats = [...new Set(allMainCats)];
             
-            // Map back to category objects to get images (using first match)
-            const cats = uniqueMainCats.map(mainName => appData.categories.find(c => c.categoryname === mainName || c.categoryname.startsWith(mainName + ' > '))).filter(c => c);
+            // ৩. ইমেজ পাওয়ার জন্য অবজেক্টে ম্যাপ করা
+            const cats = uniqueMainCats.map(mainName => topCats.find(c => c.categoryname === mainName || c.categoryname.startsWith(mainName + ' > '))).filter(c => c);
             
-            container.innerHTML = cats.slice(0, 4).map(c => {
+            // ৪. HTML তৈরি করা (আগের মতোই, তবে slice(0, 4) রিমুভ করা হয়েছে)
+            let html = cats.map(c => {
                 const displayName = c.categoryname.split(' > ')[0];
                 return `
                 <div onclick="navigateTo('#category?name=${encodeURIComponent(displayName)}')" class="text-center cursor-pointer group">
@@ -4103,6 +4107,22 @@ function buyNow(product, qty = 1) {
                 </div>
                 `;
             }).join('');
+            
+            // ==========================================
+            // ৫. মাঝে বরাবর এলাইনমেন্ট লজিক (Centering Last Row)
+            // যদি মোট ক্যাটাগরির সংখ্যা ৪ এর চেয়ে কম হয় অথবা ৪ দিয়ে ভাগ না যায়, 
+            // তবে বাকি ঘরগুলো অদৃশ্য (invisible) ডিভ দিয়ে ফিল করে দেওয়া হবে।
+            // এতে করে ক্যাটাগরিগুলো গ্রিডের মাঝখানে চলে আসবে।
+            // ==========================================
+            const remainder = cats.length % 4;
+            if (remainder > 0) {
+                const emptySpaces = 4 - remainder;
+                for (let i = 0; i < emptySpaces; i++) {
+                    html += `<div class="invisible"></div>`;
+                }
+            }
+            
+            container.innerHTML = html;
         }
 
         function loadFeaturedProducts() {
@@ -5529,7 +5549,7 @@ function searchProducts(query) {
                     
                     <div class="border-t border-gray-800 pt-6 text-center text-sm text-white font-bold">
                         &copy; ${year} ${s.sitename}. All rights reserved.
-                        <br>Developed by MBbd Team
+                        <br>Developed by SafaBoxbd team
                     </div>
                 </div>
             </footer>`;
