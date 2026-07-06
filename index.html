@@ -4096,17 +4096,16 @@ function buyNow(product, qty = 1) {
             const cats = uniqueMainCats.map(mainName => topCats.find(c => c.categoryname === mainName || c.categoryname.startsWith(mainName + ' > '))).filter(c => c);
             
             // ৪. HTML তৈরি করা (আগের মতোই, তবে slice(0, 4) রিমুভ করা হয়েছে)
-            let html = cats.map(c => {
-                const displayName = c.categoryname.split(' > ')[0];
-                return `
-                <div onclick="navigateTo('#category?name=${encodeURIComponent(displayName)}')" class="text-center cursor-pointer group">
-                    <div class="aspect-square rounded-xl overflow-hidden mb-2 border border-gray-100 group-hover:border-primary/30 transition">
-                        <img src="${c.categoryimageurl}" class="w-full h-full object-cover transform group-hover:scale-110 transition" loading="lazy">
-                    </div>
-                    <p class="text-xs font-bold text-gray-700 truncate">${displayName}</p>
+        let html = cats.map(c => {
+            const displayName = c.categoryname.split(' > ')[0];
+            return `
+            <div onclick="navigateTo('#category?name=${encodeURIComponent(displayName)}')" class="text-center cursor-pointer group">
+                <div class="aspect-square rounded-xl overflow-hidden border border-gray-100 group-hover:border-primary/30 transition">
+                    <img src="${c.categoryimageurl}" class="w-full h-full object-cover transform group-hover:scale-110 transition" loading="lazy">
                 </div>
-                `;
-            }).join('');
+            </div>
+            `;
+        }).join('');
             
             // ==========================================
             // ৫. মাঝে বরাবর এলাইনমেন্ট লজিক (Centering Last Row)
@@ -4963,30 +4962,46 @@ function handleSessionError() {
     });
 }
 // ==========================================
-// SMART SILENT POINTS REFRESH (HYBRID THROTTLE)
+// SMART SILENT POINTS REFRESH (FIXED: NEW TAB LOGIC)
 // ==========================================
 function silentPointsRefresh() {
     if (!appData.user || !appData.user.userid) return;
     
-    // ১. আগের সিঙ্কের সময় চেক করা (localStorage ব্যবহার করছি, কারণ এটা ট্যাব বন্ধ হলেও থাকে)
-    let lastSyncTime = 0;
+    // ==========================================
+    // FIX: NEW TAB DETECTION USING SESSIONSTORAGE
+    // ==========================================
+    let isNewTab = false;
     try {
-        const saved = localStorage.getItem('lastPointsSyncTime');
-        if (saved) lastSyncTime = parseInt(saved);
+        // চেক করুন এই ট্যাবে আগে পয়েন্ট সিঙ্ক হয়েছে কিনা
+        if (!sessionStorage.getItem('ptsSyncedThisTab')) {
+            isNewTab = true; // নতুন ট্যাব বা রিফ্রেশ করা হয়েছে
+            // এই ট্যাবে একবার সিঙ্ক হয়েছে তা মার্ক করে রাখা হচ্ছে
+            sessionStorage.setItem('ptsSyncedThisTab', 'true');
+        }
     } catch (e) {}
-    
-    const timeSinceLastSync = Date.now() - lastSyncTime;
-    
-    // ২. থ্রটল টাইম: ২৪ ঘণ্টা = ৮৬৪০০০০০ মিলিসেকেন্ড
-    const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
-    
-    // ৩. যদি ২৪ ঘণ্টা পার হয়নি, তাহলে কল ব্লক করো
-    if (lastSyncTime > 0 && timeSinceLastSync < TWENTY_FOUR_HOURS_MS) {
-        // সার্ভারে যাচ্ছে না, ক্যাশ থেকেই চলবে
-        return; 
+    // ==========================================
+
+    // ১. যদি নতুন ট্যাব হয়, তাহলে ২৪ ঘণ্টার থ্রটল ইগনোর করে সরাসরি নিচের সার্ভার কলে যাবে
+    if (!isNewTab) {
+        // ২. যদি একই ট্যাবে থাকে, তাহলে আগের মতোই ২৪ ঘণ্টা চেক করবে (localStorage দিয়ে)
+        let lastSyncTime = 0;
+        try {
+            const saved = localStorage.getItem('lastPointsSyncTime');
+            if (saved) lastSyncTime = parseInt(saved);
+        } catch (e) {}
+        
+        const timeSinceLastSync = Date.now() - lastSyncTime;
+        
+        // থ্রটল টাইম: ২৪ ঘণ্টা = ৮৬৪০০০০০ মিলিসেকেন্ড
+        const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
+        
+        // যদি ২৪ ঘণ্টা পার হয়নি এবং একই ট্যাবে আছে, তাহলে কল ব্লক করো
+        if (lastSyncTime > 0 && timeSinceLastSync < TWENTY_FOUR_HOURS_MS) {
+            return; 
+        }
     }
     
-    // ৪. ২৪ ঘণ্টা পার হয়েছে বা প্রথমবার → সার্ভারে যাচ্ছে
+    // ৩. সার্ভারে যাওয়ার মূল কোড (এখানে কোনো পরিবর্তন করতে হবে না)
     google.script.run
         .withSuccessHandler(res => {
             if (res.success) {
@@ -5022,14 +5037,14 @@ function silentPointsRefresh() {
                     console.log(`Points updated: ${oldPoints} → ${newPoints}`);
                 }
                 
-                // ৫. নতুন সময় সেভ করো
+                // সময় সেভ করো (একই ট্যাবে পুনরায় কল রোধ করতে)
                 try {
                     localStorage.setItem('lastPointsSyncTime', Date.now().toString());
                 } catch (e) {}
             }
         })
         .withFailureHandler(err => {
-            // এরর হলেও সময় সেভ করে দিবো, যাতে বারবার ট্রাই করে স্লো না হয়
+            // এরর হলেও সময় সেভ করে দিবো
             try {
                 localStorage.setItem('lastPointsSyncTime', Date.now().toString());
             } catch (e) {}
@@ -5627,7 +5642,7 @@ function searchProducts(query) {
                     
                     <div class="border-t border-gray-800 pt-6 text-center text-sm text-white font-bold">
                         &copy; ${year} ${s.sitename}. All rights reserved.
-                        <br>Developed by Safa Team
+                        <br>Developed by SafaBoxbd Team
                     </div>
                 </div>
             </footer>`;
