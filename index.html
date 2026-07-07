@@ -3400,31 +3400,35 @@ function calculateCartTotal() {
         // ১. বর্তমান কার্টের আইটেমগুলো নিন
         const selectedItems = appData.cart.filter(item => item.selected !== false);
         
-        // ২. একটি ইউনিক হ্যাশ (Hash) তৈরি করুন (UserID + CartItems)
-        // কারণ পয়েন্ট ব্যক্তিগত, তাই UserID যোগ করা জরুরি
+        // ২. একটি ইউনিক হ্যাশ (Hash) তৈরি করুন
         const cartString = JSON.stringify(selectedItems);
         const currentHash = simpleHash(appData.user.userid + cartString);
 
         // ৩. চেক করুন: আগে কি একই কার্ট নিয়ে একই ইউজার চেক করেছিল?
         if (cachedPointsResult && lastPointsCartHash === currentHash) {
-            // হ্যাঁ, ক্যাশ আছে! সার্ভারে যাওয়ার দরকার নেই।
             
-            // সরাসরি ক্যাশ থেকে ডাটা লোড করুন
+            // ==========================================
+            // নতুন যোগ করা লজিক: যদি আগের রেজাল্ট এরর (Failed) হয়ে থাকে
+            // ==========================================
+            if (cachedPointsResult.failed) {
+                toggle.checked = false; // সুইচ বন্ধ রাখুন
+                if(spinner) spinner.classList.add('hidden');
+                toggle.disabled = false;
+                return; // সার্ভারে যাওয়ার দরকার নেই, এখানেই থামানো হলো
+            }
+            // ==========================================
+
+            // হ্যাঁ, সফল ক্যাশ আছে!
             appData.pointsDiscount = cachedPointsResult.discount;
-            
-            // UI আপডেট করুন
             if(savingsLabel) savingsLabel.innerText = `Save ৳${cachedPointsResult.discount.toFixed(2)}`;
-            updateOrderSummary(); // টোটাল প্রাইস আপডেট করুন
-            
-            // স্পিনার বন্ধ করুন (যদি কোথাও ওপেন থাকে)
+            updateOrderSummary(); 
             if(spinner) spinner.classList.add('hidden');
             toggle.disabled = false;
-            
-            return; // ফাংশন এখানেই শেষ করুন, নিচের সার্ভার কলে যাবে না
+            return; 
         }
 
-        // যদি ক্যাশ না থাকে, তবে নিচের সাধারণ প্রসেস (Server Call) শুরু হবে
-        toggle.checked = false; // টেম্পোরারিলি বন্ধ রাখুন লোডিংয়ের সময়
+        // যদি ক্যাশ না থাকে, তবে নিচের সার্ভার কল শুরু হবে
+        toggle.checked = false; 
         spinner.classList.remove('hidden');
         toggle.disabled = true;
 
@@ -3440,17 +3444,20 @@ function calculateCartTotal() {
                     appData.pointsDiscount = res.discount;
                     if(savingsLabel) savingsLabel.innerText = `Save ৳${res.discount.toFixed(2)}`;
                     
-                    // ==========================================
-                    // SAVE TO CACHE (ক্যাশে সেভ করুন)
-                    // ==========================================
-                    cachedPointsResult = { discount: res.discount }; // ডিসকাউন্ট অ্যামাউন্ট সেভ রাখুন
-                    lastPointsCartHash = currentHash;               // হ্যাশ সেভ রাখুন
-                    // ==========================================
-                    
+                    // সফল রেজাল্ট ক্যাশে সেভ
+                    cachedPointsResult = { discount: res.discount }; 
+                    lastPointsCartHash = currentHash;               
                     updateOrderSummary();
                 } else {
-                    // ... existing error handling ...
-                    // Custom Dynamic Message Logic (আপনার আগের কোড)
+                    // ==========================================
+                    // নতুন যোগ করা লজিক: ব্যর্থ রেজাল্টও ক্যাশে সেভ
+                    // যাতে পরের ক্লিকে সার্ভারে কল না যায়
+                    // ==========================================
+                    cachedPointsResult = { discount: 0, failed: true, error: res.error };
+                    lastPointsCartHash = currentHash;
+                    // ==========================================
+
+                    // Custom Dynamic Message Logic
                     if (res.error.includes("Minimum order not met")) {
                         const minAmount = appData.settings.minorderforpoints || 0;
                         const messageBn = `পয়েন্ট ডিসকাউন্ট ব্যবহার করতে হলে আপনাকে নূন্যতম ${minAmount} টাকার অর্ডার করতে হবে...`;
