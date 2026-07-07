@@ -4925,6 +4925,7 @@ function loadCheckoutPage() {
                 localStorage.setItem('cached_district', this.value);
                 // জেলা পরিবর্তন হলে উপজেলা রিসেট হয়ে যাবে (কারণ নতুন জেলার অন্য উপজেলা হতে পারে)
                 localStorage.removeItem('cached_upazila');
+                populateUpazilas(this.value); // ← এই লাইনটি মিসিং ছিল
             });
 
             upaSelect.addEventListener('change', function() {
