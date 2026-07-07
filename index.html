@@ -106,7 +106,8 @@ src="https://www.facebook.com/tr?id=1526489362525698&ev=PageView&noscript=1"
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .nav-active { color: var(--primary-color); }
         .hero-container { scroll-snap-type: x mandatory; }
-        .hero-slide { scroll-snap-align: start; }
+        .hero-slide { scroll-snap-align: start;
+        scroll-snap-stop: always;}
         .gallery-container { scroll-snap-type: x mandatory; }
         .gallery-slide { scroll-snap-align: start; }
         .line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
@@ -4244,20 +4245,42 @@ function buyNow(product, qty = 1) {
             });
         }
 
-        function loadHeroSlider() {
-            const container = document.getElementById('sliderContainer');
-            const dots = document.getElementById('sliderDots');
-            if (!container || appData.banners.length === 0) return;
-            container.innerHTML = appData.banners.map((b, i) => `
-                <div class="hero-slide w-full shrink-0 relative cursor-pointer" onclick="handleBannerClick('${b.linktocategory}', '${b.redirecturl}')">
-                    <img src="${b.imageurl}" class="w-full h-auto object-cover bg-gray-200 aspect-video rounded-xl" loading="lazy">
-                </div>
-            `).join('');
-            dots.innerHTML = appData.banners.map((_, i) => `
-                <button onclick="scrollToSlide(${i})" class="w-2 h-2 rounded-full transition-colors ${i===0?'bg-[var(--primary-color)]':'bg-white/50'}"></button>
-            `).join('');
-            startSlider();
-        }
+function loadHeroSlider() {
+    const container = document.getElementById('sliderContainer');
+    const dots = document.getElementById('sliderDots');
+    if (!container || appData.banners.length === 0) return;
+    container.innerHTML = appData.banners.map((b, i) => `
+        <div class="hero-slide w-full shrink-0 relative cursor-pointer" onclick="handleBannerClick('${b.linktocategory}', '${b.redirecturl}')">
+            <img src="${b.imageurl}" class="w-full h-auto object-cover bg-gray-200 aspect-video rounded-xl" loading="lazy">
+        </div>
+    `).join('');
+    dots.innerHTML = appData.banners.map((_, i) => `
+        <button onclick="scrollToSlide(${i})" class="w-2 h-2 rounded-full transition-colors ${i===0?'bg-[var(--primary-color)]':'bg-white/50'}"></button>
+    `).join('');
+    
+    // ==========================================
+    // নতুন কোড: সোয়াইপ/স্ক্রল করলে ডট আপডেট করার লজিক
+    // ==========================================
+    container.addEventListener('scroll', function() {
+        // বর্তমানে কোন স্লাইডে আছে তা ক্যালকুলেট করা হচ্ছে
+        const scrollPosition = container.scrollLeft;
+        const slideWidth = container.clientWidth;
+        const activeIndex = Math.round(scrollPosition / slideWidth);
+        
+        // সব ডট থেকে আগের অ্যাক্টিভ কালার সরিয়ে ফেলা হচ্ছে এবং নতুন অ্যাক্টিভ ডটে কালার দেওয়া হচ্ছে
+        const allDots = document.getElementById('sliderDots').querySelectorAll('button');
+        allDots.forEach((dot, index) => {
+            if (index === activeIndex) {
+                dot.className = 'w-2 h-2 rounded-full transition-colors bg-[var(--primary-color)]';
+            } else {
+                dot.className = 'w-2 h-2 rounded-full transition-colors bg-white/50';
+            }
+        });
+    });
+    // ==========================================
+
+    startSlider();
+}
 
         function startSlider() {
             if (appData.sliderInterval) clearInterval(appData.sliderInterval);
@@ -4865,18 +4888,55 @@ function loadCheckoutPage() {
 
             document.getElementById('checkoutName').value = appData.user.fullname;
             document.getElementById('checkoutPhone').value = appData.user.mobilenumber;
-            document.getElementById('checkoutAddress').value = appData.user.fulladdress || '';
+            
+            // ==========================================
+            // ১. লোকাল স্টোরেজ থেকে আগের সেভ করা ডাটা আনা হচ্ছে
+            // ==========================================
+            const savedDistrict = localStorage.getItem('cached_district') || appData.user.defaultdistrict || '';
+            const savedUpazila = localStorage.getItem('cached_upazila') || appData.user.defaultupazila || '';
+            const savedAddress = localStorage.getItem('cached_address') || appData.user.fulladdress || '';
+
             const distSelect = document.getElementById('checkoutDistrict');
             const upaSelect = document.getElementById('checkoutUpazila');
+            const addressInput = document.getElementById('checkoutAddress');
+            
             distSelect.innerHTML = '<option value="">' + t('Select District') + '</option>' + Object.keys(appData.locations).map(d => `<option value="${d}">${d}</option>`).join('');
-            if (appData.user.defaultdistrict) {
-                distSelect.value = appData.user.defaultdistrict;
-                populateUpazilas(appData.user.defaultdistrict);
-                setTimeout(() => upaSelect.value = appData.user.defaultupazila || '', 100);
+            
+            // সেভ করা জেলা থাকলে সেট করা
+            if (savedDistrict) {
+                distSelect.value = savedDistrict;
+                // জেলা সিলেক্ট করার সাথে সাথে উপজেলার লিস্ট তৈরি করা হচ্ছে
+                populateUpazilas(savedDistrict);
+                // উপজেলা লোড হতে ক্ষুদ্র সময় লাগে তাই setTimeout ব্যবহার করা হয়েছে
+                setTimeout(() => {
+                    upaSelect.value = savedUpazila;
+                }, 150);
+            } else {
+                populateUpazilas('');
             }
-            distSelect.onchange = () => populateUpazilas(distSelect.value);
+
+            // সেভ করা ঠিকানা ইনপুট বক্সে বসানো হচ্ছে
+            addressInput.value = savedAddress;
+
+            // ==========================================
+            // ২. নতুন কোড: টাইপ করার সাথে সাথে ব্রাউজারে সেভ হওয়া
+            // ==========================================
+            distSelect.addEventListener('change', function() {
+                localStorage.setItem('cached_district', this.value);
+                // জেলা পরিবর্তন হলে উপজেলা রিসেট হয়ে যাবে (কারণ নতুন জেলার অন্য উপজেলা হতে পারে)
+                localStorage.removeItem('cached_upazila');
+            });
+
+            upaSelect.addEventListener('change', function() {
+                localStorage.setItem('cached_upazila', this.value);
+            });
+
+            addressInput.addEventListener('input', function() {
+                localStorage.setItem('cached_address', this.value);
+            });
+            // ==========================================
+
             updateCheckoutSummary();
-}
         
         function populateUpazilas(dist) {
             const upaSelect = document.getElementById('checkoutUpazila');
