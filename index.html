@@ -3031,12 +3031,32 @@ function loadAllProductsSection(pageNum, shouldScrollToTop = true) {
     // খ. ব্যানার এবং তার আন্ডারে থাকা প্রোডাক্ট রেন্ডার
     if (pageData.bannerGroups && pageData.bannerGroups.length > 0) {
         pageData.bannerGroups.forEach(group => {
+            
+            // চেক করা হচ্ছে লিংকটি ভিডিও (mp4/webm) নাকি সাধারণ ইমেজ
+            const isVideo = group.bannerUrl && group.bannerUrl.match(/\.(mp4|webm|ogg)($|\?)/i);
+            
+            let mediaTag = '';
+            if (isVideo) {
+                // ভিডিওর জন্য ট্যাগ (অটো-প্লে, লুপ এবং সাউন্ড মিউট করা হয়েছে ব্রাউজার পলিসির জন্য)
+                mediaTag = `
+                    <video src="${group.bannerUrl}" class="w-full h-auto object-cover" 
+                           autoplay loop muted playsinline
+                           onerror="this.parentElement.parentElement.style.display='none';">
+                    </video>
+                `;
+            } else {
+                // ইমেজের জন্য আগের ট্যাগ
+                mediaTag = `
+                    <img src="${group.bannerUrl}" class="w-full h-auto object-cover" loading="lazy"
+                         onerror="this.parentElement.parentElement.style.display='none';" alt="${group.category}">
+                `;
+            }
+
             html += `
                 <div class="col-span-2 w-full my-2">
                     <div class="w-full rounded-xl overflow-hidden border border-gray-100 bg-gray-50 shadow-sm cursor-pointer hover:shadow-md transition-shadow" 
                          onclick="event.stopPropagation(); navigateTo('#category?name=${encodeURIComponent(group.category)}')">
-                        <img src="${group.bannerUrl}" class="w-full h-auto object-cover" loading="lazy"
-                             onerror="this.parentElement.parentElement.style.display='none';" alt="${group.category}">
+                        ${mediaTag}
                     </div>
                 </div>
             `;
@@ -3050,6 +3070,7 @@ function loadAllProductsSection(pageNum, shouldScrollToTop = true) {
             }
         });
     }
+
 
     // গ. সাধারণ বা নরমাল প্রোডাক্ট রেন্ডার
     if (pageData.normalProducts && pageData.normalProducts.length > 0) {
