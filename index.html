@@ -4937,7 +4937,7 @@ function loadCheckoutPage() {
             // ==========================================
 
             updateCheckoutSummary();
-        
+        }
         function populateUpazilas(dist) {
             const upaSelect = document.getElementById('checkoutUpazila');
             upaSelect.innerHTML = '<option value="">' + t('Select Upazila') + '</option>' + (appData.locations[dist] || []).map(u => `<option value="${u}">${u}</option>`).join('');
