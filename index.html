@@ -3414,8 +3414,29 @@ function calculateCartTotal() {
                 toggle.checked = false; // সুইচ বন্ধ রাখুন
                 if(spinner) spinner.classList.add('hidden');
                 toggle.disabled = false;
+                
+                // ক্যাশ থেকে আগের এরর মেসেজটি রিট্রিভ করা হচ্ছে
+                const savedError = cachedPointsResult.error || "Something went wrong.";
+                
+                // চেক করা হচ্ছে এটা কি মিনিমাম অর্ডার এরর নাকি অন্য কোনো এরর (যেমন: এক্সপায়ার্ড)
+                if (savedError.includes("Minimum order not met")) {
+                    const minAmount = appData.settings.minorderforpoints || 0;
+                    const messageBn = `পয়েন্ট ডিসকাউন্ট ব্যবহার করতে হলে আপনাকে নূন্যতম ${minAmount} টাকার অর্ডার করতে হবে...`;
+                    const messageEn = `To use points discount, you need to place a minimum order of ${minAmount} Taka...`;
+                    Swal.fire({
+                        icon: 'info',
+                        title: appData.language === 'bn' ? 'তথ্য' : 'Info',
+                        text: appData.language === 'bn' ? messageBn : messageEn,
+                        confirmButtonText: appData.language === 'bn' ? 'ঠিক আছে' : 'OK',
+                        confirmButtonColor: appData.settings.themecolor || '#2563eb'
+                    });
+                } else {
+                    // পয়েন্ট এক্সপায়ার্ড বা অন্য যেকোনো এরর
+                    Swal.fire('Info', savedError, 'info');
+                }
                 return; // সার্ভারে যাওয়ার দরকার নেই, এখানেই থামানো হলো
             }
+            // ==========================================
             // ==========================================
 
             // হ্যাঁ, সফল ক্যাশ আছে!
