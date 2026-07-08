@@ -2,6 +2,44 @@
 <html lang="en">
 <head>
 <meta name="google-site-verification" content="yHp-0_G2el853pU5DenVxHAp743vJTPdicmY2CnbHqA" />
+<!-- FORCE UPDATE SYSTEM -->
+<script>
+(async()=>{
+  try {
+    const res = await fetch('./v.txt?_='+Date.now());
+    const newV = await res.text();
+    const oldV = localStorage.getItem('_cv') || '0';
+    
+    if(newV.trim() !== oldV) {
+      
+      // ব্যাকআপ নিচ্ছে (কার্ট যোগ করা হয়েছে)
+      const u = localStorage.getItem('user');
+      const s = localStorage.getItem('sessionToken');
+      const l = localStorage.getItem('language');
+      const c = localStorage.getItem('cart');         // ← নতুন
+      const cp = localStorage.getItem('coupon');     // ← নতুন
+      
+      localStorage.clear();
+      sessionStorage.clear();
+      
+      // রিস্টোর করছে (কার্ট যোগ করা হয়েছে)
+      if(u) localStorage.setItem('user', u);
+      if(s) localStorage.setItem('sessionToken', s);
+      if(l) localStorage.setItem('language', l);
+      if(c) localStorage.setItem('cart', c);         // ← নতুন
+      if(cp) localStorage.setItem('coupon', cp);     // ← নতুন
+      
+      localStorage.setItem('_cv', newV.trim());
+      
+      if(navigator.serviceWorker) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        for(let r of regs) await r.unregister();
+      }
+      window.location.href = window.location.pathname + '?_='+Date.now();
+    }
+  } catch(e){}
+})();
+</script>
 <!-- Meta Pixel Code -->
 <script>
 !function(f,b,e,v,n,t,s)
@@ -27,7 +65,7 @@ src="https://www.facebook.com/tr?id=1526489362525698&ev=PageView&noscript=1"
     <!-- নতুন ফেভিকন ও ডেসক্রিপশন -->
     <!-- ========================================== -->
     
-    <link rel="icon" type="image/webp" href="https://res.cloudinary.com/dkowkawiq/image/upload/v1781534517/134354_qrjim2.webp">
+    <link rel="icon" type="image/webp" href="https://res.cloudinary.com/dkowkawiq/image/upload/v1783075015/20260703_163558_tmym5q.webp">
     
     <meta name="description" content="একটি আধুনিক ও ট্রেন্ডি ভ্যারাইটি শপ, আমরা ইনসাফ ভিত্তিক ব্যবসা পরিচালনায় সচেষ্ট। সাশ্রয়ী মূল্য এবং গুণগত মানের নিশ্চয়তায় সেরা অনলাইন শপিং অভিজ্ঞতা প্রদানে দৃঢ় প্রতিজ্ঞাবদ্ধ">
 
