@@ -39,6 +39,17 @@ self.addEventListener('activate', (e) => {
 
 // ৩. ফেচ ইভেন্ট (ক্যাশ থেকে লোড করবে, না থাকলে সার্ভার থেকে)
 self.addEventListener('fetch', (e) => {
+  // গুগল অ্যাপস স্ক্রিপ্ট বা API এর URL ক্যাশ বাইপাস করার জন্য লজিক
+  if (e.request.url.includes('script.google.com') || e.request.url.includes('action=')) {
+    e.respondWith(
+      fetch(e.request).catch(() => {
+        console.log('API Fetch failed. Offline?');
+      })
+    );
+    return; // API রিকোয়েস্ট হলে এখানেই শেষ, ক্যাশে যাবে না
+  }
+
+  // স্ট্যাটিক ফাইলের জন্য আগের "Cache First" লজিক
   e.respondWith(
     caches.match(e.request).then((cachedResponse) => {
       return cachedResponse || fetch(e.request);
