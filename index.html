@@ -1188,7 +1188,7 @@ src="https://www.facebook.com/tr?id=1526489362525698&ev=PageView&noscript=1"
     // VERCEL/NETLIFY HOSTING HELPER (POLYFILL FOR GOOGLE.SCRIPT.RUN)
     // ============================================================
     // নিচে আপনার Google Apps Script-এর বর্তমান Web App URL-টি বসিয়ে দিন:
-    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzL4ayBnG-6MVtRv-lbHCS7cO4Bumm57kIHt7NVvhiVzUj0YHF_h49Ac8EpzVsnLJH1/exec"; 
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzBEgehDIHOH4X4oYLplxmKgKKuR3qa_aNmiKS1ZqY0d0hXtWTSCxNiToAt7KBR_sp6/exec"; 
 
     if (typeof google === 'undefined' || !google.script) {
         window.google = {
@@ -1639,11 +1639,25 @@ function instantScrollFix() {
 <!-- পরের ভাগ (Part 3) এই লাইনের ঠিক নিচে পেস্ট করুন -->
 <!-- Part 2: JavaScript Logic (Data Loading, Orders, Auth, Cart & Translation Fixes) -->
         // ============================================================
-        // SMART DATA LOADING & VERSION CONTROL (UPDATED)
+        // SMART DATA LOADING & VERSION CONTROL (FIXED FOR FRESH SESSION)
         // ============================================================
         function loadInitialData() {
             const cachedDataStr = localStorage.getItem('cached_app_data');
             const localVersion = localStorage.getItem('local_data_version');
+
+            // ==========================================
+            // নতুন যুক্ত করা হয়েছে: ফ্রেশ সেশন ডিটেক্টর
+            // ব্রাউজার বন্ধ থাকলে sessionStorage মুছে যায়। 
+            // তাই নতুন করে ওপেন করলে এটি 'true' হবে।
+            // ==========================================
+            let isFreshSession = false;
+            try {
+                if (!sessionStorage.getItem('appInitialized')) {
+                    isFreshSession = true;
+                    sessionStorage.setItem('appInitialized', 'true');
+                }
+            } catch (e) {}
+            // ==========================================
 
             // ১. পেজ দ্রুত লোড করার জন্য প্রথমে ক্যাশ থেকে রেন্ডার করা
             if (cachedDataStr) {
@@ -1681,9 +1695,9 @@ function instantScrollFix() {
             // ২. ব্যাকগ্রাউন্ডে সার্ভারের আসল ভার্সন চেক করা
             google.script.run
                 .withSuccessHandler(serverVersion => {
-                    // যদি ভার্সন না মেলে অথবা আগে থেকে ক্যাশ না থাকে, তবে নতুন ডাটা আনবে
-                    if (!localVersion || localVersion !== serverVersion || !cachedDataStr) {
-                        console.log("%c[Server Fetch] New version detected! Fetching fresh data...", "color: blue; font-weight: bold;");
+                    // লজিক: নতুন ট্যাব হলে, অথবা ভার্সন আলাদা হলে, অথবা ক্যাশ না থাকলে নতুন ডাটা আনবে
+                    if (isFreshSession || !localVersion || localVersion !== serverVersion || !cachedDataStr) {
+                        console.log("%c[Server Fetch] New session or version mismatch detected! Fetching fresh data...", "color: blue; font-weight: bold;");
                         
                         fetch(GAS_WEB_APP_URL + '?action=getInitialData')
                             .then(response => response.json())
@@ -1727,7 +1741,6 @@ function instantScrollFix() {
                                         updateUIText();
                                         syncCartWithLivePrices();
                                         initFilterOptions();
-                                        
                                     }
                                 }
                             })
@@ -1735,9 +1748,52 @@ function instantScrollFix() {
                                 console.error(err);
                                 if (!cachedDataStr) Swal.fire('Connection Error', 'Could not load data.', 'error');
                             });
+                    } else {
+                        console.log("%c[Cache Used] Data is up to date.", "color: green;");
                     }
                 })
-                .withFailureHandler(err => console.error("Failed to fetch version", err))
+                // ==========================================
+                // ক্রিটিক্যাল ফিক্স: FALLBACK MECHANISM
+                // ==========================================
+                .withFailureHandler(err => {
+                    console.error("Failed to fetch version:", err);
+                    
+                    // যদি ভার্সন চেক ফেইল হয় এবং এটি নতুন ট্যাব হয়, 
+                    // তবে ভার্সন চেক বাদ দিয়ে সরাসরি ডাটা আনার চেষ্টা করবে (ফলব্যাক)
+                    if (isFreshSession && cachedDataStr) {
+                        console.warn("%c[Version Check Failed] Forcing direct data fetch for fresh session.", "color: orange; font-weight: bold;");
+                        fetch(GAS_WEB_APP_URL + '?action=getInitialData')
+                            .then(response => response.json())
+                            .then(res => {
+                                if (res.success) {
+                                    localStorage.setItem('cached_app_data', JSON.stringify(res.data));
+                                    localStorage.setItem('local_data_version', String(Date.now())); // Fallback version
+                                    
+                                    appData.settings = res.data.settings;
+                                    appData.categories = res.data.categories;
+                                    appData.products = res.data.products;
+                                    appData.banners = res.data.banners;
+                                    appData.locations = res.data.locations;
+                                    appData.socialMedia = res.data.socialMedia;
+                                    appData.policies = res.data.policies;
+                                    appData.popups = res.data.popups;
+                                    appData.reviews = res.data.reviews;
+
+                                    updateDOMWithSettings(appData.settings);
+                                    loadRoute(window.location.hash || '#home');
+                                    updateCartBadge();
+                                    updateOrderSummary();
+                                    updateUIText();
+                                    syncCartWithLivePrices();
+                                    initFilterOptions();
+                                }
+                            })
+                            .catch(err2 => console.error("Direct fetch fallback also failed:", err2));
+                    } else if (!cachedDataStr) {
+                        Swal.fire('Connection Error', 'Could not load data.', 'error');
+                    }
+                })
+                // ==========================================
                 .getServerVersion();
         }
 
