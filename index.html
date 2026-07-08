@@ -1678,70 +1678,72 @@ function instantScrollFix() {
                 }
             }
 
-// ২. ব্যাকগ্রাউন্ডে সার্ভারের আসল ভার্সন চেক করা
-google.script.run
-    .withSuccessHandler(serverVersion => {
-        // যদি ভার্সন না মেলে অথবা আগে থেকে ক্যাশ না থাকে, তবে নতুন ডাটা আনবে
-        if (!localVersion || localVersion !== serverVersion || !cachedDataStr) {
-            console.log("%c[Server Fetch] New version detected! Fetching fresh data...", "color: blue; font-weight: bold;");
-            
-            // 🔴 পরিবর্তন: Cache-Busting প্যারামিটার (t) এবং cache: 'no-store' যুক্ত করা হয়েছে
-            const cacheBuster = new Date().getTime();
-            const fetchUrl = GAS_WEB_APP_URL + '?action=getInitialData&t=' + cacheBuster;
-
-            fetch(fetchUrl, { cache: "no-store" }) // ব্রাউজারকে ক্যাশ ব্যবহার করতে নিষেধ করা
-                .then(response => response.json())
-                .then(res => {
-                    if (res.success) {
-                        // নতুন ডাটা এবং ভার্সন লোকাল স্টোরেজে সেভ করা
-                        localStorage.setItem('cached_app_data', JSON.stringify(res.data));
-                        localStorage.setItem('local_data_version', serverVersion);
-
-                        // অ্যাপের ডাটা আপডেট করা
-                        appData.settings = res.data.settings;
-                        appData.categories = res.data.categories;
-                        appData.products = res.data.products;
-                        appData.banners = res.data.banners;
-                        appData.locations = res.data.locations;
-                        appData.socialMedia = res.data.socialMedia;
-                        appData.policies = res.data.policies;
-                        appData.popups = res.data.popups;
-                        appData.reviews = res.data.reviews;
-
-                        updateDOMWithSettings(appData.settings);
-
-                        // যদি আগে ক্যাশ না থাকে (নতুন ইউজার)
-                        if (!cachedDataStr) {
-                            document.getElementById('skeletonLoader').classList.add('hidden');
-                            document.getElementById('app').classList.remove('hidden');
-                            document.getElementById('app').classList.add('flex');
-                        }
+            // ২. ব্যাকগ্রাউন্ডে সার্ভারের আসল ভার্সন চেক করা
+            google.script.run
+                .withSuccessHandler(serverVersion => {
+                    // যদি ভার্সন না মেলে অথবা আগে থেকে ক্যাশ না থাকে, তবে নতুন ডাটা আনবে
+                    if (!localVersion || localVersion !== serverVersion || !cachedDataStr) {
+                        console.log("%c[Server Fetch] New version detected! Fetching fresh data...", "color: blue; font-weight: bold;");
                         
-                        // 🔴 পরিবর্তন: ডাটা আপডেট হওয়ার পর UI যেন ফোর্স আপডেট হয়
-                        // অনেক সময় loadRoute একই হ্যাশ থাকলে UI রি-রেন্ডার করে না। 
-                        // তাই নিশ্চিত করুন আপনার ফাংশনগুলো যেন DOM নতুন করে আপডেট করে।
-                        loadRoute(window.location.hash || '#home');
-                        updateCartBadge();
-                        updateOrderSummary();
-                        updateUIText();
-                        syncCartWithLivePrices();
-                        initFilterOptions();
-                        
-                        // অপশনাল: ব্যবহারকারীকে জানাতে পারেন যে ডাটা আপডেট হয়েছে (যেমন একটি ছোট Toast Message)
-                        if (cachedDataStr) {
-                            console.log("UI updated with fresh data silently.");
-                        }
+// রিকোয়েস্টের সাথে বর্তমান সময় জুড়ে দেওয়া হলো (Cache-Busting)
+const timestamp = new Date().getTime();
+fetch(`${GAS_WEB_APP_URL}?action=getInitialData&t=${timestamp}`, { 
+    cache: "no-store" 
+})
+                            .then(response => response.json())
+                            .then(res => {
+                                if (res.success) {
+                                    // নতুন ডাটা এবং ভার্সন লোকাল স্টোরেজে সেভ করা
+                                    localStorage.setItem('cached_app_data', JSON.stringify(res.data));
+                                    localStorage.setItem('local_data_version', serverVersion);
+
+                                    // অ্যাপের ডাটা আপডেট করা
+                                    appData.settings = res.data.settings;
+                                    appData.categories = res.data.categories;
+                                    appData.products = res.data.products;
+                                    appData.banners = res.data.banners;
+                                    appData.locations = res.data.locations;
+                                    appData.socialMedia = res.data.socialMedia;
+                                    appData.policies = res.data.policies;
+                                    appData.popups = res.data.popups;
+                                    appData.reviews = res.data.reviews;
+
+                                    updateDOMWithSettings(appData.settings);
+
+                                    // যদি আগে ক্যাশ না থাকে (নতুন ইউজার), তবে এখানেই সব দৃশ্যমান করবে
+                                    if (!cachedDataStr) {
+                                        document.getElementById('skeletonLoader').classList.add('hidden');
+                                        document.getElementById('app').classList.remove('hidden');
+                                        document.getElementById('app').classList.add('flex');
+                                        
+                                        loadRoute(window.location.hash || '#home');
+                                        updateCartBadge();
+                                        updateOrderSummary();
+                                        updateUIText();
+                                        syncCartWithLivePrices();
+                                        initFilterOptions();
+                                        initPopupSystem();
+                                    } else {
+                                        // ব্যাকগ্রাউন্ডে ডাটা আপডেট হলে পেজ রিলোড না করেই UI আপডেট করে দেওয়া
+                                        loadRoute(window.location.hash || '#home');
+                                        updateCartBadge();
+                                        updateOrderSummary();
+                                        updateUIText();
+                                        syncCartWithLivePrices();
+                                        initFilterOptions();
+                                        
+                                    }
+                                }
+                            })
+                            .catch(err => {
+                                console.error(err);
+                                if (!cachedDataStr) Swal.fire('Connection Error', 'Could not load data.', 'error');
+                            });
                     }
                 })
-                .catch(err => {
-                    console.error(err);
-                    if (!cachedDataStr) Swal.fire('Connection Error', 'Could not load data.', 'error');
-                });
+                .withFailureHandler(err => console.error("Failed to fetch version", err))
+                .getServerVersion();
         }
-    })
-    .withFailureHandler(err => console.error("Failed to fetch version", err))
-    .getServerVersion();
-    }
 
 
         // ==========================================
