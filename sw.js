@@ -1,5 +1,5 @@
 // প্রতিবার index.html আপডেট করলে এই ভার্সন নম্বর বাড়াতে হবে (যেমন: v4, v5)
-const CACHE_NAME = 'SafaBoxbd-v2'; 
+const CACHE_NAME = 'SafaBoxbd-v3'; 
 
 // ১. ইন্সটল ইভেন্ট (ডাবল ডাউনলোড রোধে cache.addAll রিমুভ করা হয়েছে)
 self.addEventListener('install', (e) => {
