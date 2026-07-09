@@ -1,30 +1,18 @@
-const CACHE_NAME = 'SafaBoxbd-v3'; // ভার্সন চেঞ্জ করেছি (v1 থেকে v2)
+// প্রতিবার index.html আপডেট করলে এই ভার্সন নম্বর বাড়াতে হবে (যেমন: v4, v5)
+const CACHE_NAME = 'SafaBoxbd-v4'; 
 
-const ASSETS = [
-  './',
-  './index.html',
-  './manifest.json'
-];
-
-// ১. ইন্সটল ইভেন্ট
+// ১. ইন্সটল ইভেন্ট (ডাবল ডাউনলোড রোধে cache.addAll রিমুভ করা হয়েছে)
 self.addEventListener('install', (e) => {
-  // নতুন সার্ভিস ওয়ার্কার ডাউনলোড হলে সাথে সাথে অ্যাক্টিভ হবে (waiting থাকবে না)
   self.skipWaiting(); 
-
-  e.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS);
-    })
-  );
+  // আমরা এখানে কোনো ফাইল ডাউনলোড করব না। fetch ইভেন্টে ডাইনামিক্যালি ক্যাশ হবে।
 });
 
-// ২. অ্যাক্টিভেট ইভেন্ট (নতুন ভার্সন আসলে পুরনো ক্যাশ ডিলিট হবে)
+// ২. অ্যাক্টিভেট ইভেন্ট (পুরনো ক্যাশ ডিলিট)
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cache) => {
-          // যদি ক্যাশের নাম বর্তমান ভার্সনের সাথে ম্যাচ না করে, তবে সেটি ডিলিট করুন
           if (cache !== CACHE_NAME) {
             console.log('Deleting old cache:', cache);
             return caches.delete(cache);
@@ -33,26 +21,62 @@ self.addEventListener('activate', (e) => {
       );
     })
   );
-  // সব ক্লায়েন্টকে (ট্যাব) নিয়ন্ত্রণ করবে
   return self.clients.claim();
 });
 
-// ৩. ফেচ ইভেন্ট (ক্যাশ থেকে লোড করবে, না থাকলে সার্ভার থেকে)
+// ৩. ফেচ ইভেন্ট (মূল লজিক)
 self.addEventListener('fetch', (e) => {
-  // গুগল অ্যাপস স্ক্রিপ্ট বা API এর URL ক্যাশ বাইপাস করার জন্য লজিক
+  // ক. Google Apps Script API ক্যাশ হবে না
   if (e.request.url.includes('script.google.com') || e.request.url.includes('action=')) {
     e.respondWith(
-      fetch(e.request).catch(() => {
-        console.log('API Fetch failed. Offline?');
-      })
+      fetch(e.request).catch(() => new Response('Offline', { status: 503 }))
     );
-    return; // API রিকোয়েস্ট হলে এখানেই শেষ, ক্যাশে যাবে না
+    return; 
   }
 
-  // স্ট্যাটিক ফাইলের জন্য আগের "Cache First" লজিক
+  // খ. নেভিগেশন রিকোয়েস্ট (index.html লোড হওয়ার সময়) - "Network First"
+  if (e.request.mode === 'navigate') {
+    e.respondWith(
+      fetch(e.request)
+        .then((networkResponse) => {
+          // সার্ভার থেকে নতুন ফাইল পাওয়া গেছে
+          // ক্লোন করে ক্যাশে সেভ করা হচ্ছে (পরে অফলাইনে দেখানোর জন্য)
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(e.request, responseToCache);
+          });
+          
+          // ইউজারকে নতুন ফাইলটি দেখানো হচ্ছে
+          return networkResponse;
+        })
+        .catch(() => {
+          // ইন্টারনেট নেই (অফলাইন) - তাহলে ক্যাশ থেকে পুরনো ফাইল দেখাবে
+          return caches.match(e.request).then((cachedResponse) => {
+            return cachedResponse || new Response('Offline', { status: 503 });
+          });
+        })
+    );
+    return;
+  }
+
+  // গ. অন্যান্য স্ট্যাটিক ফাইল (CSS, JS, ফন্ট, ছবি) - "Cache First"
   e.respondWith(
     caches.match(e.request).then((cachedResponse) => {
-      return cachedResponse || fetch(e.request);
+      // ক্যাশে থাকলে সেটাই দেখাবে (দ্রুত লোডিং)
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+      
+      // ক্যাশে না থাকলে সার্ভার থেকে আনবে এবং ক্যাশে সেভ করবে
+      return fetch(e.request).then((networkResponse) => {
+        if (networkResponse && networkResponse.status === 200) {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(e.request, responseToCache);
+          });
+        }
+        return networkResponse;
+      });
     })
   );
 });
