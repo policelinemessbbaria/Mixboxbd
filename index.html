@@ -44,6 +44,16 @@ src="https://www.facebook.com/tr?id=1526489362525698&ev=PageView&noscript=1"
     <meta name="theme-color" content="#006a4e">
 <script>
   if ('serviceWorker' in navigator) {
+    let refreshing = false; // ইনফিনিট লুপ রোধ করার জন্য
+    
+    // যখন ব্যাকগ্রাউন্ডে নতুন SW আপডেট হবে, তখন এই ইভেন্ট ফায়ার হবে
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (refreshing) return; 
+      refreshing = true;
+      console.log("New Service Worker detected. Reloading...");
+      window.location.reload(); // ইউজারের অজান্তেই পেজ রিফ্রেশ হয়ে যাবে
+    });
+
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('./sw.js')
         .then(reg => console.log('Service Worker Registered!', reg))
@@ -5945,7 +5955,7 @@ function searchProducts(query) {
                     
                     <div class="border-t border-gray-800 pt-6 text-center text-sm text-white font-bold">
                         &copy; ${year} ${s.sitename}. All rights reserved.
-                        <br>Developed by SafaBoxbd Team
+                        <br>Developed by Safabd Team
                     </div>
                 </div>
             </footer>`;
