@@ -1731,15 +1731,17 @@ fetch(`${GAS_WEB_APP_URL}?action=getInitialData&t=${timestamp}`, {
                                         syncCartWithLivePrices();
                                         initFilterOptions();
                                         initPopupSystem();
-                                    } else {
-                                        // ব্যাকগ্রাউন্ডে ডাটা আপডেট হলে পেজ রিলোড না করেই UI আপডেট করে দেওয়া
-                                        loadRoute(window.location.hash || '#home');
-                                        updateCartBadge();
-                                        updateOrderSummary();
-                                        updateUIText();
-                                        syncCartWithLivePrices();
-                                        initFilterOptions();
+                                                                        } else {
+                                        // পুরনো ইউজার হলে: নতুন ডাটা পেয়ে সাইলেন্টলি রিলোড করা হচ্ছে
+                                        console.log("%c[Data Update] New data found. Refreshing silently...", "color: green; font-weight: bold;");
                                         
+                                        // ইউজার যেন যেখানে স্ক্রল করে আছিল সেখানেই থাকে, সেটা সেভ করা হচ্ছে
+                                        sessionStorage.setItem('force_scroll_top', window.scrollY);
+                                        
+                                        // ১০০ মিলিসেকেন্ড পর রিলোড (ইউজার বুঝতে পারবে না)
+                                        setTimeout(() => {
+                                            window.location.reload();
+                                        }, 100);
                                     }
                                 }
                             })
