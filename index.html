@@ -2,44 +2,6 @@
 <html lang="en">
 <head>
 <meta name="google-site-verification" content="yHp-0_G2el853pU5DenVxHAp743vJTPdicmY2CnbHqA" />
-<!-- FORCE UPDATE SYSTEM -->
-<script>
-(async()=>{
-  try {
-    const res = await fetch('./v.txt?_='+Date.now());
-    const newV = await res.text();
-    const oldV = localStorage.getItem('_cv') || '0';
-    
-    if(newV.trim() !== oldV) {
-      
-      // ব্যাকআপ নিচ্ছে (কার্ট যোগ করা হয়েছে)
-      const u = localStorage.getItem('user');
-      const s = localStorage.getItem('sessionToken');
-      const l = localStorage.getItem('language');
-      const c = localStorage.getItem('cart');         // ← নতুন
-      const cp = localStorage.getItem('coupon');     // ← নতুন
-      
-      localStorage.clear();
-      sessionStorage.clear();
-      
-      // রিস্টোর করছে (কার্ট যোগ করা হয়েছে)
-      if(u) localStorage.setItem('user', u);
-      if(s) localStorage.setItem('sessionToken', s);
-      if(l) localStorage.setItem('language', l);
-      if(c) localStorage.setItem('cart', c);         // ← নতুন
-      if(cp) localStorage.setItem('coupon', cp);     // ← নতুন
-      
-      localStorage.setItem('_cv', newV.trim());
-      
-      if(navigator.serviceWorker) {
-        const regs = await navigator.serviceWorker.getRegistrations();
-        for(let r of regs) await r.unregister();
-      }
-      window.location.href = window.location.pathname + '?_='+Date.now();
-    }
-  } catch(e){}
-})();
-</script>
 <!-- Meta Pixel Code -->
 <script>
 !function(f,b,e,v,n,t,s)
@@ -50,13 +12,20 @@ n.queue=[];t=b.createElement(e);t.async=!0;
 t.src=v;s=b.getElementsByTagName(e)[0];
 s.parentNode.insertBefore(t,s)}(window, document,'script',
 'https://connect.facebook.net/en_US/fbevents.js');
-fbq('init', '1660225198402364');
+fbq('init', '1526489362525698');
 fbq('track', 'PageView');
 </script>
 <noscript><img height="1" width="1" style="display:none"
-src="https://www.facebook.com/tr?id=1660225198402364&ev=PageView&noscript=1"
+src="https://www.facebook.com/tr?id=1526489362525698&ev=PageView&noscript=1"
 /></noscript>
 <!-- End Meta Pixel Code -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-N74T65FH7X"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-N74T65FH7X');
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MixBoxbd | A Budget Friendly Variety Store</title> <!-- Default Title, will be updated by JS -->
@@ -326,16 +295,7 @@ src="https://www.facebook.com/tr?id=1660225198402364&ev=PageView&noscript=1"
 }
     </style>
     
-    <!-- GA4 -->
-    <? const gaId = getSettings().ga4measurementid; if(gaId){ ?>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=<?= gaId ?>"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', '<?= gaId ?>');
-    </script>
-    <? } ?>
+
 </head>
 <body class="bg-background text-gray-800 font-sans antialiased">
 
@@ -1787,26 +1747,28 @@ fetch(`${GAS_WEB_APP_URL}?action=getInitialData&t=${timestamp}`, {
         // ==========================================
         // NEW HELPER: UPDATE DOM ELEMENTS DYNAMICALLY
         // ==========================================
-        function updateDOMWithSettings(settings) {
-            if(!settings) return;
-            // 1. Title
-            document.title = settings.sitename || 'E-commerce Store';
-            
-            // 2. Logo
-            const logoEl = document.getElementById('siteLogo');
-            if(logoEl && settings.sitelogo) {
-                logoEl.src = settings.sitelogo;
-            }
+function updateDOMWithSettings(settings) {
+    if(!settings) return;
+    
+    // ১. সাইটের নাম পরিবর্তন
+    document.title = settings.sitename || 'E-commerce Store';
+    
+    // ২. সাইটের লোগো পরিবর্তন
+    const logoEl = document.getElementById('siteLogo');
+    if(logoEl && settings.sitelogo) {
+        logoEl.src = settings.sitelogo;
+    }
 
-            // 3. CSS Variables (Colors)
-            const root = document.documentElement;
-            if(settings.themecolor) {
-                root.style.setProperty('--primary-color', settings.themecolor);
-            }
-            if(settings.bgcolor) {
-                root.style.setProperty('--bg-color', settings.bgcolor);
-            }
-        }
+    // ৩. সাইটের কালার পরিবর্তন
+    const root = document.documentElement;
+    if(settings.themecolor) {
+        root.style.setProperty('--primary-color', settings.themecolor);
+    }
+    if(settings.bgcolor) {
+        root.style.setProperty('--bg-color', settings.bgcolor);
+    }
+}
+
 
         // ================= HELPER FUNCTIONS =================
         function t(key) {
@@ -5983,7 +5945,7 @@ function searchProducts(query) {
                     
                     <div class="border-t border-gray-800 pt-6 text-center text-sm text-white font-bold">
                         &copy; ${year} ${s.sitename}. All rights reserved.
-                        <br>Developed by SafaBoxbd Team
+                        <br>Developed by bd Team
                     </div>
                 </div>
             </footer>`;
