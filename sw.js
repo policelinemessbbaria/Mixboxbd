@@ -23,9 +23,10 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   if (e.request.url.includes('script.google.com') || e.request.url.includes('action=')) {
     e.respondWith(
-      fetch(e.request).catch(() => new Response('Offline', { status: 503 }))
+      // API কলে ব্রাউজার ক্যাশ ফোর্স করে বন্ধ করা হলো
+      fetch(e.request, { cache: 'no-store' }).catch(() => new Response('Offline', { status: 503 }))
     );
-    return; 
+    return;
   }
 
   // নেভিগেশন রিকোয়েস্ট (index.html) - Network First
