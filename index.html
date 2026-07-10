@@ -1731,16 +1731,18 @@ fetch(`${GAS_WEB_APP_URL}?action=getInitialData&t=${timestamp}`, {
                                         syncCartWithLivePrices();
                                         initFilterOptions();
                                         initPopupSystem();
-                                    } else {
-                                        // ব্যাকগ্রাউন্ডে ডাটা আপডেট হলে পেজ রিলোড না করেই UI আপডেট করে দেওয়া
-                                        loadRoute(window.location.hash || '#home');
-                                        updateCartBadge();
-                                        updateOrderSummary();
-                                        updateUIText();
-                                        syncCartWithLivePrices();
-                                        initFilterOptions();
-                                        
-                                    }
+        } else {
+            // পুরনো ইউজার হলে: নতুন ডাটা পেয়ে ক্যাশ বাইপাস করে রিলোড
+            console.log("%c[Data Update] New data found. Force reloading...", "color: green; font-weight: bold;");
+            // স্ক্রল পজিশন সেভ করা হচ্ছে
+            sessionStorage.setItem('force_scroll_top', window.scrollY);
+            
+            setTimeout(() => {
+                // ফিক্স: Query Parameter (?v=) অবশ্যই Hash (#) এর আগে বসাতে হবে
+                const newUrl = window.location.pathname + '?v=' + Date.now() + window.location.hash;
+                window.location.replace(newUrl);
+            }, 100);
+        }
                                 }
                             })
                             .catch(err => {
@@ -5955,7 +5957,7 @@ function searchProducts(query) {
                     
                     <div class="border-t border-gray-800 pt-6 text-center text-sm text-white font-bold">
                         &copy; ${year} ${s.sitename}. All rights reserved.
-                        <br>Developed by Safa Team
+                        <br>Developed by SafaBox Team
                     </div>
                 </div>
             </footer>`;
