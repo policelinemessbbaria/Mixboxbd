@@ -44,14 +44,16 @@ src="https://www.facebook.com/tr?id=1526489362525698&ev=PageView&noscript=1"
     <meta name="theme-color" content="#006a4e">
 <script>
   if ('serviceWorker' in navigator) {
-    let refreshing = false; // ইনফিনিট লুপ রোধ করার জন্য
+    let refreshing = false;
     
-    // যখন ব্যাকগ্রাউন্ডে নতুন SW আপডেট হবে, তখন এই ইভেন্ট ফায়ার হবে
+    // যখন ব্যাকগ্রাউন্ডে নতুন SW আপডেট সম্পন্ন হবে, তখন ক্যাশ বাইপাস করে রিলোড হবে
     navigator.serviceWorker.addEventListener('controllerchange', () => {
       if (refreshing) return; 
       refreshing = true;
-      console.log("New Service Worker detected. Reloading...");
-      window.location.reload(); // ইউজারের অজান্তেই পেজ রিফ্রেশ হয়ে যাবে
+      console.log("New Service Worker detected. Force reloading with cache buster...");
+      
+      // ফিক্স: হ্যাশ (#) এর আগে sw-update প্যারামিটার যুক্ত করা হলো যেন পুরনো ক্যাশ বাইপাস হয়
+      window.location.replace(window.location.pathname + '?sw-update=' + Date.now() + window.location.hash);
     });
 
     window.addEventListener('load', () => {
@@ -61,6 +63,7 @@ src="https://www.facebook.com/tr?id=1526489362525698&ev=PageView&noscript=1"
     });
   }
 </script>
+
     
     <!-- Bungee & Poppins Font -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Bungee&display=swap" rel="stylesheet">
@@ -1224,7 +1227,7 @@ src="https://www.facebook.com/tr?id=1526489362525698&ev=PageView&noscript=1"
 
                             return function(...args) {
                                 // Vercel থেকে Apps Script-এ ডাটা পাঠানোর জন্য Fetch API
-                fetch(`${GAS_WEB_APP_URL}?t=${Date.now()}`, { // <-- এখানে ?t=Date.now() যুক্ত করা হয়েছে
+                fetch(GAS_WEB_APP_URL, {
                     method: 'POST',
                     mode: 'cors',
                     headers: {
@@ -1731,31 +1734,17 @@ fetch(`${GAS_WEB_APP_URL}?action=getInitialData&t=${timestamp}`, {
                                         syncCartWithLivePrices();
                                         initFilterOptions();
                                         initPopupSystem();
-                                } else {
-            // রিলোড না করে সরাসরি নতুন ডাটা অ্যাপ্লাই করা হচ্ছে
-            console.log("%c[Data Update] New data applied seamlessly!", "color: green; font-weight: bold;");
-            
-            // নতুন ডাটা গ্লোবাল ভেরিয়েবলে আপডেট করা
-            appData.settings = res.data.settings;
-            appData.categories = res.data.categories;
-            appData.products = res.data.products;
-            appData.banners = res.data.banners;
-            appData.locations = res.data.locations;
-            appData.socialMedia = res.data.socialMedia;
-            appData.policies = res.data.policies;
-            appData.popups = res.data.popups;
-            appData.reviews = res.data.reviews;
-
-            // UI সাথে সাথে রেন্ডার করা (কোনো রিলোড ছাড়াই)
-            updateDOMWithSettings(appData.settings);
-            appData.computedPages = null; // হোমপেজের লেআউট নতুন করে সাজানোর জন্য
-            loadRoute(window.location.hash || '#home');
-            
-            updateCartBadge();
-            updateOrderSummary();
-            updateUIText();
-            syncCartWithLivePrices();
-            }
+} else { // পুরনো ইউজার হলে: নতুন ডাটা পেয়ে ক্যাশ বাইপাস করে রিলোড
+    console.log("%c[Data Update] New data found. Force reloading...", "color: green; font-weight: bold;");
+    
+    // স্ক্রল পজিশন সেভ করা হচ্ছে
+    sessionStorage.setItem('force_scroll_top', window.scrollY);
+    
+    // ফিক্স: ?v=Date.now() প্যারামিটারটি হ্যাশ (window.location.hash) এর আগে নিয়ে আসা হলো
+    setTimeout(() => {
+        window.location.replace(window.location.pathname + '?v=' + Date.now() + window.location.hash);
+    }, 100);
+}
 
                                 }
                             })
@@ -5971,7 +5960,7 @@ function searchProducts(query) {
                     
                     <div class="border-t border-gray-800 pt-6 text-center text-sm text-white font-bold">
                         &copy; ${year} ${s.sitename}. All rights reserved.
-                        <br>Developed by Safa Team
+                        <br>Developed by Box Team
                     </div>
                 </div>
             </footer>`;
