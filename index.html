@@ -1224,7 +1224,7 @@ src="https://www.facebook.com/tr?id=1526489362525698&ev=PageView&noscript=1"
 
                             return function(...args) {
                                 // Vercel থেকে Apps Script-এ ডাটা পাঠানোর জন্য Fetch API
-                fetch(GAS_WEB_APP_URL, {
+                fetch(`${GAS_WEB_APP_URL}?t=${Date.now()}`, { // <-- এখানে ?t=Date.now() যুক্ত করা হয়েছে
                     method: 'POST',
                     mode: 'cors',
                     headers: {
@@ -1731,18 +1731,32 @@ fetch(`${GAS_WEB_APP_URL}?action=getInitialData&t=${timestamp}`, {
                                         syncCartWithLivePrices();
                                         initFilterOptions();
                                         initPopupSystem();
-        } else {
-            // পুরনো ইউজার হলে: নতুন ডাটা পেয়ে ক্যাশ বাইপাস করে রিলোড
-            console.log("%c[Data Update] New data found. Force reloading...", "color: green; font-weight: bold;");
-            // স্ক্রল পজিশন সেভ করা হচ্ছে
-            sessionStorage.setItem('force_scroll_top', window.scrollY);
+                                } else {
+            // রিলোড না করে সরাসরি নতুন ডাটা অ্যাপ্লাই করা হচ্ছে
+            console.log("%c[Data Update] New data applied seamlessly!", "color: green; font-weight: bold;");
             
-            setTimeout(() => {
-                // ফিক্স: Query Parameter (?v=) অবশ্যই Hash (#) এর আগে বসাতে হবে
-                const newUrl = window.location.pathname + '?v=' + Date.now() + window.location.hash;
-                window.location.replace(newUrl);
-            }, 100);
-        }
+            // নতুন ডাটা গ্লোবাল ভেরিয়েবলে আপডেট করা
+            appData.settings = res.data.settings;
+            appData.categories = res.data.categories;
+            appData.products = res.data.products;
+            appData.banners = res.data.banners;
+            appData.locations = res.data.locations;
+            appData.socialMedia = res.data.socialMedia;
+            appData.policies = res.data.policies;
+            appData.popups = res.data.popups;
+            appData.reviews = res.data.reviews;
+
+            // UI সাথে সাথে রেন্ডার করা (কোনো রিলোড ছাড়াই)
+            updateDOMWithSettings(appData.settings);
+            appData.computedPages = null; // হোমপেজের লেআউট নতুন করে সাজানোর জন্য
+            loadRoute(window.location.hash || '#home');
+            
+            updateCartBadge();
+            updateOrderSummary();
+            updateUIText();
+            syncCartWithLivePrices();
+            }
+
                                 }
                             })
                             .catch(err => {
