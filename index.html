@@ -1739,9 +1739,13 @@ fetch(`${GAS_WEB_APP_URL}?action=getInitialData&t=${timestamp}`, {
             sessionStorage.setItem('force_scroll_top', window.scrollY);
             
             // ?v=Date.now() যুক্ত করা হচ্ছে যাতে ব্রাউজার এটিকে নতুন পেজ ভেবে সরাসরি সার্ভার থেকে ডাউনলোড করে
-            setTimeout(() => {
-                window.location.replace(window.location.pathname + window.location.hash + '?v=' + Date.now());
-            }, 100);
+setTimeout(() => {
+    // কোয়েরি প্যারামিটার (?v=) হ্যাশের (#) আগে বসানো হয়েছে
+    window.location.replace(window.location.pathname + '?v=' + Date.now() + (window.location.hash || ''));
+    
+    // অথবা আপনি চাইলে সরাসরি রিলোডও ব্যবহার করতে পারেন, কারণ ডাটা তো localStorage-এ সেভ হয়েই গেছে:
+    // window.location.reload(); 
+}, 100);
         }
                                 }
                             })
@@ -5957,7 +5961,7 @@ function searchProducts(query) {
                     
                     <div class="border-t border-gray-800 pt-6 text-center text-sm text-white font-bold">
                         &copy; ${year} ${s.sitename}. All rights reserved.
-                        <br>Developed by SafaBox Team
+                        <br>Developed by Safa Team
                     </div>
                 </div>
             </footer>`;
