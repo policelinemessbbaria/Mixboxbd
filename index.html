@@ -1731,22 +1731,16 @@ fetch(`${GAS_WEB_APP_URL}?action=getInitialData&t=${timestamp}`, {
                                         syncCartWithLivePrices();
                                         initFilterOptions();
                                         initPopupSystem();
-        } else {
-            // পুরনো ইউজার হলে: নতুন ডাটা পেয়ে ক্যাশ বাইপাস করে রিলোড
-            console.log("%c[Data Update] New data found. Force reloading...", "color: green; font-weight: bold;");
-            
-            // স্ক্রল পজিশন সেভ করা হচ্ছে
-            sessionStorage.setItem('force_scroll_top', window.scrollY);
-            
-            // ?v=Date.now() যুক্ত করা হচ্ছে যাতে ব্রাউজার এটিকে নতুন পেজ ভেবে সরাসরি সার্ভার থেকে ডাউনলোড করে
-setTimeout(() => {
-    // কোয়েরি প্যারামিটার (?v=) হ্যাশের (#) আগে বসানো হয়েছে
-    window.location.replace(window.location.pathname + '?v=' + Date.now() + (window.location.hash || ''));
-    
-    // অথবা আপনি চাইলে সরাসরি রিলোডও ব্যবহার করতে পারেন, কারণ ডাটা তো localStorage-এ সেভ হয়েই গেছে:
-    // window.location.reload(); 
-}, 100);
-        }
+                                    } else {
+                                        // ব্যাকগ্রাউন্ডে ডাটা আপডেট হলে পেজ রিলোড না করেই UI আপডেট করে দেওয়া
+                                        loadRoute(window.location.hash || '#home');
+                                        updateCartBadge();
+                                        updateOrderSummary();
+                                        updateUIText();
+                                        syncCartWithLivePrices();
+                                        initFilterOptions();
+                                        
+                                    }
                                 }
                             })
                             .catch(err => {
@@ -5961,7 +5955,7 @@ function searchProducts(query) {
                     
                     <div class="border-t border-gray-800 pt-6 text-center text-sm text-white font-bold">
                         &copy; ${year} ${s.sitename}. All rights reserved.
-                        <br>Developed by Safa Team
+                        <br>Developed by SafaBox Team
                     </div>
                 </div>
             </footer>`;
