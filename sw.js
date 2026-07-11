@@ -21,13 +21,9 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-  // গুগলের সব ধরনের ডোমেইন চেক করা হয়েছে
-  if (e.request.url.includes('script.google.com') || e.request.url.includes('googleusercontent.com') || e.request.url.includes('action=')) {
+  if (e.request.url.includes('script.google.com') || e.request.url.includes('action=')) {
     e.respondWith(
-      // ==========================================
-      // জাদুর কথা: { cache: 'no-store' } যোগ করা হয়েছে
-      // ==========================================
-      fetch(e.request, { cache: 'no-store' }).catch(() => new Response('Offline', { status: 503 }))
+      fetch(e.request).catch(() => new Response('Offline', { status: 503 }))
     );
     return; 
   }
@@ -71,3 +67,4 @@ self.addEventListener('fetch', (e) => {
     })
   );
 });
+// পরিবর্তন বাবে আপডেট হয়ে যায় মেনুয়ালি কোন রিফ্রেস দিতে না হয় সেই লজিক টি যুক্ত করি। তারপর থেকে এখন এই সমস্যাটি হচ্ছে। সমস্যাটা শুধুমাত্র ক্রোম বাওজারেই হচ্ছে, অন্যান্য ব্রাউজারে সবকিছু ঠিকঠাক কাজ করছে। এই সমস্যাটি নেই
