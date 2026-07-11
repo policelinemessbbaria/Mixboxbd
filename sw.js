@@ -1,5 +1,5 @@
-// প্রতিবার আপডেটে ভার্সন বাড়াবেন (v2 থেকে v3 বা v5 করে দিন)
-const CACHE_NAME = 'SafaBoxbd-v5'; // আপনি চাইলে এখনই v3 বা v5 করে দিতে পারেন যেন নতুন নিয়মটি কার্যকর হয়
+// প্রতিবার আপডেটে ভার্সন বাড়াবেন (v4 থেকে v5 করে দিন)
+const CACHE_NAME = 'SafaBoxbd-v2'; 
 
 self.addEventListener('install', (e) => {
   self.skipWaiting(); 
@@ -21,23 +21,17 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-  // গুগল স্ক্রিপ্ট এবং শিটের ডাটা হ্যান্ডেল করার অংশ
   if (e.request.url.includes('script.google.com') || e.request.url.includes('action=')) {
-    if (e.request.method === 'GET') {
-      e.respondWith(
-        fetch(e.request, { cache: 'no-cache' }).catch(() => new Response('Offline', { status: 503 }))
-      );
-    } else {
-      e.respondWith(
-        fetch(e.request).catch(() => new Response('Offline', { status: 503 }))
-      );
-    }
+    e.respondWith(
+      fetch(e.request).catch(() => new Response('Offline', { status: 503 }))
+    );
     return; 
   }
 
   // নেভিগেশন রিকোয়েস্ট (index.html) - Network First
   if (e.request.mode === 'navigate') {
     e.respondWith(
+      // { cache: 'no-cache' } যোগ করা হয়েছে। এটি ব্রাউজারের নিজস্ব ক্যাশ ইগনোর করে সরাসরি সার্ভার থেকে নতুন ফাইল আনবে।
       fetch(e.request, { cache: 'no-cache' })
         .then((networkResponse) => {
           const responseToCache = networkResponse.clone();
@@ -47,6 +41,7 @@ self.addEventListener('fetch', (e) => {
           return networkResponse;
         })
         .catch(() => {
+          // ইন্টারনেট না থাকলে পুরনো ক্যাশ দেখাবে
           return caches.match(e.request).then((cachedResponse) => {
             return cachedResponse || new Response('Offline', { status: 503 });
           });
