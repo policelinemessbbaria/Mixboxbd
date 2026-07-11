@@ -1,5 +1,5 @@
 // প্রতিবার আপডেটে ভার্সন বাড়াবেন (v2 থেকে v3 বা v5 করে দিন)
-const CACHE_NAME = 'SafaBoxbd-v3'; // আপনি চাইলে এখনই v3 বা v5 করে দিতে পারেন যেন নতুন নিয়মটি কার্যকর হয়
+const CACHE_NAME = 'SafaBoxbd-v4'; // আপনি চাইলে এখনই v3 বা v5 করে দিতে পারেন যেন নতুন নিয়মটি কার্যকর হয়
 
 self.addEventListener('install', (e) => {
   self.skipWaiting(); 
