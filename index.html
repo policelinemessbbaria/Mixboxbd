@@ -1196,7 +1196,7 @@ src="https://www.facebook.com/tr?id=1526489362525698&ev=PageView&noscript=1"
     // VERCEL/NETLIFY HOSTING HELPER (POLYFILL FOR GOOGLE.SCRIPT.RUN)
     // ============================================================
     // নিচে আপনার Google Apps Script-এর বর্তমান Web App URL-টি বসিয়ে দিন:
-    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyRm3YPD_F66zbyt7SLW6j6Ak1AYl3E6SKJpUff9RFVsiFIl23MowrsEXQYBFyhHEVdRQ/exec"; 
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw7Y_CUuATKy-twXw0jONe_9YqlBoNhlDW9dmvG_fiEFqegR_QSMcsV4Nv9_KiuYJCAkw/exec"; 
 
     if (typeof google === 'undefined' || !google.script) {
         window.google = {
@@ -2273,7 +2273,27 @@ function simpleHash(str) {
     }
     return hash;
 }
-
+// ==========================================
+// NEW: HIERARCHICAL CATEGORY MATCHING (FRONTEND)
+// ব্যাকএন্ডের লজিকের সাথে হুবহু মিল রাখতে ফ্রন্টএন্ডেও এই ফাংশন ব্যবহার করা হবে
+// ==========================================
+function isCategoryMatch(productCategory, categoryList) {
+    if (!productCategory || !categoryList || categoryList.length === 0) return false;
+    const normalizedProduct = (productCategory || '').toString().trim().toLowerCase();
+    const productPaths = [];
+    const parts = normalizedProduct.split('>');
+    let currentPath = '';
+    parts.forEach((part, index) => {
+        currentPath += (index > 0 ? ' > ' : '') + part.trim();
+        productPaths.push(currentPath);
+    });
+    for (let i = 0; i < productPaths.length; i++) {
+        if (categoryList.includes(productPaths[i])) {
+            return true;
+        }
+    }
+    return false;
+}
 // ==========================================
 // NEW: HELPER FUNCTION TO TOGGLE ORDER DETAILS
 // ==========================================
@@ -3306,20 +3326,21 @@ window.addEventListener('scroll', () => {
 
                 // UPDATED LOGIC: Multi-Category Check
                 if (isFreeDeliveryActive) {
-                    // If 'all' categories are free, everything goes to freeItems
-                    if (isAllCategory) {
-                        allItems.push({ qty, extraCharge });
-                    } 
-                    // If specific categories, check if item category is in the array
-                    else if (applicableCategories.includes(itemCat)) {
-                        allItems.push({ qty, extraCharge });
-                    } 
-                    // Else, it's a paid item
-                    else {
-                        paidItems.push({ qty, extraCharge });
-                        allItems.push({ qty, extraCharge });
-                    }
+                const excludedList = appData.coupon.excludedCategories || [];
+                
+                // Check if item matches applicable categories (Supports hierarchical match)
+                let isApplicable = isAllCategory || isCategoryMatch(item.category, applicableCategories);
+                // Check if item is in excluded categories (Supports hierarchical match)
+                let isExcluded = isCategoryMatch(item.category, excludedList);
+                
+                // Must be applicable AND not excluded to get free delivery
+                if (isApplicable && !isExcluded) {
+                    allItems.push({ qty, extraCharge });
                 } else {
+                    paidItems.push({ qty, extraCharge });
+                    allItems.push({ qty, extraCharge });
+                }
+            } else {
                     // No coupon or coupon has no free delivery, everything is paid
                     paidItems.push({ qty, extraCharge });
                     allItems.push({ qty, extraCharge });
@@ -3572,7 +3593,8 @@ async function handleApplyCoupon() {
                 discount: response.discount, 
                 isFreeDelivery: response.isFreeDelivery,
                 isAllCategory: response.isAllCategory, 
-                applicableCategories: response.applicableCategories 
+                applicableCategories: response.applicableCategories,
+                excludedCategories: response.excludedCategories // এই লাইনটি নতুন যোগ করা হয়েছে
             };
             Swal.fire({ icon: 'success', title: 'Coupon Applied!', text: `You saved ৳${response.discount.toFixed(2)}`, timer: 2000, showConfirmButton: false });
             updateOrderSummary();
