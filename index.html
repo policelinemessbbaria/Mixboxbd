@@ -3593,8 +3593,8 @@ async function handleApplyCoupon() {
                 discount: response.discount, 
                 isFreeDelivery: response.isFreeDelivery,
                 isAllCategory: response.isAllCategory, 
-                applicableCategories: response.applicableCategories,
-                excludedCategories: response.excludedCategories // এই লাইনটি নতুন যোগ করা হয়েছে
+                applicableCategories: response.applicableCategoriesArray, // ঠিক করা হয়েছে
+                excludedCategories: response.excludedCategoriesArray  // ঠিক করা হয়েছে
             };
             Swal.fire({ icon: 'success', title: 'Coupon Applied!', text: `You saved ৳${response.discount.toFixed(2)}`, timer: 2000, showConfirmButton: false });
             updateOrderSummary();
