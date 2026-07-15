@@ -1235,7 +1235,7 @@ src="https://www.facebook.com/tr?id=1526489362525698&ev=PageView&noscript=1"
     // VERCEL/NETLIFY HOSTING HELPER (POLYFILL FOR GOOGLE.SCRIPT.RUN)
     // ============================================================
     // নিচে আপনার Google Apps Script-এর বর্তমান Web App URL-টি বসিয়ে দিন:
-    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyLQE4WwzmHEjraXXFXs1IY8dENUGADpFUzCqxV4bKIOlvaDJWhoqFTS8iu4mu7zpAHdA/exec"; 
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwSg9Q2QubArS5xY2b00pZKgsIEBJ-DiVZxk88pYj94vdUgVr8pr5VxSBHj63BwdnlVAg/exec"; 
 
     if (typeof google === 'undefined' || !google.script) {
         window.google = {
@@ -3357,142 +3357,172 @@ function toggleSelectItem(idx) {
     if(document.getElementById('cartRecommendationsSection')) renderCartRecommendations();
 }
 
-        // ================= COUPON & CALCULATION LOGIC (UPDATED FOR MULTI-CATEGORY) =================
-        function updateOrderSummary() {
-            const selectedItems = appData.cart.filter(item => item.selected !== false);
+// ================= COUPON & CALCULATION LOGIC (UPDATED FOR MULTI-CATEGORY & PARTIAL DELIVERY DISCOUNT) =================
+function updateOrderSummary() {
+    const selectedItems = appData.cart.filter(item => item.selected !== false);
 
-            if (selectedItems.length === 0) {
-                appData.coupon = null;
-                appData.pointsDiscount = 0;
-                localStorage.setItem('coupon', JSON.stringify(null));
-                const toggle = document.getElementById('ptsToggle');
-                if(toggle) {
-                    toggle.checked = false;
-                    toggle.disabled = true;
-                }
-            }
+    if (selectedItems.length === 0) {
+        appData.coupon = null;
+        appData.pointsDiscount = 0;
+        localStorage.setItem('coupon', JSON.stringify(null));
+        const toggle = document.getElementById('ptsToggle');
+        if(toggle) {
+            toggle.checked = false;
+            toggle.disabled = true;
+        }
+    }
 
-            let productDiscountAmount = 0;
-            let isFreeDeliveryActive = false;
-            let isAllCategory = false; // NEW: Flag for All Category
-            let applicableCategories = []; // NEW: Array for specific categories
-            const baseDelivery = parseFloat(appData.settings.deliverycharge) || 0;
+    let productDiscountAmount = 0;
+    let isFreeDeliveryActive = false;
+    let isAllCategory = false;
+    let applicableCategories = [];
+    const baseDelivery = parseFloat(appData.settings.deliverycharge) || 0;
 
-            if (appData.coupon) {
-                productDiscountAmount = parseFloat(appData.coupon.discount) || 0;
-                if (appData.coupon.isFreeDelivery) {
-                    isFreeDeliveryActive = true;
-                    // UPDATED: Extract boolean and array from coupon object
-                    isAllCategory = appData.coupon.isAllCategory || false;
-                    applicableCategories = appData.coupon.applicableCategories || [];
-                }
-            }
+    if (appData.coupon) {
+        productDiscountAmount = parseFloat(appData.coupon.discount) || 0;
+        if (appData.coupon.isFreeDelivery) {
+            isFreeDeliveryActive = true;
+            isAllCategory = appData.coupon.isAllCategory || false;
+            applicableCategories = appData.coupon.applicableCategories || [];
+        }
+    }
 
-            let subTotal = 0;
-            let paidItems = [];
-            let allItems = []; 
+    let subTotal = 0;
+    let paidItems = [];
+    let allItems = []; 
 
-            selectedItems.forEach(item => {
-                const qty = item.quantity || item.qty || 1;
-                const price = parseFloat(item.price); // Item price is specific (variant or main)
-                const itemCat = (item.category || '').toString().trim().toLowerCase();
-                const extraCharge = parseFloat(item.extradeliverycharge || 0);
+    selectedItems.forEach(item => {
+        const qty = item.quantity || item.qty || 1;
+        const price = parseFloat(item.price); 
+        const itemCat = (item.category || '').toString().trim().toLowerCase();
+        const extraCharge = parseFloat(item.extradeliverycharge || 0);
 
-                subTotal += (price * qty);
+        subTotal += (price * qty);
 
-                // UPDATED LOGIC: Multi-Category Check
-                if (isFreeDeliveryActive) {
-                const excludedList = appData.coupon.excludedCategories || [];
-                
-                // Check if item matches applicable categories (Supports hierarchical match)
-                let isApplicable = isAllCategory || isCategoryMatch(item.category, applicableCategories);
-                // Check if item is in excluded categories (Supports hierarchical match)
-                let isExcluded = isCategoryMatch(item.category, excludedList);
-                
-                // Must be applicable AND not excluded to get free delivery
-                if (isApplicable && !isExcluded) {
-                    allItems.push({ qty, extraCharge });
-                } else {
-                    paidItems.push({ qty, extraCharge });
-                    allItems.push({ qty, extraCharge });
-                }
-            } else {
-                    // No coupon or coupon has no free delivery, everything is paid
-                    paidItems.push({ qty, extraCharge });
-                    allItems.push({ qty, extraCharge });
-                }
-            });
-
-            const calcShipping = (items) => {
-                if (items.length === 0) return 0;
-                let totalShipping = 0;
-                let isFirstItem = true;
-                items.forEach(item => {
-                    const qty = item.qty;
-                    const extra = item.extraCharge;
-                    if (isFirstItem) {
-                        totalShipping += baseDelivery;
-                        if (qty >1) totalShipping += ((qty - 1) * extra);
-                        isFirstItem = false;
-                    } else {
-                        totalShipping += (qty * extra);
-                    }
-                });
-                return totalShipping;
-            };
-
-            const totalShipping = calcShipping(paidItems);
-            const totalShippingWithoutCoupon = isFreeDeliveryActive ? calcShipping(allItems) : totalShipping;
-            const deliveryDiscountAmount = totalShippingWithoutCoupon - totalShipping;
+        // ==========================================
+        // NEW: PARTIAL DELIVERY DISCOUNT LOGIC
+        // ==========================================
+        if (isFreeDeliveryActive) {
+            const excludedList = appData.coupon.excludedCategories || [];
+            const hasPartialDelDiscount = appData.coupon && appData.coupon.deliveryDiscountAmount > 0;
             
-            const finalTotal = (subTotal + totalShipping) - productDiscountAmount - appData.pointsDiscount;
+            let isApplicable = isAllCategory || isCategoryMatch(item.category, applicableCategories);
+            let isExcluded = isCategoryMatch(item.category, excludedList);
+            
+            if (hasPartialDelDiscount) {
+                // PARTIAL DISCOUNT: সব আইটেমে স্বাভাবিক চার্জ, পরে নির্দিষ্ট টাকা কাটা হবে
+                paidItems.push({ qty, extraCharge });
+                allItems.push({ qty, extraCharge });
+            } else if (isApplicable && !isExcluded) {
+                // FULL FREE: এই আইটেম ফ্রি
+                allItems.push({ qty, extraCharge });
+            } else {
+                // NOT APPLICABLE: স্বাভাবিক চার্জ
+                paidItems.push({ qty, extraCharge });
+                allItems.push({ qty, extraCharge });
+            }
+        } else {
+            paidItems.push({ qty, extraCharge });
+            allItems.push({ qty, extraCharge });
+        }
+        // ==========================================
+    });
 
-            const updateDisplay = (prefix) => {
-                const subEl = document.getElementById(`${prefix}Subtotal`);
-                const delEl = document.getElementById(`${prefix}Delivery`);
-                const totEl = document.getElementById(`${prefix}Total`);
-                
-                if(!subEl) return; 
+    const calcShipping = (items) => {
+        if (items.length === 0) return 0;
+        let totalShipping = 0;
+        let isFirstItem = true;
+        items.forEach(item => {
+            const qty = item.qty;
+            const extra = item.extraCharge;
+            if (isFirstItem) {
+                totalShipping += baseDelivery;
+                if (qty > 1) totalShipping += ((qty - 1) * extra);
+                isFirstItem = false;
+            } else {
+                totalShipping += (qty * extra);
+            }
+        });
+        return totalShipping;
+    };
 
-                subEl.innerText = `৳${subTotal.toFixed(2)}`;
-                delEl.innerText = totalShipping === 0 ? 'FREE' : `৳${totalShipping.toFixed(2)}`;
-                totEl.innerText = `৳${finalTotal.toFixed(2)}`;
+    const totalShipping = calcShipping(paidItems);
+    
+    // ==========================================
+    // FIX: DELIVERY DISCOUNT CALCULATION
+    // ==========================================
+    let deliveryDiscountAmount = 0;
+    let isPartialDelDiscount = false;
+    
+    if (isFreeDeliveryActive && appData.coupon && appData.coupon.deliveryDiscountAmount > 0) {
+        // CASE 1: PARTIAL DISCOUNT (যেমন: ৭০ টাকা ছাড়)
+        deliveryDiscountAmount = appData.coupon.deliveryDiscountAmount;
+        isPartialDelDiscount = true;
+    } else if (isFreeDeliveryActive) {
+        // CASE 2: FULL FREE (নির্দিষ্ট ক্যাটাগরি ফ্রি)
+        const totalShippingWithoutCoupon = calcShipping(allItems);
+        deliveryDiscountAmount = totalShippingWithoutCoupon - totalShipping;
+    }
+    // ==========================================
 
-                const prodDiscCont = document.getElementById(`${prefix}ProdDiscContainer`);
-                const prodDiscText = document.getElementById(`${prefix}ProdDisc`);
-                if (productDiscountAmount > 0) {
-                    prodDiscCont.classList.remove('hidden');
-                    prodDiscText.innerText = `-৳${productDiscountAmount.toFixed(2)}`;
-                } else {
-                    prodDiscCont.classList.add('hidden');
-                }
+    // ==========================================
+    // FIX: TOTAL CALCULATION
+    // ==========================================
+    let finalTotal;
+    if (isPartialDelDiscount) {
+        // PARTIAL: ডিসকাউন্ট টোটাল থেকে বাদ
+        finalTotal = (subTotal + totalShipping) - productDiscountAmount - deliveryDiscountAmount - appData.pointsDiscount;
+    } else {
+        // FULL FREE বা NO COUPON: ডিসকাউন্ট ইতিমধ্যে বাদ (চার্জেই কম আসছে)
+        finalTotal = (subTotal + totalShipping) - productDiscountAmount - appData.pointsDiscount;
+    }
+    // ==========================================
 
-                const delDiscCont = document.getElementById(`${prefix}DelDiscContainer`);
-                const delDiscText = document.getElementById(`${prefix}DelDisc`);
-                if (deliveryDiscountAmount > 0) {
-                    delDiscCont.classList.remove('hidden');
-                    delDiscText.innerText = `-৳${deliveryDiscountAmount.toFixed(2)}`;
-                } else {
-                    delDiscCont.classList.add('hidden');
-                }
+    const updateDisplay = (prefix) => {
+        const subEl = document.getElementById(`${prefix}Subtotal`);
+        const delEl = document.getElementById(`${prefix}Delivery`);
+        const totEl = document.getElementById(`${prefix}Total`);
+        
+        if(!subEl) return; 
 
-                const ptsDiscCont = document.getElementById(`${prefix}PtsDiscContainer`);
-                const ptsDiscText = document.getElementById(`${prefix}PtsDisc`);
-                if (appData.pointsDiscount > 0) {
-                    ptsDiscCont.classList.remove('hidden');
-                    ptsDiscText.innerText = `-৳${appData.pointsDiscount.toFixed(2)}`;
-                } else {
-                    ptsDiscCont.classList.add('hidden');
-                }
-            };
+        subEl.innerText = `৳${subTotal.toFixed(2)}`;
+        delEl.innerText = totalShipping === 0 ? 'FREE' : `৳${totalShipping.toFixed(2)}`;
+        totEl.innerText = `৳${finalTotal.toFixed(2)}`;
 
-            updateDisplay('cart');
-            updateDisplay('page');
-            updateDisplay('checkout');
-
-            localStorage.setItem('cart', JSON.stringify(appData.cart));
+        const prodDiscCont = document.getElementById(`${prefix}ProdDiscContainer`);
+        const prodDiscText = document.getElementById(`${prefix}ProdDisc`);
+        if (productDiscountAmount > 0) {
+            prodDiscCont.classList.remove('hidden');
+            prodDiscText.innerText = `-৳${productDiscountAmount.toFixed(2)}`;
+        } else {
+            prodDiscCont.classList.add('hidden');
         }
 
+        const delDiscCont = document.getElementById(`${prefix}DelDiscContainer`);
+        const delDiscText = document.getElementById(`${prefix}DelDisc`);
+        if (deliveryDiscountAmount > 0) {
+            delDiscCont.classList.remove('hidden');
+            delDiscText.innerText = `-৳${deliveryDiscountAmount.toFixed(2)}`;
+        } else {
+            delDiscCont.classList.add('hidden');
+        }
+
+        const ptsDiscCont = document.getElementById(`${prefix}PtsDiscContainer`);
+        const ptsDiscText = document.getElementById(`${prefix}PtsDisc`);
+        if (appData.pointsDiscount > 0) {
+            ptsDiscCont.classList.remove('hidden');
+            ptsDiscText.innerText = `-৳${appData.pointsDiscount.toFixed(2)}`;
+        } else {
+            ptsDiscCont.classList.add('hidden');
+        }
+    };
+
+    updateDisplay('cart');
+    updateDisplay('page');
+    updateDisplay('checkout');
+
+    localStorage.setItem('cart', JSON.stringify(appData.cart));
+}
     // ==========================================
     // NEW: Calculate Points Discount Logic (Checkout)
     // ==========================================
@@ -3631,12 +3661,7 @@ async function handleApplyCoupon() {
 
     // ==========================================================
     // NEW: FRONTEND VALIDATION (REGEX)
-    // Requirement: Min 3 Letters & 1 Number
     // ==========================================================
-    // Regex Explanation:
-    // (?=(.*[a-zA-Z]){3,}) -> Lookahead: Ensures at least 3 letters exist
-    // (?=.*\d)            -> Lookahead: Ensures at least 1 digit exists
-    // [a-zA-Z0-9]+$       -> Allows only alphanumeric characters for the whole string
     const couponRegex = /^(?=(.*[a-zA-Z]){3,})(?=.*\d)[a-zA-Z0-9]+$/;
 
     if (!couponRegex.test(rawCode)) {
@@ -3646,7 +3671,6 @@ async function handleApplyCoupon() {
             text: 'Invalid Coupon Code!' 
         });
     }
-    // ==========================================================
 
     inputField.value = t('validating');
 
@@ -3669,10 +3693,31 @@ async function handleApplyCoupon() {
                 discount: response.discount, 
                 isFreeDelivery: response.isFreeDelivery,
                 isAllCategory: response.isAllCategory, 
-                applicableCategories: response.applicableCategoriesArray, // ঠিক করা হয়েছে
-                excludedCategories: response.excludedCategoriesArray  // ঠিক করা হয়েছে
+                applicableCategories: response.applicableCategoriesArray, 
+                excludedCategories: response.excludedCategoriesArray,
+                deliveryDiscountAmount: response.deliveryDiscountAmount || 0
             };
-            Swal.fire({ icon: 'success', title: 'Coupon Applied!', text: `You saved ৳${response.discount.toFixed(2)}`, timer: 2000, showConfirmButton: false });
+            
+            // ==========================================
+            // NEW: Build discount message (Product + Delivery)
+            // ==========================================
+            let msgHtml = `<div style="text-align:left; line-height:1.8;">`;
+            msgHtml += `<span style="color:#16a34a;font-weight:700;">${tL('product_discount')}:</span> <span style="font-size:18px;font-weight:800;color:#16a34a;">৳${response.discount.toFixed(2)}</span>`;
+            
+            if (response.isFreeDelivery && response.deliveryDiscountAmount > 0) {
+                msgHtml += `<br><span style="color:#2563eb;font-weight:700;">${tL('delivery_save')}:</span> <span style="font-size:16px;font-weight:800;color:#2563eb;">৳${response.deliveryDiscountAmount}</span>`;
+            } else if (response.isFreeDelivery) {
+                msgHtml += `<br><span style="color:#16a34a;font-weight:700;">${tL('free_delivery_badge')}</span>`;
+            }
+            msgHtml += `</div>`;
+            
+            Swal.fire({ 
+                icon: 'success', 
+                title: tL('coupon_applied'), 
+                html: msgHtml, 
+                timer: 2500, 
+                showConfirmButton: false 
+            });
             updateOrderSummary();
             if(couponInput) couponInput.value = '';
             if(pageCouponInput) pageCouponInput.value = '';
@@ -4914,6 +4959,8 @@ function tL(key) {
         off:                   { en: 'off', bn: 'ছাড়' },
         free_delivery_title:   { en: 'Add this product with the same delivery charge!', bn: 'একই ডেলিভারি চার্জে নিচের প্রোডাক্টটি লুফে নিন!' },
         free_delivery_sub:     { en: 'No extra shipping fees (0 TK)', bn: 'কোনো অতিরিক্ত শিপিং চার্জ নেই (০ টাকা)' },
+        free_delivery_badge:   { en: '🚚 Free Delivery', bn: '🚚 ফ্রি ডেলিভারি' },
+        delivery_save:         { en: 'Delivery Save', bn: 'ডেলিভারি সেভ' },
         see_more:              { en: 'See More', bn: 'আরও দেখুন' },
         see_less:              { en: 'See Less', bn: 'কম দেখান' },
         add_item:              { en: '+ Add Item', bn: '+ যোগ করুন' },
@@ -4928,7 +4975,6 @@ function tL(key) {
     };
     return (map[key] && map[key][lang]) || key;
 }
-
 // ==========================================
 // FORMAT COUPON DATE
 // ==========================================
@@ -5059,7 +5105,8 @@ async function applyCouponFromCartCard(code, btnElement) {
                 isFreeDelivery: response.isFreeDelivery,
                 isAllCategory: response.isAllCategory, 
                 applicableCategories: response.applicableCategoriesArray,
-                excludedCategories: response.excludedCategoriesArray
+                excludedCategories: response.excludedCategoriesArray,
+                deliveryDiscountAmount: response.deliveryDiscountAmount || 0
             };
             localStorage.setItem('coupon', JSON.stringify(appData.coupon));
             
@@ -5069,7 +5116,26 @@ async function applyCouponFromCartCard(code, btnElement) {
             const sidebarCouponInput = document.getElementById('couponCode');
             if(sidebarCouponInput) sidebarCouponInput.value = '';
             
-            Swal.fire({ icon: 'success', title: tL('coupon_applied'), text: `${tL('product_discount')}: ৳${response.discount.toFixed(2)}`, timer: 2000, showConfirmButton: false });
+            // ==========================================
+            // NEW: Build discount message (Product + Delivery)
+            // ==========================================
+            let msgHtml = `<div style="text-align:left; line-height:1.8;">`;
+            msgHtml += `<span style="color:#16a34a;font-weight:700;">${tL('product_discount')}:</span> <span style="font-size:18px;font-weight:800;color:#16a34a;">৳${response.discount.toFixed(2)}</span>`;
+            
+            if (response.isFreeDelivery && response.deliveryDiscountAmount > 0) {
+                msgHtml += `<br><span style="color:#2563eb;font-weight:700;">${tL('delivery_save')}:</span> <span style="font-size:16px;font-weight:800;color:#2563eb;">৳${response.deliveryDiscountAmount}</span>`;
+            } else if (response.isFreeDelivery) {
+                msgHtml += `<br><span style="color:#16a34a;font-weight:700;">${tL('free_delivery_badge')}</span>`;
+            }
+            msgHtml += `</div>`;
+            
+            Swal.fire({ 
+                icon: 'success', 
+                title: tL('coupon_applied'), 
+                html: msgHtml, 
+                timer: 2500, 
+                showConfirmButton: false 
+            });
             
             updateOrderSummary();
             updateCartPageUI();
