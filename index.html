@@ -295,6 +295,82 @@ src="https://www.facebook.com/tr?id=1526489362525698&ev=PageView&noscript=1"
     width: 100%;             /* পুরো জায়গা নেবে */
     line-height: 1.4;
 }
+.cart-section-header{display:flex;align-items:center;gap:8px;margin-bottom:12px;padding:0 2px}
+.cart-section-header i{font-size:14px;color:#6b7280}
+.cart-section-header span{font-size:13px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.5px}
+.cart-section-divider{height:1px;background:#e5e7eb;margin:0 0 10px 0}
+
+.cart-empty-state{text-align:center;padding:35px 20px 25px}
+.cart-empty-icon{width:76px;height:76px;margin:0 auto 14px;background:#f3f4f6;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.cart-empty-icon i{font-size:30px;color:#d1d5db}
+.cart-empty-state h3{font-size:15px;font-weight:700;color:#374151;margin-bottom:5px}
+.cart-empty-state p{font-size:12px;color:#9ca3af;margin-bottom:18px}
+.cart-btn-start{background:#111827;color:#fff;border:none;border-radius:10px;padding:11px 28px;font-size:13px;font-weight:600;cursor:pointer;transition:.2s}
+.cart-btn-start:hover{background:#000;transform:translateY(-1px)}
+.cart-btn-start:active{transform:scale(.97)}
+
+/* ==========================================
+   UPDATED: COUPON CARD - Locked Left & Right
+   ========================================== */
+.coupon-new-card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:11px 13px;box-shadow:0 2px 8px rgba(0,0,0,.04);margin-bottom:10px;transition:box-shadow .2s}
+.coupon-new-card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}
+
+/* Row 1: Absolute alignment (Code Left, Button Right) */
+.coupon-new-row1{display:flex;align-items:center;justify-content:space-between;width:100%}
+.coupon-new-code{min-width:100px;background:#ecfff1;border:1px solid #bfe8c9;border-radius:6px;text-align:center;font-size:14px;font-weight:700;color:#111;padding:5px 8px;letter-spacing:.5px;flex-shrink:0;margin-right:auto}
+.coupon-new-spacer{display:none} 
+.coupon-new-apply{background:#111827;color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:11px;font-weight:600;cursor:pointer;transition:.2s;flex-shrink:0;white-space:nowrap;margin-left:auto}
+.coupon-new-apply:hover{background:#000}
+
+/* Row 2: Offer Badges (Centered, Smaller) */
+.coupon-new-offers{display:flex;flex-wrap:wrap;justify-content:center;gap:4px;margin-top:8px}
+.coupon-new-badge{display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:600;padding:2px 6px;border-radius:4px;white-space:nowrap;line-height:1.3}
+
+/* কন্টেন্ট না থাকলে ব্যাজটি পুরোপুরি গায়েব হয়ে যাবে */
+.coupon-new-badge:empty{display:none !important} 
+
+.coupon-new-badge.disc{background:#e8f8ea;color:#16803c}
+.coupon-new-badge.del-partial{background:#ebf3ff;color:#2563eb}
+.coupon-new-badge.del-free{background:#e8f8ea;color:#15803d}
+.coupon-new-badge i{font-size:7px}
+
+.coupon-new-row2{margin-top:8px;padding-top:7px;border-top:1px solid #f3f4f6;display:flex;justify-content:center;gap:12px;font-size:11px;color:#9ca3af;flex-wrap:wrap}
+.coupon-new-row2 b{color:#374151}
+.coupon-new-row3{margin-top:7px;padding-top:7px;border-top:1px solid #f3f4f6;font-size:12px;color:#6b7280;text-align:center;line-height:1.7}
+.coupon-new-row3 strong{color:#374151}
+
+/* Applied State */
+.coupon-new-card.applied{border-color:#86efac;background:#f0fdf4}
+.coupon-new-card.applied .coupon-new-code{background:#bbf7d0;border-color:#86efac}
+.coupon-new-card.applied .coupon-new-apply{display:none}
+.coupon-new-applied-badge{display:none;align-items:center;gap:4px;background:#16a34a;color:#fff;font-size:11px;font-weight:600;padding:7px 11px;border-radius:8px;flex-shrink:0;margin-left:auto}
+.coupon-new-card.applied .coupon-new-applied-badge{display:flex}
+
+/* ==========================================
+   RECOMMENDATION CARDS
+   ========================================== */
+.rec-new-card{background:#fff;border:1px solid #d1fae5;border-radius:12px;padding:11px;display:flex;gap:10px;align-items:center;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.04);transition:.2s}
+.rec-new-card:hover{box-shadow:0 3px 10px rgba(0,0,0,.08)}
+.rec-new-img{width:54px;height:54px;border-radius:8px;object-fit:cover;border:1px solid #e5e7eb;flex-shrink:0;background:#f9fafb}
+.rec-new-info{flex:1;min-width:0}
+.rec-new-name{font-size:12px;font-weight:600;color:#1f2937;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rec-new-cat{font-size:10px;color:#9ca3af;margin-top:1px}
+.rec-new-price-row{display:flex;align-items:center;gap:5px;margin-top:3px}
+.rec-new-price{font-size:13px;font-weight:700;color:var(--primary-color,#006a4e)}
+.rec-new-old{font-size:11px;color:#9ca3af;text-decoration:line-through}
+.rec-new-save{font-size:9px;font-weight:700;color:#16a34a;background:#dcfce7;padding:1px 5px;border-radius:4px}
+.rec-new-free{font-size:9px;font-weight:600;color:#16a34a;display:flex;align-items:center;gap:2px;margin-top:3px}
+.rec-new-btn{background:var(--primary-color,#006a4e);color:#fff;border:none;border-radius:8px;padding:7px 11px;font-size:11px;font-weight:600;cursor:pointer;transition:.2s;flex-shrink:0;white-space:nowrap}
+.rec-new-btn:hover{opacity:.9}
+.rec-new-btn.added{background:#16a34a;pointer-events:none}
+
+@media(max-width:380px){
+    .coupon-new-code{min-width:88px;font-size:12px;padding:4px 6px}
+    .coupon-new-badge{font-size:8px;padding:1px 5px;gap:2px}
+    .coupon-new-badge i{font-size:6px}
+    .coupon-new-apply{padding:6px 9px;font-size:10px}
+    .coupon-new-row2{gap:8px;font-size:10px}
+}
 
 /* ভ্যারিয়েন্টের স্টাইল: নিচের লাইনে */
 .cart-variant-text {
@@ -822,83 +898,63 @@ src="https://www.facebook.com/tr?id=1526489362525698&ev=PageView&noscript=1"
     </template>
 
 <template id="cartPageTemplate">
-        <!-- Added pb-16 -->
-        <div class="animate-fade-in pb-16">
-            <h1 class="text-2xl font-bold mb-6" data-i18n="cart">Shopping Cart</h1>
-            <div id="cartPageItems" class="space-y-4"></div>
-            
-            <div id="emptyCart" class="hidden flex flex-col items-center justify-center py-12 text-center">
-                <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4"><i class="fas fa-shopping-basket text-3xl text-gray-300"></i></div>
-                <h3 class="font-bold text-gray-600" data-i18n="empty_cart_msg">Your cart is empty</h3>
-                <button onclick="navigateTo('#home')" class="mt-4 px-6 py-2 bg-primary text-white rounded-lg text-sm font-bold" data-i18n="start_shopping">Start Shopping</button>
+    <div class="animate-fade-in pb-16">
+        <h1 class="text-2xl font-bold mb-6" data-i18n="cart">Shopping Cart</h1>
+        <div id="cartPageItems" class="space-y-4"></div>
+        
+        <div id="emptyCart" class="hidden cart-empty-state">
+            <div class="cart-empty-icon"><i class="fas fa-shopping-basket"></i></div>
+            <h3 data-i18n="empty_cart_msg">Your cart is empty</h3>
+            <button onclick="navigateTo('#home')" class="cart-btn-start" data-i18n="start_shopping">Start Shopping</button>
+        </div>
+        
+        <div id="cartSummary" class="hidden bg-white rounded-xl shadow-sm border p-4 mt-6 space-y-2">
+            <div class="space-y-1 text-sm">
+                <div class="flex justify-between text-gray-600"><span data-i18n="subtotal">Subtotal</span> <span id="pageSubtotal" class="font-medium">৳ 0</span></div>
+                <div class="flex justify-between text-gray-600"><span data-i18n="delivery">Delivery</span> <span id="pageDelivery" class="font-medium">৳ 0</span></div>
+                <div id="pageProdDiscContainer" class="flex justify-between text-green-600 hidden"><span data-i18n="product_discount">Product Discount</span> <span id="pageProdDisc">-৳ 0</span></div>
+                <div id="pageDelDiscContainer" class="flex justify-between text-green-600 hidden"><span data-i18n="delivery_discount">Delivery Discount</span> <span id="pageDelDisc">-৳ 0</span></div>
+                <div id="pagePtsDiscContainer" class="flex justify-between text-purple-600 hidden"><span data-i18n="points_discount">Points Discount</span> <span id="pagePtsDisc">-৳ 0</span></div>
+                <div class="flex justify-between text-lg font-bold border-t pt-2 mt-2"><span data-i18n="total">Total</span> <span id="pageTotal" class="text-primary">৳ 0</span></div>
             </div>
-            
-            <div id="cartSummary" class="hidden bg-white rounded-xl shadow-sm border p-4 mt-6 space-y-2">
-                <div class="flex justify-between text-sm text-gray-600"><span data-i18n="subtotal">Subtotal</span> <span id="pageSubtotal" class="font-medium">৳ 0</span></div>
-                <div class="flex justify-between text-sm text-gray-600"><span data-i18n="delivery">Delivery</span> <span id="pageDelivery" class="font-medium">৳ 0</span></div>
-                
-                <!-- UPDATED: Separate Discounts -->
-                <div id="pageProdDiscContainer" class="flex justify-between text-sm text-green-600 hidden">
-                    <span data-i18n="product_discount">Product Discount</span> 
-                    <span id="pageProdDisc">-৳ 0</span>
-                </div>
-                <div id="pageDelDiscContainer" class="flex justify-between text-sm text-green-600 hidden">
-                    <span data-i18n="delivery_discount">Delivery Discount</span> 
-                    <span id="pageDelDisc">-৳ 0</span>
-                </div>
-                 <!-- NEW: Points Discount -->
-                 <div id="pagePtsDiscContainer" class="flex justify-between text-sm text-purple-600 hidden">
-                    <span data-i18n="points_discount">Points Discount</span> 
-                    <span id="pagePtsDisc">-৳ 0</span>
-                </div>
-                <!-- End Update -->
-
-                <div class="border-t pt-2 flex justify-between text-lg font-bold"><span data-i18n="total">Total</span> <span id="pageTotal" class="text-primary">৳ 0</span></div>
-                <div class="flex mt-4">
-                    <input type="text" id="pageCouponCode" placeholder="Coupon Code" class="flex-1 px-3 py-2 border rounded-l-lg text-sm focus:outline-none focus:ring-1 focus:ring-primary">
-                    <button onclick="handleApplyCouponFromPage()" class="bg-gray-800 text-white px-4 py-2 rounded-r-lg text-sm font-medium" data-i18n="apply">Apply</button>
-                </div>
-                <div id="pageCouponMessage" class="text-xs"></div>
-                <button onclick="proceedToCheckout()" class="w-full bg-primary text-white py-3 rounded-lg font-bold mt-2 hover:opacity-90 shadow-lg" data-i18n="checkout">Checkout</button>
-                
-                <!-- ========================================== -->
-                <!-- MOVED: AVAILABLE COUPONS (নিচে সরানো হয়েছে) -->
-                <!-- ========================================== -->
-                <div id="cartCouponsSection" class="mt-4 bg-white rounded-xl shadow-sm border p-4 hidden">
-                    <div class="flex items-center gap-2 mb-3 pb-2 border-b border-gray-100">
-                        <i class="fas fa-ticket-alt text-primary"></i>
-                        <h2 class="font-bold text-sm text-gray-800" id="cartCouponsTitle">Available Coupons</h2>
-                    </div>
-                    <div id="cartCouponsList" class="space-y-3"></div>
-                    <div id="cartNoCouponsMsg" class="hidden text-center py-3">
-                        <p class="text-gray-400 text-sm" id="cartNoCouponsText">No coupons available right now.</p>
-                    </div>
-                </div>
-                
-                <!-- ========================================== -->
-                <!-- MOVED: FREE DELIVERY RECOMMENDATION (নিচে সরানো হয়েছে) -->
-                <!-- ========================================== -->
-                <div id="cartRecommendationsSection" class="rounded-xl border-2 p-4 mt-4 hidden" style="background: linear-gradient(160deg, #ecfdf5 0%, #d1fae5 60%, #a7f3d0 100%); border-color: #6ee7b7;">
-                    <div class="flex items-start gap-2.5 mb-1">
-                        <div class="w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5 bg-primary">
-                            <i class="fas fa-truck-fast text-white text-[10px]"></i>
-                        </div>
-                        <div>
-                            <h2 class="font-bold text-[13px] text-green-900 leading-tight" id="cartRecTitle">Add this product with the same delivery charge!</h2>
-                            <p class="text-[10px] text-green-700 mt-0.5" id="cartRecSub">No extra shipping fees (0 TK)</p>
-                        </div>
-                    </div>
-                    <div id="cartRecommendationFirst"></div>
-                    <div id="cartSeeMoreBtnContainer" class="text-center mt-3">
-                        <button id="cartSeeMoreBtn" onclick="toggleCartRecommendations()" class="inline-flex items-center text-green-700 text-[11px] font-bold underline hover:text-green-900 transition">
-                            <i class="fas fa-chevron-down ml-1 text-[10px]"></i>
-                            <span id="cartSeeMoreText">See More</span>
-                        </button>
-                    </div>
-                    <div id="cartRecommendationMore" class="hidden space-y-2 mt-3"></div>
-                </div>
+            <div class="flex mt-4">
+                <input type="text" id="pageCouponCode" placeholder="Coupon Code" class="flex-1 px-3 py-2 border rounded-l-lg text-sm focus:outline-none focus:ring-1 focus:ring-primary">
+                <button onclick="handleApplyCouponFromPage()" class="bg-gray-800 text-white px-4 py-2 rounded-r-lg text-sm font-medium" data-i18n="apply">Apply</button>
+            </div>
+            <div id="pageCouponMessage" class="text-xs"></div>
+            <button onclick="proceedToCheckout()" class="w-full bg-primary text-white py-3 rounded-lg font-bold mt-2 hover:opacity-90 shadow-lg" data-i18n="checkout">Checkout</button>
+        </div>
+        
+        <!-- COUPONS: আলাদা div, summary এর বাইরে -->
+        <div id="cartCouponsSection" class="hidden mt-6">
+            <div class="cart-section-header">
+                <i class="fas fa-ticket-alt"></i>
+                <span data-i18n="available_coupons">Available Coupons</span>
+            </div>
+            <div class="cart-section-divider"></div>
+            <div id="cartCouponsList" class="space-y-3"></div>
+            <div id="cartNoCouponsMsg" class="hidden text-center py-4">
+                <p class="text-gray-400 text-sm" data-i18n="no_coupons">No coupons available right now.</p>
             </div>
         </div>
+        
+        <!-- RECOMMENDATIONS: আলাদা div, summary এর বাইরে -->
+        <div id="cartRecommendationsSection" class="hidden mt-6">
+            <div class="cart-section-header">
+                <i class="fas fa-truck-fast"></i>
+                <span id="cartRecTitle">Add this product with the same delivery charge!</span>
+            </div>
+            <div class="cart-section-divider"></div>
+            <div id="cartRecommendationFirst"></div>
+            <div id="cartSeeMoreBtnContainer" class="text-center mt-3">
+                <button id="cartSeeMoreBtn" onclick="toggleCartRecommendations()" class="inline-flex items-center text-green-700 text-[11px] font-bold underline hover:text-green-900 transition">
+                    <i class="fas fa-chevron-down ml-1 text-[10px]"></i>
+                    <span id="cartSeeMoreText">See More</span>
+                </button>
+            </div>
+            <div id="cartRecommendationMore" class="hidden space-y-2 mt-3"></div>
+        </div>
+    </div>
 </template>
 
     <template id="checkoutTemplate">
@@ -1521,7 +1577,9 @@ let lastPointsCartHash = '';   // শেষবার কোন কার্ট �
                 high_low: "Price: High to Low",
                 error_loading: "Failed to load orders.",
                 try_again: "Try Again",
-                no_orders_sub: "You haven't placed any orders yet."
+                no_orders_sub: "You haven't placed any orders yet.",
+                // ✅ এই লাইনটি যোগ করুন
+                available_coupons: "Available Coupons"
             },
             bn: {
                 home: "হোম", categories: "ক্যাটাগরি", message: "মেসেজ", cart: "কার্ট", account: "অ্যাকাউন্ট",
@@ -1654,7 +1712,9 @@ let lastPointsCartHash = '';   // শেষবার কোন কার্ট �
                 high_low: "দাম: বেশি থেকে কম",
                 error_loading: "অর্ডার লোড করতে ব্যর্থ হয়েছে।",
                 try_again: "আবার চেষ্টা করুন",
-                no_orders_sub: "আপনি এখনো কোনো অর্ডার করেননি।"
+                no_orders_sub: "আপনি এখনো কোনো অর্ডার করেননি।",
+                // ✅ এই লাইনটি যোগ করুন
+                available_coupons: "চলতি কুপন সমূহ"
             }
         };
         // ==========================================
@@ -4937,9 +4997,22 @@ function loadProductDetails(id) {
 function loadCartPage() {
     window.scrollTo(0, 0);
     loadTemplate('cartPageTemplate');
-    updateCartPageUI();
     
-    // এই ২ লাইন যোগ করুন
+    // ==========================================
+    // EMPTY STATE: কার্ট খালি হলে শুধু এই তিনটি দেখাবে
+    // ==========================================
+    if (appData.cart.length === 0) {
+        document.getElementById('cartPageItems').innerHTML = '';
+        document.getElementById('emptyCart').classList.remove('hidden');
+        document.getElementById('cartSummary').classList.add('hidden');
+    } else {
+        document.getElementById('emptyCart').classList.add('hidden');
+        updateCartPageUI();
+    }
+    
+    // ==========================================
+    // কুপন ও রিকমেন্ডেশন: সবসময় দেখাবে (কার্ট খালি থাকলেও)
+    // ==========================================
     renderCartCoupons();
     renderCartRecommendations();
 }
@@ -4971,7 +5044,18 @@ function tL(key) {
         product_discount:      { en: 'Product Discount', bn: 'পণ্য মূল্য ছাড়' },
         added_cart:            { en: 'Added to cart', bn: 'কার্টে যোগ করা হয়েছে' },
         validating:            { en: 'Validating...', bn: 'যাচাই হচ্ছে...' },
-        fill_all:              { en: 'Please fill all fields', bn: 'অনুগ্রহ করে সব তথ্য পূরণ করুন' }
+        fill_all:              { en: 'Please fill all fields', bn: 'অনুগ্রহ করে সব তথ্য পূরণ করুন' },
+        
+        // ==========================================
+        // NEW: DELIVERY DISCOUNT LABELS
+        // ==========================================
+        delivery_discount_label:    { en: 'Delivery Discount', bn: 'ডেলিভারি ছাড়' },
+        free_delivery_on_coupon:  { en: 'Free Delivery', bn: 'ফ্রি ডেলিভারি' },
+        save_taka:               { en: 'Save ৳', bn: '৳ সেভ' },
+        up_to:                   { en: 'up to', bn: 'পর্যন্ত' },
+        on_delivery:             { en: 'on delivery', bn: 'ডেলিভারিতে' },
+        plus_delivery:           { en: '+ Delivery', bn: '+ ডেলিভারি' },
+        // ==========================================
     };
     return (map[key] && map[key][lang]) || key;
 }
@@ -4998,9 +5082,6 @@ function renderCartCoupons() {
     
     const coupons = appData.coupons || [];
     
-    // ==========================================
-    // FILTER: শুধুমাত্র যেসব কুপনে ডেসক্রিপশন আছে সেগুলোই দেখাবে
-    // ==========================================
     const filteredCoupons = coupons.filter(coupon => {
         return coupon.description && coupon.description.trim() !== '';
     });
@@ -5014,67 +5095,51 @@ function renderCartCoupons() {
     listEl.innerHTML = '';
     noMsg.classList.add('hidden');
     
-    // হেডার ট্রান্সলেট
-    const ct = document.getElementById('cartCouponsTitle');
-    if(ct) ct.innerText = tL('available_coupons');
-    
-    // ==========================================
-    // filteredCoupons ব্যবহার করে রেন্ডার (পুরোনো coupons এর বদলে)
-    // ==========================================
     filteredCoupons.forEach(coupon => {
         const isApplied = appData.coupon && appData.coupon.code === coupon.couponcode;
         
+        // ---- PRODUCT DISCOUNT LABEL ----
         let discountLabel = '';
         if (coupon.type === 'flat') {
-            discountLabel = tL('flat') + ' ৳' + coupon.discountamount + ' ' + tL('off');
+            discountLabel = `<i class="fas fa-tag" style="font-size:8px"></i> ${tL('flat')} ৳${coupon.discountamount} ${tL('off')}`;
         } else if (coupon.type === 'percentage') {
-            discountLabel = coupon.discountamount + '% ' + tL('off');
+            discountLabel = `<i class="fas fa-tag" style="font-size:8px"></i> ${coupon.discountamount}% ${tL('off')}`;
+            if (coupon.maxdiscountamount > 0) {
+                discountLabel += ` <span style="color:#9ca3af;font-weight:400">(${tL('up_to')} ৳${coupon.maxdiscountamount})</span>`;
+            }
         }
         
-        const cardHtml = `
-            <div class="border ${isApplied ? 'border-green-300 bg-green-50/50' : 'border-gray-200'} rounded-lg p-3 hover:shadow-sm transition-all">
-                <div class="flex items-start justify-between gap-3">
-                    <div class="flex-1 min-w-0">
-                        <div class="font-mono text-[17px] font-extrabold tracking-widest py-1 px-2 rounded inline-block ${isApplied ? 'text-green-600 bg-green-100' : 'text-primary bg-green-50'}">${coupon.couponcode}</div>
-                        ${coupon.description ? `<p class="text-[11px] text-gray-400 mt-1.5 leading-relaxed line-clamp-2">${coupon.description}</p>` : ''}
-                        
-                        <div class="flex items-center gap-2.5 mt-2.5">
-                            <div class="flex items-center gap-1 text-[9px]">
-                                <span class="text-gray-400">${tL('min_spend')}:</span>
-                                <span class="font-bold text-gray-700">৳${coupon.minpurchase.toLocaleString()}</span>
-                            </div>
-                            <div class="w-px h-3 bg-gray-200"></div>
-                            <div class="flex items-center gap-1 text-[9px]">
-                                <span class="text-gray-400">${tL('max_discount')}:</span>
-                                <span class="font-bold text-gray-700">৳${coupon.maxdiscountamount.toLocaleString()}</span>
-                            </div>
-                            <div class="w-px h-3 bg-gray-200"></div>
-                            <div class="flex items-center gap-1 text-[9px]">
-                                <span class="text-gray-400">${tL('expires_on')}:</span>
-                                <span class="font-bold text-gray-700">${formatCouponDate(coupon.expirydate)}</span>
-                            </div>
-                        </div>
+        // ---- DELIVERY DISCOUNT LABEL ----
+        let deliveryHtml = '';
+        const hasFreeDelivery = coupon.freedelivery === 'yes';
+        const delDiscAmt = parseFloat(coupon.deliverydiscountamount) || 0;
+        
+        if (hasFreeDelivery && delDiscAmt > 0) {
+            deliveryHtml = `<div class="coupon-new-badge del-partial"><i class="fas fa-truck" style="font-size:8px"></i> ${tL('delivery_discount_label')}: -৳${delDiscAmt}</div>`;
+        } else if (hasFreeDelivery) {
+            deliveryHtml = `<div class="coupon-new-badge del-free"><i class="fas fa-truck-fast" style="font-size:8px"></i> ${tL('free_delivery_on_coupon')}</div>`;
+        }
+        
+        // ---- BUILD CARD ----
+        listEl.innerHTML += `
+            <div class="coupon-new-card ${isApplied ? 'applied' : ''}">
+                <div class="coupon-new-row1">
+                    <div class="coupon-new-code">${coupon.couponcode}</div>
+                    <div class="coupon-new-offers">
+                        <div class="coupon-new-badge disc">${discountLabel}</div>
+                        ${deliveryHtml}
                     </div>
-                    
-                    ${isApplied ? `
-                        <div class="shrink-0 flex items-center gap-1 bg-green-100 text-green-700 text-xs font-bold px-3 py-2 rounded-lg">
-                            <i class="fas fa-check-circle"></i> ${tL('coupon_applied')}
-                        </div>
-                    ` : `
-                        <button onclick="applyCouponFromCartCard('${coupon.couponcode}', this)" 
-                                class="shrink-0 bg-primary text-white text-[11px] font-bold px-4 py-2 rounded-lg hover:opacity-90 transition whitespace-nowrap shadow-sm">
-                            ${tL('apply_coupon_btn')}
-                        </button>
-                    `}
+                    <button class="coupon-new-apply" onclick="applyCouponFromCartCard('${coupon.couponcode}', this)">${tL('apply_coupon_btn')}</button>
+                    <div class="coupon-new-applied-badge"><i class="fas fa-check-circle"></i> Applied</div>
                 </div>
-                <div class="mt-2 inline-flex items-center gap-1 text-[9px] font-bold px-2 py-0.5 rounded ${isApplied ? 'text-green-600 bg-[#dcfce7]' : 'text-primary bg-[#ecfdf5]'}">
-                    <i class="fas fa-tag text-[8px]"></i>
-                    ${discountLabel}
+                <div class="coupon-new-row2">
+                    <span>Min: <b>৳${coupon.minpurchase.toLocaleString()}</b></span>
+                    <span>Max: <b>৳${coupon.maxdiscountamount.toLocaleString()}</b></span>
+                    <span>Exp: <b>${formatCouponDate(coupon.expirydate)}</b></span>
                 </div>
+                <div class="coupon-new-row3">${coupon.description}</div>
             </div>
         `;
-        
-        listEl.innerHTML += cardHtml;
     });
 }
 // ==========================================
@@ -5176,35 +5241,23 @@ function getRecommendationProducts() {
     return selected;
 }
 
-// ==========================================
-// RENDER RECOMMENDATION SECTION (UPDATED: HIDE WHEN NO SELECTION, EXCLUDE SELECTED ITEMS)
-// ==========================================
 let cartRecExpanded = false;
 let cartRecProducts = [];
 
 function renderCartRecommendations() {
     const section = document.getElementById('cartRecommendationsSection');
     
-    // ==========================================
-    // শর্ত ১: কার্ট সম্পূর্ণ খালি থাকলে দেখাবে না
-    // ==========================================
     if (!appData.cart || appData.cart.length === 0) {
         if(section) section.classList.add('hidden');
         return;
     }
     
-    // ==========================================
-    // শর্ত ২: কোনো আইটেম সিলেক্ট না থাকলে দেখাবে না
-    // ==========================================
     const selectedItems = appData.cart.filter(item => item.selected !== false);
     if (selectedItems.length === 0) {
         if(section) section.classList.add('hidden');
         return;
     }
     
-    // ==========================================
-    // শর্ত ৩: সিলেক্টেড আইটেমগুলোর ID বাদ দিয়ে রিকমেন্ডেশন তৈরি
-    // ==========================================
     const selectedIds = new Set(selectedItems.map(item => String(item.id)));
     
     const allProducts = appData.products || [];
@@ -5240,20 +5293,15 @@ function renderCartRecommendations() {
     if(section) section.classList.remove('hidden');
     cartRecExpanded = false;
     
-    // প্রথম প্রোডাক্ট
     document.getElementById('cartRecommendationFirst').innerHTML = createRecCard(cartRecProducts[0], 'cartRec1');
     
-    // See More বাটন রিসেট
     document.getElementById('cartSeeMoreBtnContainer').classList.remove('hidden');
     document.getElementById('cartRecommendationMore').classList.add('hidden');
     document.getElementById('cartSeeMoreText').innerText = tL('see_more');
     document.querySelector('#cartSeeMoreBtn i').className = 'fas fa-chevron-down ml-1 text-[10px]';
     
-    // হেডার ট্রান্সলেট
     const rt = document.getElementById('cartRecTitle');
     if(rt) rt.innerText = tL('free_delivery_title');
-    const rs = document.getElementById('cartRecSub');
-    if(rs) rs.innerText = tL('free_delivery_sub');
 }
 
 function toggleCartRecommendations() {
@@ -5263,7 +5311,6 @@ function toggleCartRecommendations() {
     const iconEl = document.querySelector('#cartSeeMoreBtn i');
     
     if (cartRecExpanded) {
-        // বাকি ৯টি রেন্ডার
         moreContainer.innerHTML = '';
         for (let i = 1; i < cartRecProducts.length; i++) {
             moreContainer.innerHTML += createRecCard(cartRecProducts[i], 'cartRecM_' + i);
@@ -5286,41 +5333,29 @@ function createRecCard(product, prefix) {
     const isSelected = appData.cart.some(item => item.id == product.id && item.selected !== false);
     
     return `
-        <div class="bg-white rounded-xl p-3 shadow-sm flex gap-3 items-center border border-green-200">
-            <div onclick="navigateTo('#product?id=${product.id}')" class="w-[60px] h-[60px] shrink-0 rounded-lg overflow-hidden border border-gray-200 bg-gray-100 cursor-pointer hover:scale-105 transition-transform duration-200">
-                <img src="${product.imagemain}" class="w-full h-full object-cover" loading="lazy" alt="${product.name}" onerror="this.src='https://via.placeholder.com/64?text=No+Img'">
-            </div>
-            <div class="flex-1 min-w-0">
-                <h4 onclick="navigateTo('#product?id=${product.id}')" class="text-[12px] font-bold text-gray-800 truncate cursor-pointer hover:text-primary hover:underline transition-colors leading-tight">${product.name}</h4>
-                <p class="text-[9px] text-gray-400 mt-0.5 font-medium">${toCategoryTitleCase(mainCat)}</p>
-                <div class="flex items-center gap-1.5 mt-1.5">
-                    <span class="text-[14px] font-bold text-primary">৳${price.toFixed(0)}</span>
-                    ${savings > 0 ? `<span class="text-[11px] text-gray-400 line-through">৳${originalPrice.toFixed(0)}</span><span class="text-[9px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded font-bold">Save ৳${savings.toFixed(0)}</span>` : ''}
+        <div class="rec-new-card">
+            <img src="${product.imagemain}" class="rec-new-img" loading="lazy" alt="${product.name}" onerror="this.src='https://via.placeholder.com/54?text=Img'">
+            <div class="rec-new-info">
+                <div class="rec-new-name">${product.name}</div>
+                <div class="rec-new-cat">${toCategoryTitleCase(mainCat)}</div>
+                <div class="rec-new-price-row">
+                    <span class="rec-new-price">৳${price.toFixed(0)}</span>
+                    ${savings > 0 ? `<span class="rec-new-old">৳${originalPrice.toFixed(0)}</span><span class="rec-new-save">Save ৳${savings.toFixed(0)}</span>` : ''}
                 </div>
-                <div class="flex items-center gap-1 mt-1">
-                    <i class="fas fa-truck-fast text-green-500 text-[8px]"></i>
-                    <span class="text-[9px] text-green-600 font-semibold">${tL('free_delivery_sub')}</span>
-                </div>
+                <div class="rec-new-free"><i class="fas fa-truck-fast" style="font-size:8px"></i> ${tL('free_delivery_sub')}</div>
             </div>
-            <div id="${prefix}_btn_${product.id}" class="shrink-0">
+            <div id="${prefix}_btn_${product.id}">
                 ${isSelected ? `
-                    <span class="bg-green-100 text-green-700 text-[11px] font-bold px-3 py-2.5 rounded-lg whitespace-nowrap">
-                        <i class="fas fa-check mr-1"></i>${tL('already_added')}
-                    </span>
+                    <span class="rec-new-btn added"><i class="fas fa-check" style="margin-right:4px"></i>${tL('already_added')}</span>
                 ` : `
-                    <button onclick="addRecToCart('${product.id}')" 
-                            class="shrink-0 bg-primary text-white text-[11px] font-bold px-3.5 py-2.5 rounded-lg hover:opacity-90 transition whitespace-nowrap shadow-sm">
-                        ${tL('add_item')}
-                    </button>
+                    <button onclick="addRecToCart('${product.id}')" class="rec-new-btn">${tL('add_item')}</button>
                 `}
             </div>
         </div>
     `;
 }
 
-// ==========================================
-// ADD RECOMMENDATION TO CART
-// ==========================================
+// ✅ ফিক্সড কোড
 function addRecToCart(productId) {
     const product = appData.products.find(p => p.id == productId);
     if (!product) return;
@@ -5345,12 +5380,10 @@ function addRecToCart(productId) {
     localStorage.setItem('cart', JSON.stringify(appData.cart));
     updateCartBadge();
     updateOrderSummary();
-    updateCartPageUI();
     
-    // সব ম্যাচিং বাটন আপডেট
-    document.querySelectorAll(`[id$="_btn_${productId}"]`).forEach(el => {
-        el.innerHTML = `<span class="bg-green-100 text-green-700 text-[11px] font-bold px-3 py-2.5 rounded-lg whitespace-nowrap"><i class="fas fa-check mr-1"></i>${tL('already_added')}</span>`;
-    });
+    // ✅ শুধু UI আপডেট করুন, পুরো পেজ রিলোড করবেন না
+    if(document.getElementById('cartPageItems')) updateCartPageUI();
+    if(document.getElementById('cartItems')) updateCartSidebarUI();
     
     const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 1500 });
     Toast.fire({ icon: 'success', title: tL('added_cart') });
