@@ -3390,20 +3390,22 @@ window.addEventListener('scroll', () => {
         }
     }
 }, { passive: true });
-        // ================= COUPON RESET LOGIC =================
-        function resetCouponLogic() {
-            if (appData.coupon) {
-                appData.coupon = null;
-                localStorage.setItem('coupon', JSON.stringify(null));
-                const sidebarInput = document.getElementById('couponCode');
-                const pageInput = document.getElementById('pageCouponCode');
-                if(sidebarInput) sidebarInput.value = '';
-                if(pageInput) pageInput.value = '';
-                const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 2000 });
-                Toast.fire({ icon: 'info', title: t('coupon_removed') });
-                updateOrderSummary();
-            }
-        }
+function resetCouponLogic() {
+    if (appData.coupon) {
+        appData.coupon = null;
+        localStorage.setItem('coupon', JSON.stringify(null));
+        const sidebarInput = document.getElementById('couponCode');
+        const pageInput = document.getElementById('pageCouponCode');
+        if(sidebarInput) sidebarInput.value = '';
+        if(pageInput) pageInput.value = '';
+        const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 2000 });
+        Toast.fire({ icon: 'info', title: t('coupon_removed') });
+        updateOrderSummary();
+        
+        // ✅ এই ১ লাইনটি যোগ করুন — কুপন কার্ডের UI আপডেট হবে
+        if (document.getElementById('cartCouponsSection')) renderCartCoupons();
+    }
+}
 
 function toggleSelectItem(idx) {
     appData.cart[idx].selected = appData.cart[idx].selected === false ? true : false;
@@ -5354,8 +5356,7 @@ function createRecCard(product, prefix) {
         </div>
     `;
 }
-
-// ✅ ফিক্সড কোড
+// ✅ ফিক্সড কোড — পুরো ফাংশনটি রিপ্লেস করে দিন
 function addRecToCart(productId) {
     const product = appData.products.find(p => p.id == productId);
     if (!product) return;
@@ -5366,6 +5367,16 @@ function addRecToCart(productId) {
     if (existing) {
         existing.selected = true;
     } else {
+        // ✅ ১. কার্ট লিমিট চেক — সর্বোচ্চ ৫টি আইটেম
+        if (appData.cart.length >= 5) {
+            return Swal.fire({
+                icon: 'warning',
+                title: t('limit'),
+                text: t('cart_full'),
+                confirmButtonColor: appData.settings.themecolor || '#2563eb'
+            });
+        }
+        
         const price = parseFloat(product.discountprice || product.price);
         appData.cart.push({
             ...product,
@@ -5377,13 +5388,20 @@ function addRecToCart(productId) {
         });
     }
     
+    // ✅ ২. কুপন রিসেট — কার্টে পরিবর্তন হলে কুপন মুছে যাবে
+    resetCouponLogic();
+    // ✅ কুপন কার্ডের "Applied" ব্যাজও আপডেট হবে
+    if (document.getElementById('cartCouponsSection')) renderCartCoupons();
+    
     localStorage.setItem('cart', JSON.stringify(appData.cart));
     updateCartBadge();
     updateOrderSummary();
     
-    // ✅ শুধু UI আপডেট করুন, পুরো পেজ রিলোড করবেন না
-    if(document.getElementById('cartPageItems')) updateCartPageUI();
-    if(document.getElementById('cartItems')) updateCartSidebarUI();
+    if (document.getElementById('cartPageItems')) updateCartPageUI();
+    if (document.getElementById('cartItems')) updateCartSidebarUI();
+    
+    // ✅ রিকমেন্ডেশন UI আপডেট (Added ব্যাজ দেখানোর জন্য)
+    if (document.getElementById('cartRecommendationsSection')) renderCartRecommendations();
     
     const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 1500 });
     Toast.fire({ icon: 'success', title: tL('added_cart') });
