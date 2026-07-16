@@ -3418,7 +3418,95 @@ function toggleSelectItem(idx) {
     // ==========================================
     if(document.getElementById('cartRecommendationsSection')) renderCartRecommendations();
 }
+// ==========================================
+// NEW: LOCAL COUPON VALIDATION LOGIC
+// ==========================================
+function validateCouponLocally(rawCode, selectedItems) {
+    if (!appData.coupons || appData.coupons.length === 0) {
+        return { success: false, message: 'No coupons available right now.' };
+    }
 
+    // ১. কুপন কোড ম্যাচিং চেক (Case-Insensitive)
+    const coupon = appData.coupons.find(c => c.couponcode && c.couponcode.toLowerCase() === rawCode.toLowerCase());
+    if (!coupon) {
+        return { success: false, message: 'Invalid Coupon Code!' };
+    }
+
+    // ২. এক্সপায়ারি ডেট চেক
+    if (coupon.expirydate) {
+        const now = new Date();
+        // সময়টি শেষ দিনের রাত ১২টা পর্যন্ত বিবেচনা করার জন্য একদিন যোগ করা হয়েছে
+        const expiry = new Date(coupon.expirydate);
+        expiry.setDate(expiry.getDate() + 1); 
+        
+        if (now > expiry) {
+            return { success: false, message: 'This coupon has expired.' };
+        }
+    }
+
+    // ৩. সিলেক্টেড আইটেমের সাবটোটাল বের করা
+    const subTotal = selectedItems.reduce((sum, item) => sum + ((item.price) * (item.quantity || item.qty)), 0);
+
+    // ৪. মিনিমাম পারচেজ চেক
+    const minPurchase = parseFloat(coupon.minpurchase) || 0;
+    if (subTotal < minPurchase) {
+        const msg = appData.language === 'bn' 
+            ? `এই কুপন ব্যবহার করতে নূন্যতম ৳${minPurchase} কেনাকাটা করতে হবে।` 
+            : `Minimum purchase of ৳${minPurchase} is required for this coupon.`;
+        return { success: false, message: msg };
+    }
+
+    // ৫. ডিসকাউন্ট ক্যালকুলেশন (Flat / Percentage)
+    let discountAmount = 0;
+    if (coupon.type === 'flat') {
+        discountAmount = parseFloat(coupon.discountamount) || 0;
+    } else if (coupon.type === 'percentage') {
+        const percentage = parseFloat(coupon.discountamount) || 0;
+        discountAmount = (subTotal * percentage) / 100;
+        const maxDisc = parseFloat(coupon.maxdiscountamount) || 0;
+        if (maxDisc > 0 && discountAmount > maxDisc) {
+            discountAmount = maxDisc;
+        }
+    }
+
+    // ৬. ডেলিভারি ডিসকাউন্ট চেক
+    let isFreeDelivery = coupon.freedelivery === 'yes';
+    let deliveryDiscountAmount = parseFloat(coupon.deliverydiscountamount) || 0;
+
+    // ৭. ক্যাটাগরি রেস্ট্রিকশন চেক (যদি লোকাল ডাটায় থাকে)
+    let isAllCategory = true;
+    let applicableCategories = [];
+    let excludedCategories = [];
+
+    try {
+        if (coupon.applicablecategories) {
+            applicableCategories = typeof coupon.applicablecategories === 'string' 
+                ? safeJsonParse(coupon.applicablecategories) 
+                : (Array.isArray(coupon.applicablecategories) ? coupon.applicablecategories : []);
+            if (applicableCategories.length > 0) isAllCategory = false;
+        }
+        if (coupon.excludedcategories) {
+            excludedCategories = typeof coupon.excludedcategories === 'string' 
+                ? safeJsonParse(coupon.excludedcategories) 
+                : (Array.isArray(coupon.excludedcategories) ? coupon.excludedcategories : []);
+        }
+    } catch (e) {
+        console.warn("Could not parse local coupon categories, assuming all categories.");
+    }
+
+    // সার্ভার রেসপন্সের মতো একই ফরম্যাটে রিটার্ন করা হচ্ছে 
+    // যাতে বাকি কোডে কোনো পরিবর্তন করতে না হয়
+    return {
+        success: true,
+        couponCode: coupon.couponcode,
+        discount: discountAmount,
+        isFreeDelivery: isFreeDelivery,
+        isAllCategory: isAllCategory,
+        applicableCategoriesArray: applicableCategories,
+        excludedCategoriesArray: excludedCategories,
+        deliveryDiscountAmount: deliveryDiscountAmount
+    };
+}
 // ================= COUPON & CALCULATION LOGIC (UPDATED FOR MULTI-CATEGORY & PARTIAL DELIVERY DISCOUNT) =================
 function updateOrderSummary() {
     const selectedItems = appData.cart.filter(item => item.selected !== false);
@@ -3721,18 +3809,7 @@ async function handleApplyCoupon() {
     
     if (!rawCode) return Swal.fire('Warning', t('fill_all'), 'warning');
 
-    // ==========================================================
-    // NEW: FRONTEND VALIDATION (REGEX)
-    // ==========================================================
-    const couponRegex = /^(?=(.*[a-zA-Z]){3,})(?=.*\d)[a-zA-Z0-9]+$/;
-
-    if (!couponRegex.test(rawCode)) {
-        return Swal.fire({
-            icon: 'warning', 
-            title: 'Invalid Coupon', 
-            text: 'Invalid Coupon Code!' 
-        });
-    }
+    // ❌ রেগেক্স চেক রিমুভ করা হয়েছে (লোকালি ম্যাচিংয়ে এটার দরকার নেই)
 
     inputField.value = t('validating');
 
@@ -3744,12 +3821,10 @@ async function handleApplyCoupon() {
             return Swal.fire('Warning', 'Please select at least one item to apply coupon', 'warning');
         }
 
-        const response = await new Promise((resolve, reject) => {
-            google.script.run.withSuccessHandler(resolve).withFailureHandler(reject).validateCoupon(rawCode, appData.user?.userid, selectedItems);
-        });
+        // লোকাল ফাংশন কল
+        const response = validateCouponLocally(rawCode, selectedItems);
 
         if (response.success) {
-            // Store the full object
             appData.coupon = { 
                 code: response.couponCode, 
                 discount: response.discount, 
@@ -3760,9 +3835,6 @@ async function handleApplyCoupon() {
                 deliveryDiscountAmount: response.deliveryDiscountAmount || 0
             };
             
-            // ==========================================
-            // NEW: Build discount message (Product + Delivery)
-            // ==========================================
             let msgHtml = `<div style="text-align:left; line-height:1.8;">`;
             msgHtml += `<span style="color:#16a34a;font-weight:700;">${tL('product_discount')}:</span> <span style="font-size:18px;font-weight:800;color:#16a34a;">৳${response.discount.toFixed(2)}</span>`;
             
@@ -3796,8 +3868,8 @@ async function handleApplyCoupon() {
     }
 }
 
-        function handleApplyCouponFromPage() { handleApplyCoupon(); }
-        function removeCoupon() { appData.coupon = null; updateOrderSummary(); }
+function handleApplyCouponFromPage() { handleApplyCoupon(); }
+function removeCoupon() { appData.coupon = null; updateOrderSummary(); }
 
         // ================= UI HELPERS =================
         function updateCartBadge() {
@@ -5161,9 +5233,8 @@ async function applyCouponFromCartCard(code, btnElement) {
     }
     
     try {
-        const response = await new Promise((resolve, reject) => {
-            google.script.run.withSuccessHandler(resolve).withFailureHandler(reject).validateCoupon(code, appData.user?.userid, selectedItems);
-        });
+        // ❌ রেগেক্স চেক রিমুভ করা হয়েছে
+        const response = validateCouponLocally(code, selectedItems);
         
         if (response.success) {
             appData.coupon = { 
@@ -5177,15 +5248,11 @@ async function applyCouponFromCartCard(code, btnElement) {
             };
             localStorage.setItem('coupon', JSON.stringify(appData.coupon));
             
-            // FIX: পেজের কুপন ইনপুট ফিল্ড আপডেট করা হচ্ছে
             const pageCouponInput = document.getElementById('pageCouponCode');
             if(pageCouponInput) pageCouponInput.value = response.couponCode;
             const sidebarCouponInput = document.getElementById('couponCode');
             if(sidebarCouponInput) sidebarCouponInput.value = '';
             
-            // ==========================================
-            // NEW: Build discount message (Product + Delivery)
-            // ==========================================
             let msgHtml = `<div style="text-align:left; line-height:1.8;">`;
             msgHtml += `<span style="color:#16a34a;font-weight:700;">${tL('product_discount')}:</span> <span style="font-size:18px;font-weight:800;color:#16a34a;">৳${response.discount.toFixed(2)}</span>`;
             
@@ -5217,7 +5284,6 @@ async function applyCouponFromCartCard(code, btnElement) {
         btnElement.disabled = false;
     }
 }
-
 // ==========================================
 // GET RECOMMENDATION PRODUCTS
 // ==========================================
