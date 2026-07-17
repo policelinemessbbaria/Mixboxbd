@@ -492,29 +492,36 @@ src="https://www.facebook.com/tr?id=1526489362525698&ev=PageView&noscript=1"
     <div id="app" class="hidden min-h-screen flex flex-col relative">
         
         <!-- Header -->
-        <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-sm shadow-sm border-b shrink-0">
-            <div class="container mx-auto px-4 py-3 flex items-center justify-between">
-                <div onclick="navigateTo('#home')" class="flex items-center space-x-3 overflow-hidden cursor-pointer">
-<div onclick="navigateTo('#home')" class="flex items-center cursor-pointer">
-  
-  <!-- Bigger Logo: src খালি রাখা হয়েছে, JS লোড হলে সেট হবে -->
-  <img id="siteLogo" 
-       src="https://via.placeholder.com/150" 
-       alt="Logo" 
-       class="h-12 w-auto object-contain shrink-0" 
-       style="mix-blend-mode: multiply;">
-  
+<header class="sticky top-0 z-40 bg-white shadow-sm shrink-0">
+<div class="container mx-auto px-4 py-2 relative flex items-center justify-center">
+    
+    <!-- ========================================== -->
+    <!-- বাম পাশের আইকন (z-10 যোগ করা হয়েছে) -->
+    <!-- ========================================== -->
+    <div class="absolute left-4 z-10 flex items-center space-x-2">
+        <!-- অর্ডার ট্র্যাকিং আইকন -->
+        <button onclick="handleTrackOrder()" class="text-gray-600 hover:text-primary transition" title="Track Order">
+            <i class="fas fa-route text-lg"></i>
+        </button>
+        
+        <!-- ল্যাঙ্গুয়েজ টগল বাটন -->
+        <button onclick="changeLanguage()" id="headerLangBtn" class="text-[11px] font-bold border border-gray-300 rounded-md px-2 py-0.5 hover:bg-gray-50 transition text-gray-700">
+            EN
+        </button>
+    </div>
+    <!-- ========================================== -->
+
+    <!-- লোগো (মাঝখানে) -->
+    <div onclick="navigateTo('#home')" class="flex items-center cursor-pointer max-w-[60%]">
+        <img id="siteLogo" src="https://via.placeholder.com/150" alt="Logo" class="h-12 w-auto object-contain shrink-0 mx-auto" style="mix-blend-mode: multiply;">
+    </div>
+    
+    <!-- ডান পাশের আইকন (z-10 যোগ করা হয়েছে) -->
+    <div class="absolute right-4 z-10 flex items-center space-x-4">
+        <button onclick="toggleFilter()" class="text-gray-600 hover:text-primary transition"><i class="fas fa-filter text-lg"></i></button>
+        <button onclick="toggleSearch()" class="text-gray-600 hover:text-primary transition"><i class="fas fa-search text-lg"></i></button>
+    </div>
 </div>
-<!--<h1 id="siteName" class="text-xl text-primary truncate" style="font-family: 'Bungee', cursive; opacity: 0;">
-</h1>-->
-                </div>
-                <div class="flex items-center space-x-4">
-                    <!-- NEW: Filter Icon -->
-                    <button onclick="toggleFilter()" class="text-gray-600 hover:text-primary transition"><i class="fas fa-filter text-lg"></i></button>
-                    <!-- Search Icon -->
-                    <button onclick="toggleSearch()" class="text-gray-600 hover:text-primary transition"><i class="fas fa-search text-lg"></i></button>
-                </div>
-            </div>
             
             <!-- NEW SEARCH BAR SNIPPET -->
             <div id="searchBar" class="hidden border-t bg-white px-4 py-2 animate-fade-in absolute top-14 left-0 right-0 shadow-lg z-50">
@@ -532,7 +539,7 @@ src="https://www.facebook.com/tr?id=1526489362525698&ev=PageView&noscript=1"
         <main id="content" class="flex-1 container mx-auto px-4 py-4"></main>
         
         <!-- Bottom Nav -->
-        <nav class="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg z-40">
+        <nav class="fixed bottom-0 left-0 right-0 bg-white shadow-sm z-40">
             <div class="flex justify-around items-center h-16">
                 <button onclick="navigateTo('#home')" id="nav-home" class="flex flex-col items-center justify-center w-full text-gray-500 transition-all duration-200"><i class="fas fa-home text-xl mb-1"></i><span class="text-[10px] font-medium">Home</span></button>
                 <button onclick="navigateTo('#categories')" id="nav-categories" class="flex flex-col items-center justify-center w-full text-gray-500 transition-all duration-200"><i class="fas fa-th-large text-xl mb-1"></i><span class="text-[10px] font-medium">Categories</span></button>
@@ -1983,10 +1990,17 @@ function safeJsonParse(jsonString) {
                 document.querySelectorAll('[data-placeholder-ph]').forEach(el => {
                     el.placeholder = t(el.getAttribute('data-placeholder-ph'));
                 });
+// ==========================================
+                // নতুন: হেডারের ল্যাঙ্গুয়েজ বাটন আপডেট
+                // ==========================================
+                const headerLangBtn = document.getElementById('headerLangBtn');
+                if(headerLangBtn) {
+                    headerLangBtn.innerText = appData.language === 'bn' ? 'বাং' : 'EN';
+                }
+                // ==========================================
 
             } catch(e) {}
         }
-
 document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     // FIX: SCROLL RESTORATION DISABLE
@@ -7365,3 +7379,4 @@ async function trackCAPI(eventName, customData, eventId) {
     </script>
 </body>
 </html>
+cuon reset ui er pore 
