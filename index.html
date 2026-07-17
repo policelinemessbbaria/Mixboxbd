@@ -5178,19 +5178,13 @@ function formatCouponDate(dateStr) {
     } catch(e) { return 'N/A'; }
 }
 
-// ==========================================
-// RENDER CART COUPONS
-// ==========================================
 function renderCartCoupons() {
     const section = document.getElementById('cartCouponsSection');
     const listEl = document.getElementById('cartCouponsList');
     const noMsg = document.getElementById('cartNoCouponsMsg');
-    // হেডার টেক্সট চেঞ্জ করার জন্য স্প্যানটি সিলেক্ট করা হচ্ছে
     const headerTextEl = document.querySelector('#cartCouponsSection .cart-section-header span');
     
     const coupons = appData.coupons || [];
-    
-    // ডেসক্রিপশন আছে এমন কুপনগুলো ফিল্টার করা হচ্ছে
     const filteredCoupons = coupons.filter(coupon => coupon.description && coupon.description.trim() !== '');
     
     if (!filteredCoupons || filteredCoupons.length === 0) {
@@ -5203,47 +5197,56 @@ function renderCartCoupons() {
     noMsg.classList.add('hidden');
 
     // ==========================================
-    // নতুন লজিক: লগইন ভিত্তিক কুপন স্প্লিট
+    // VIP কুপন লজিক (সেফগার্ড সহ)
     // ==========================================
     const isLoggedIn = appData.user && appData.user.fullname;
     let regularCoupons = [];
-    let specialCoupon = null;
+    let specialCoupons = [];
+    
+    // যতগুলো VIP করতে চান সেই নম্বর দিন
+    const vipCount = 2; 
 
     if (isLoggedIn) {
-        // লগইন থাকলে: প্রথম কুপনটি = স্পেশাল, বাকিগুলো = সাধারণ
-        specialCoupon = filteredCoupons[0];
-        regularCoupons = filteredCoupons.slice(1);
-
-if (headerTextEl) {
-    const displayName = appData.user.fullname.split(' ').slice(0, 2).join(' ');
-    
-    // নামটিকে স্প্যান দিয়ে ডায়নামিক থিম কালারে মুড়ে নেওয়া হচ্ছে
-    const coloredName = `<span style="color: var(--primary-color); font-weight: 800;">${displayName}</span>`;
-    
-    // এখানে innerHTML ব্যবহার করা হয়েছে
-    headerTextEl.innerHTML = appData.language === 'bn' 
-        ? `${coloredName}, আপনার জন্য স্পেশাল কুপন সমূহ ✨` 
-        : `${coloredName}, Special Coupons for You! ✨`;
-}
+        // লগইন থাকলে
+        if (filteredCoupons.length > vipCount) {
+            // কুপন যথেষ্ট আছে → VIP + সাধারণ স্প্লিট
+            specialCoupons = filteredCoupons.slice(0, vipCount);
+            regularCoupons = filteredCoupons.slice(vipCount);
+            
+            const displayName = appData.user.fullname.split(' ').slice(0, 2).join(' ');
+            const coloredName = `<span style="color: var(--primary-color); font-weight: 800;">${displayName}</span>`;
+            headerTextEl.innerHTML = appData.language === 'bn' 
+                ? `${coloredName}, আপনার জন্য স্পেশাল কুপন সমূহ ✨` 
+                : `${coloredName}, Special Coupons for You! ✨`;
+        } else {
+            // কুপন কম আছে (যেমন: ৩টি আছে কিন্তু vipCount=3)
+            // সবকে সাধারণ হিসেবে দেখাবো, VIP স্প্লিট করবো না
+            regularCoupons = filteredCoupons;
+        }
     } else {
-        // লগইন না থাকলে: প্রথম কুপন বাদ, বাকিগুলো দেখাবে
-        regularCoupons = filteredCoupons.slice(1);
-        // হেডার টেক্সট ডিফল্ট থাকবে (updateUIText দিয়ে যা সেট হয়)
+        // লগইন না থাকলে
+        if (filteredCoupons.length > vipCount) {
+            // কুপন যথেষ্ট আছে → প্রথম কয়েকটি বাদ
+            regularCoupons = filteredCoupons.slice(vipCount);
+        } else {
+            // কুপন কম আছে → সবকেই দেখাবো (ফাঁকা পেজ এড়াতে)
+            regularCoupons = filteredCoupons;
+        }
     }
     // ==========================================
 
-    // স্পেশাল কুপন রেন্ডার (যদি থাকে)
-    if (specialCoupon) {
-        listEl.innerHTML += generateCouponHTML(specialCoupon, true);
-    }
+    // স্পেশাল কুপন রেন্ডার
+    specialCoupons.forEach(coupon => {
+        listEl.innerHTML += generateCouponHTML(coupon, true);
+    });
 
     // সাধারণ কুপন রেন্ডার
     regularCoupons.forEach(coupon => {
         listEl.innerHTML += generateCouponHTML(coupon, false);
     });
 
-    // যদি কোনো সাধারণ কুপন না থাকে এবং স্পেশালও না থাকে (অত্যন্ত বিরল ক্ষেত্র)
-    if (regularCoupons.length === 0 && !specialCoupon) {
+    // দুটোই ফাঁকা হলে সেকশন লুকাবো
+    if (regularCoupons.length === 0 && specialCoupons.length === 0) {
         if(section) section.classList.add('hidden');
     }
 }
