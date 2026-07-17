@@ -318,6 +318,28 @@ src="https://www.facebook.com/tr?id=1526489362525698&ev=PageView&noscript=1"
    UPDATED: COUPON CARD - Locked Left & Right
    ========================================== */
 .coupon-new-card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:11px 13px;box-shadow:0 2px 8px rgba(0,0,0,.04);margin-bottom:10px;transition:box-shadow .2s}
+/* ==========================================
+   VIP / SPECIAL COUPON STYLE
+   ========================================== */
+.coupon-vip-card {
+    border: 2px solid #f59e0b !important; /* Golden Border */
+    background: linear-gradient(135deg, #fffbeb 0%, #fff 100%) !important;
+    position: relative;
+    overflow: hidden;
+}
+.coupon-vip-card::before {
+    content: 'for you';
+    position: absolute;
+    top: 10px;
+    right: -25px;
+    background: #f59e0b;
+    color: white;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 2px 30px;
+    transform: rotate(45deg);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
 .coupon-new-card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}
 
 /* Row 1: Absolute alignment (Code Left, Button Right) */
@@ -5163,12 +5185,13 @@ function renderCartCoupons() {
     const section = document.getElementById('cartCouponsSection');
     const listEl = document.getElementById('cartCouponsList');
     const noMsg = document.getElementById('cartNoCouponsMsg');
+    // হেডার টেক্সট চেঞ্জ করার জন্য স্প্যানটি সিলেক্ট করা হচ্ছে
+    const headerTextEl = document.querySelector('#cartCouponsSection .cart-section-header span');
     
     const coupons = appData.coupons || [];
     
-    const filteredCoupons = coupons.filter(coupon => {
-        return coupon.description && coupon.description.trim() !== '';
-    });
+    // ডেসক্রিপশন আছে এমন কুপনগুলো ফিল্টার করা হচ্ছে
+    const filteredCoupons = coupons.filter(coupon => coupon.description && coupon.description.trim() !== '');
     
     if (!filteredCoupons || filteredCoupons.length === 0) {
         if(section) section.classList.add('hidden');
@@ -5178,53 +5201,104 @@ function renderCartCoupons() {
     if(section) section.classList.remove('hidden');
     listEl.innerHTML = '';
     noMsg.classList.add('hidden');
+
+    // ==========================================
+    // নতুন লজিক: লগইন ভিত্তিক কুপন স্প্লিট
+    // ==========================================
+    const isLoggedIn = appData.user && appData.user.fullname;
+    let regularCoupons = [];
+    let specialCoupon = null;
+
+    if (isLoggedIn) {
+        // লগইন থাকলে: প্রথম কুপনটি = স্পেশাল, বাকিগুলো = সাধারণ
+        specialCoupon = filteredCoupons[0];
+        regularCoupons = filteredCoupons.slice(1);
+
+if (headerTextEl) {
+    const displayName = appData.user.fullname.split(' ').slice(0, 2).join(' ');
     
-    filteredCoupons.forEach(coupon => {
-        const isApplied = appData.coupon && appData.coupon.code === coupon.couponcode;
-        
-        // ---- PRODUCT DISCOUNT LABEL ----
-        let discountLabel = '';
-        if (coupon.type === 'flat') {
-            discountLabel = `<i class="fas fa-tag" style="font-size:8px"></i> ${tL('flat')} ৳${coupon.discountamount} ${tL('off')}`;
-        } else if (coupon.type === 'percentage') {
-            discountLabel = `<i class="fas fa-tag" style="font-size:8px"></i> ${coupon.discountamount}% ${tL('off')}`;
-            if (coupon.maxdiscountamount > 0) {
-                discountLabel += ` <span style="color:#9ca3af;font-weight:400">(${tL('up_to')} ৳${coupon.maxdiscountamount})</span>`;
-            }
-        }
-        
-        // ---- DELIVERY DISCOUNT LABEL ----
-        let deliveryHtml = '';
-        const hasFreeDelivery = coupon.freedelivery === 'yes';
-        const delDiscAmt = parseFloat(coupon.deliverydiscountamount) || 0;
-        
-        if (hasFreeDelivery && delDiscAmt > 0) {
-            deliveryHtml = `<div class="coupon-new-badge del-partial"><i class="fas fa-truck" style="font-size:8px"></i> ${tL('delivery_discount_label')}: -৳${delDiscAmt}</div>`;
-        } else if (hasFreeDelivery) {
-            deliveryHtml = `<div class="coupon-new-badge del-free"><i class="fas fa-truck-fast" style="font-size:8px"></i> ${tL('free_delivery_on_coupon')}</div>`;
-        }
-        
-        // ---- BUILD CARD ----
-        listEl.innerHTML += `
-            <div class="coupon-new-card ${isApplied ? 'applied' : ''}">
-                <div class="coupon-new-row1">
-                    <div class="coupon-new-code">${coupon.couponcode}</div>
-                    <div class="coupon-new-offers">
-                        <div class="coupon-new-badge disc">${discountLabel}</div>
-                        ${deliveryHtml}
-                    </div>
-                    <button class="coupon-new-apply" onclick="applyCouponFromCartCard('${coupon.couponcode}', this)">${tL('apply_coupon_btn')}</button>
-                    <div class="coupon-new-applied-badge"><i class="fas fa-check-circle"></i> Applied</div>
-                </div>
-                <div class="coupon-new-row2">
-                    <span>Min: <b>৳${coupon.minpurchase.toLocaleString()}</b></span>
-                    <span>Max: <b>৳${coupon.maxdiscountamount.toLocaleString()}</b></span>
-                    <span>Exp: <b>${formatCouponDate(coupon.expirydate)}</b></span>
-                </div>
-                <div class="coupon-new-row3">${coupon.description}</div>
-            </div>
-        `;
+    // নামটিকে স্প্যান দিয়ে ডায়নামিক থিম কালারে মুড়ে নেওয়া হচ্ছে
+    const coloredName = `<span style="color: var(--primary-color); font-weight: 800;">${displayName}</span>`;
+    
+    // এখানে innerHTML ব্যবহার করা হয়েছে
+    headerTextEl.innerHTML = appData.language === 'bn' 
+        ? `${coloredName}, আপনার জন্য স্পেশাল কুপন সমূহ ✨` 
+        : `${coloredName}, Special Coupons for You! ✨`;
+}
+    } else {
+        // লগইন না থাকলে: প্রথম কুপন বাদ, বাকিগুলো দেখাবে
+        regularCoupons = filteredCoupons.slice(1);
+        // হেডার টেক্সট ডিফল্ট থাকবে (updateUIText দিয়ে যা সেট হয়)
+    }
+    // ==========================================
+
+    // স্পেশাল কুপন রেন্ডার (যদি থাকে)
+    if (specialCoupon) {
+        listEl.innerHTML += generateCouponHTML(specialCoupon, true);
+    }
+
+    // সাধারণ কুপন রেন্ডার
+    regularCoupons.forEach(coupon => {
+        listEl.innerHTML += generateCouponHTML(coupon, false);
     });
+
+    // যদি কোনো সাধারণ কুপন না থাকে এবং স্পেশালও না থাকে (অত্যন্ত বিরল ক্ষেত্র)
+    if (regularCoupons.length === 0 && !specialCoupon) {
+        if(section) section.classList.add('hidden');
+    }
+}
+
+// ==========================================
+// হেল্পার ফাংশন: কুপনের HTML তৈরি করা
+// ==========================================
+function generateCouponHTML(coupon, isSpecial) {
+    const isApplied = appData.coupon && appData.coupon.code === coupon.couponcode;
+    
+    // ---- PRODUCT DISCOUNT LABEL ----
+    let discountLabel = '';
+    if (coupon.type === 'flat') {
+        discountLabel = `<i class="fas fa-tag" style="font-size:8px"></i> ${tL('flat')} ৳${coupon.discountamount} ${tL('off')}`;
+    } else if (coupon.type === 'percentage') {
+        discountLabel = `<i class="fas fa-tag" style="font-size:8px"></i> ${coupon.discountamount}% ${tL('off')}`;
+        if (coupon.maxdiscountamount > 0) {
+            discountLabel += ` <span style="color:#9ca3af;font-weight:400">(${tL('up_to')} ৳${coupon.maxdiscountamount})</span>`;
+        }
+    }
+    
+    // ---- DELIVERY DISCOUNT LABEL ----
+    let deliveryHtml = '';
+    const hasFreeDelivery = coupon.freedelivery === 'yes';
+    const delDiscAmt = parseFloat(coupon.deliverydiscountamount) || 0;
+    
+    if (hasFreeDelivery && delDiscAmt > 0) {
+        deliveryHtml = `<div class="coupon-new-badge del-partial"><i class="fas fa-truck" style="font-size:8px"></i> ${tL('delivery_discount_label')}: -৳${delDiscAmt}</div>`;
+    } else if (hasFreeDelivery) {
+        deliveryHtml = `<div class="coupon-new-badge del-free"><i class="fas fa-truck-fast" style="font-size:8px"></i> ${tL('free_delivery_on_coupon')}</div>`;
+    }
+    
+    // VIP ক্লাস যোগ করা হচ্ছে কি না চেক করা
+    const vipClass = isSpecial ? 'coupon-vip-card' : '';
+    
+    // ---- BUILD CARD ----
+    return `
+        <div class="coupon-new-card ${isApplied ? 'applied' : ''} ${vipClass}">
+            <div class="coupon-new-row1">
+                <div class="coupon-new-code">${coupon.couponcode}</div>
+                <div class="coupon-new-offers">
+                    <div class="coupon-new-badge disc">${discountLabel}</div>
+                    ${deliveryHtml}
+                </div>
+                <button class="coupon-new-apply" onclick="applyCouponFromCartCard('${coupon.couponcode}', this)">${tL('apply_coupon_btn')}</button>
+                <div class="coupon-new-applied-badge"><i class="fas fa-check-circle"></i> Applied</div>
+            </div>
+            <div class="coupon-new-row2">
+                <span>Min: <b>৳${coupon.minpurchase.toLocaleString()}</b></span>
+                <span>Max: <b>৳${coupon.maxdiscountamount.toLocaleString()}</b></span>
+                <span>Exp: <b>${formatCouponDate(coupon.expirydate)}</b></span>
+            </div>
+            <div class="coupon-new-row3">${coupon.description}</div>
+        </div>
+    `;
 }
 // ==========================================
 // APPLY COUPON FROM CART CARD
