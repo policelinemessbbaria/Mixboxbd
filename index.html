@@ -1990,7 +1990,8 @@ function safeJsonParse(jsonString) {
                 document.querySelectorAll('[data-placeholder-ph]').forEach(el => {
                     el.placeholder = t(el.getAttribute('data-placeholder-ph'));
                 });
-// ==========================================
+
+                // ==========================================
                 // নতুন: হেডারের ল্যাঙ্গুয়েজ বাটন আপডেট
                 // ==========================================
                 const headerLangBtn = document.getElementById('headerLangBtn');
@@ -6259,17 +6260,22 @@ function logout() {
     
     navigateTo('#home'); 
 }
-        
-        function changeLanguage() {
-            const newLang = appData.language === 'en' ? 'bn' : 'en';
-            appData.language = newLang;
-            localStorage.setItem('language', newLang);
-            if(appData.user) google.script.run.updateUserProfile(appData.user.userid, { language: newLang });
-            document.getElementById('currentLanguage').textContent = newLang === 'bn' ? 'বাংলা' : 'English';
-            updateUIText(); 
-            loadRoute(window.location.hash || '#home'); 
-            Swal.fire({ icon: 'success', title: newLang === 'bn' ? 'ভাষা পরিবর্তন হয়েছে' : 'Language Changed', timer: 1000, showConfirmButton: false });
-        }
+function changeLanguage() {
+    const newLang = appData.language === 'en' ? 'bn' : 'en';
+    appData.language = newLang;
+    localStorage.setItem('language', newLang);
+    if(appData.user) google.script.run.updateUserProfile(appData.user.userid, { language: newLang });
+    
+    // ✅ ফিক্স: এলিমেন্ট থাকলেই টেক্সট চেঞ্জ হবে
+    const currentLangEl = document.getElementById('currentLanguage');
+    if(currentLangEl) {
+        currentLangEl.textContent = newLang === 'bn' ? 'বাংলা' : 'English';
+    }
+    
+    updateUIText(); 
+    loadRoute(window.location.hash || '#home'); 
+    Swal.fire({ icon: 'success', title: newLang === 'bn' ? 'ভাষা পরিবর্তন হয়েছে' : 'Language Changed', timer: 1000, showConfirmButton: false });
+}
 // ==========================================
 // NEW: CONFIRMATION FOR LOGOUT
 // ==========================================
@@ -7379,4 +7385,3 @@ async function trackCAPI(eventName, customData, eventId) {
     </script>
 </body>
 </html>
-cuon reset ui er pore 
