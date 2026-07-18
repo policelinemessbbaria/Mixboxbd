@@ -5225,19 +5225,15 @@ function renderCartCoupons() {
     noMsg.classList.add('hidden');
 
     // ==========================================
-    // VIP কুপন লজিক (সেফগার্ড সহ)
+    // VIP কুপন লজিক
     // ==========================================
     const isLoggedIn = appData.user && appData.user.fullname;
     let regularCoupons = [];
     let specialCoupons = [];
-    
-    // যতগুলো VIP করতে চান সেই নম্বর দিন
     const vipCount = 2; 
 
     if (isLoggedIn) {
-        // লগইন থাকলে
         if (filteredCoupons.length > vipCount) {
-            // কুপন যথেষ্ট আছে → VIP + সাধারণ স্প্লিট
             specialCoupons = filteredCoupons.slice(0, vipCount);
             regularCoupons = filteredCoupons.slice(vipCount);
             
@@ -5247,21 +5243,27 @@ function renderCartCoupons() {
                 ? `${coloredName}, আপনার জন্য স্পেশাল কুপন সমূহ ✨` 
                 : `${coloredName}, Special Coupons for You! ✨`;
         } else {
-            // কুপন কম আছে (যেমন: ৩টি আছে কিন্তু vipCount=3)
-            // সবকে সাধারণ হিসেবে দেখাবো, VIP স্প্লিট করবো না
             regularCoupons = filteredCoupons;
         }
     } else {
-        // লগইন না থাকলে
+        // ==========================================
+        // নতুন: লগআউট অবস্থায় লগইন প্রম্পট দেখানো
+        // ==========================================
         if (filteredCoupons.length > vipCount) {
-            // কুপন যথেষ্ট আছে → প্রথম কয়েকটি বাদ
             regularCoupons = filteredCoupons.slice(vipCount);
         } else {
-            // কুপন কম আছে → সবকেই দেখাবো (ফাঁকা পেজ এড়াতে)
             regularCoupons = filteredCoupons;
         }
+
+        if(headerTextEl) {
+            if (appData.language === 'bn') {
+                headerTextEl.innerHTML = `চলতি কুপনসমূহ <span style="font-size: 10px; color: #9ca3af; font-weight: 500;">(লগইন করুন <a href="javascript:void(0)" onclick="event.preventDefault(); navigateTo('#login')" style="color: var(--primary-color); text-decoration: underline; font-weight: 700;">আপনার স্পেশাল কুপন পেতে</a>)</span>`;
+            } else {
+                headerTextEl.innerHTML = `Available Coupons <span style="font-size: 10px; color: #9ca3af; font-weight: 500;">(Login for <a href="javascript:void(0)" onclick="event.preventDefault(); navigateTo('#login')" style="color: var(--primary-color); text-decoration: underline; font-weight: 700;">your special coupons</a>)</span>`;
+            }
+        }
+        // ==========================================
     }
-    // ==========================================
 
     // স্পেশাল কুপন রেন্ডার
     specialCoupons.forEach(coupon => {
@@ -5273,7 +5275,6 @@ function renderCartCoupons() {
         listEl.innerHTML += generateCouponHTML(coupon, false);
     });
 
-    // দুটোই ফাঁকা হলে সেকশন লুকাবো
     if (regularCoupons.length === 0 && specialCoupons.length === 0) {
         if(section) section.classList.add('hidden');
     }
