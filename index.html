@@ -1892,16 +1892,17 @@ appData.coupons = res.data.coupons || [];
                                         syncCartWithLivePrices();
                                         initFilterOptions();
                                         initPopupSystem();
-                                    } else {
-                                        // ব্যাকগ্রাউন্ডে ডাটা আপডেট হলে পেজ রিলোড না করেই UI আপডেট করে দেওয়া
-                                        loadRoute(window.location.hash || '#home');
-                                        updateCartBadge();
-                                        updateOrderSummary();
-                                        updateUIText();
-                                        syncCartWithLivePrices();
-                                        initFilterOptions();
-                                        
-                                    }
+                                                        } else {
+                        // ব্যাকগ্রাউন্ডে ডাটা আপডেট হলে পেজ রিলোড না করেই UI আপডেট করে দেওয়া
+                        appData.computedPages = null; // পুরোনো পেজিনেশন ক্যাশ রিসেট
+                        loadRoute(window.location.hash || '#home');
+                        updateCartBadge();
+                        updateOrderSummary();
+                        updateUIText();
+                        syncCartWithLivePrices();
+                        initFilterOptions();
+                        initPopupSystem(); // পপআপ ও রিসেট হবে
+                    }
                                 }
                             })
                             .catch(err => {
@@ -7398,4 +7399,4 @@ async function trackCAPI(eventName, customData, eventId) {
 }
     </script>
 </body>
-</html>
+</html>;
