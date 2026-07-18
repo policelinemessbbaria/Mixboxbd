@@ -415,12 +415,24 @@ src="https://www.facebook.com/tr?id=1526489362525698&ev=PageView&noscript=1"
     <!-- Skeleton Loader -->
     <div id="skeletonLoader" class="fixed inset-0 bg-white z-50 flex flex-col h-screen overflow-y-auto no-scrollbar">
         
-        <!-- ১. হেডার -->
-        <div class="h-16 border-b border-gray-100 flex items-center px-4 shrink-0 bg-white">
-            <div class="w-10 h-10 bg-gray-200 rounded-full style-sweep"></div>
-            <div class="w-36 h-6 bg-gray-200 rounded-lg ml-3 style-sweep"></div>
-            <div class="ml-auto w-10 h-10 bg-gray-200 rounded-full style-sweep"></div>
-        </div>
+<!-- ১. হেডার (আপডেটেড: মাঝখানে লোগো, দুইপাশে ২টি করে আইকন) -->
+<div class="h-16 border-b border-gray-100 flex items-center px-4 shrink-0 bg-white relative">
+    
+    <!-- বাম পাশের ২টি আইকনের জায়গা -->
+    <div class="absolute left-4 flex items-center space-x-2">
+        <div class="w-8 h-8 bg-gray-200 rounded-full style-sweep"></div>
+        <div class="w-12 h-8 bg-gray-200 rounded-full style-sweep"></div>
+    </div>
+    
+    <!-- মাঝখানে লোগোর জায়গা -->
+    <div class="w-32 h-10 bg-gray-200 rounded-lg mx-auto style-sweep"></div>
+    
+    <!-- ডান পাশের ২টি আইকনের জায়গা -->
+    <div class="absolute right-4 flex items-center space-x-4">
+        <div class="w-8 h-8 bg-gray-200 rounded-full style-sweep"></div>
+        <div class="w-8 h-8 bg-gray-200 rounded-full style-sweep"></div>
+    </div>
+</div>
         
         <!-- ২. হিরো স্লাইডার -->
         <div class="w-full h-64 bg-gray-200 shrink-0 style-sweep"></div>
