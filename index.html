@@ -7185,7 +7185,7 @@ window.onpopstate = function(event) {
                 Swal.fire({
                     html: `
                         <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(0, 0, 0, 0.75); color: white; padding: 10px 20px; border-radius: 50px; font-family: 'Poppins', sans-serif; font-size: 14px; white-space: nowrap; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: max-content;">
-                            <img src="${siteLogo}" style="height: 20px; width: auto; object-fit: contain; display: block;">
+<img src="${siteLogo}" style="height: 20px; width: auto; object-fit: contain; display: block; filter: brightness(0) invert(1);">
                             <span>${t('Press back again to exit')}</span>
                         </div>
                     `,
@@ -7399,4 +7399,4 @@ async function trackCAPI(eventName, customData, eventId) {
 }
     </script>
 </body>
-</html>;
+</html>
