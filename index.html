@@ -313,7 +313,37 @@ src="https://www.facebook.com/tr?id=1526489362525698&ev=PageView&noscript=1"
 .cart-btn-start{background:#111827;color:#fff;border:none;border-radius:10px;padding:11px 28px;font-size:13px;font-weight:600;cursor:pointer;transition:.2s}
 .cart-btn-start:hover{background:#000;transform:translateY(-1px)}
 .cart-btn-start:active{transform:scale(.97)}
+/* ==========================================
+   PERCENTAGE (%) INSIDE TICKET ICON
+   (কার্ট পেজ এবং হেডার উভয় জায়গার জন্য)
+   ========================================== */
+.cart-section-header i,
+#headerCouponBtn i {
+    position: relative; 
+}
 
+.cart-section-header i::after,
+#headerCouponBtn i::after {
+    content: '%'; 
+    position: absolute;
+    left: 50%;         
+    top: 50%;          
+    transform: translate(-50%, -50%); /* একদম মাঝখানে */
+    font-weight: 900;  
+    color: #374151;    /* গাঢ় ধূসর */
+    font-family: sans-serif; 
+    line-height: 1;
+}
+
+/* হেডারের আইকনটি একটু ছোট হবে */
+#headerCouponBtn i::after {
+    font-size: 7px;    
+}
+
+/* কার্ট পেজের আইকনটি একটু বড় হবে */
+.cart-section-header i::after {
+    font-size: 9px;    
+}
 /* ==========================================
    UPDATED: COUPON CARD - Locked Left & Right
    ========================================== */
@@ -511,15 +541,15 @@ src="https://www.facebook.com/tr?id=1526489362525698&ev=PageView&noscript=1"
     <!-- বাম পাশের আইকন (z-10 যোগ করা হয়েছে) -->
     <!-- ========================================== -->
     <div class="absolute left-4 z-10 flex items-center space-x-2">
-        <!-- অর্ডার ট্র্যাকিং আইকন -->
-        <button onclick="handleTrackOrder()" class="text-gray-600 hover:text-primary transition" title="Track Order">
-            <i class="fas fa-route text-lg"></i>
-        </button>
+<!-- কুপন আইকন (ট্র্যাক অর্ডারের বদলে) -->
+<button onclick="goToCoupons()" id="headerCouponBtn" class="text-gray-600 hover:text-primary transition" title="View Offers">
+    <i class="fas fa-ticket-alt text-lg"></i>
+</button>
         
         <!-- ল্যাঙ্গুয়েজ টগল বাটন -->
-<button onclick="changeLanguage()" id="headerLangBtn" class="flex items-center gap-1 bg-gray-100 hover:bg-gray-200 rounded-full px-2.5 py-1 transition text-gray-700">
+<button onclick="changeLanguage()" id="headerLangBtn" class="flex items-center gap-1 rounded-full px-2.5 py-1 transition text-gray-700 hover:text-primary">
     <i class="fas fa-globe text-sm text-gray-500"></i>
-    <span id="headerLangText" class="text-[11px] font-bold">EN</span>
+    <span id="headerLangText" class="text-[12px] font-bold">EN</span>
 </button>
     </div>
     <!-- ========================================== -->
@@ -6006,47 +6036,29 @@ function handleSessionError() {
         }
     });
 }
-// ==========================================
-// SMART SILENT POINTS REFRESH (FIXED: NEW TAB LOGIC)
-// ==========================================
 function silentPointsRefresh() {
     if (!appData.user || !appData.user.userid) return;
     
     // ==========================================
-    // FIX: NEW TAB DETECTION USING SESSIONSTORAGE
+    // FIX: STRICT 24-HOUR THROTTLE (Refresh Safe)
+    // এখন শুধুমাত্র localStorage চেক করবে। 
+    // রিফ্রেশ করলেই সার্ভারে কল যাওয়া বন্ধ হবে।
     // ==========================================
-    let isNewTab = false;
+    let lastSyncTime = 0;
     try {
-        // চেক করুন এই ট্যাবে আগে পয়েন্ট সিঙ্ক হয়েছে কিনা
-        if (!sessionStorage.getItem('ptsSyncedThisTab')) {
-            isNewTab = true; // নতুন ট্যাব বা রিফ্রেশ করা হয়েছে
-            // এই ট্যাবে একবার সিঙ্ক হয়েছে তা মার্ক করে রাখা হচ্ছে
-            sessionStorage.setItem('ptsSyncedThisTab', 'true');
-        }
+        const saved = localStorage.getItem('lastPointsSyncTime');
+        if (saved) lastSyncTime = parseInt(saved);
     } catch (e) {}
-    // ==========================================
-
-    // ১. যদি নতুন ট্যাব হয়, তাহলে ২৪ ঘণ্টার থ্রটল ইগনোর করে সরাসরি নিচের সার্ভার কলে যাবে
-    if (!isNewTab) {
-        // ২. যদি একই ট্যাবে থাকে, তাহলে আগের মতোই ২৪ ঘণ্টা চেক করবে (localStorage দিয়ে)
-        let lastSyncTime = 0;
-        try {
-            const saved = localStorage.getItem('lastPointsSyncTime');
-            if (saved) lastSyncTime = parseInt(saved);
-        } catch (e) {}
-        
-        const timeSinceLastSync = Date.now() - lastSyncTime;
-        
-        // থ্রটল টাইম: ২৪ ঘণ্টা = ৮৬৪০০০০০ মিলিসেকেন্ড
-        const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
-        
-        // যদি ২৪ ঘণ্টা পার হয়নি এবং একই ট্যাবে আছে, তাহলে কল ব্লক করো
-        if (lastSyncTime > 0 && timeSinceLastSync < TWENTY_FOUR_HOURS_MS) {
-            return; 
-        }
+    
+    const timeSinceLastSync = Date.now() - lastSyncTime;
+    const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
+    
+    // যদি ২৪ ঘণ্টা পার হয়নি, তবে সার্ভারে যাবে না
+    if (lastSyncTime > 0 && timeSinceLastSync < TWENTY_FOUR_HOURS_MS) {
+        return; 
     }
     
-    // ৩. সার্ভারে যাওয়ার মূল কোড (এখানে কোনো পরিবর্তন করতে হবে না)
+    // ২৪ ঘণ্টা পার হয়ে গেছে, এখন সার্ভারে যাও
     google.script.run
         .withSuccessHandler(res => {
             if (res.success) {
@@ -6060,10 +6072,11 @@ function silentPointsRefresh() {
                     appData.user.pointsexpirydate = newExpiry;
                     localStorage.setItem('user', JSON.stringify(appData.user));
                     
-                    // UI আপডেট
+                    // ১. অ্যাকাউন্ট পেজের ব্যাজ আপডেট
                     const badge = document.getElementById('accountPtsBadge');
                     if (badge) badge.innerText = newPoints;
                     
+                    // ২. চেকআউট পেজের টগল ও সেভিংস আপডেট (গুরুত্বপূর্ণ)
                     const toggle = document.getElementById('ptsToggle');
                     const savingsLabel = document.getElementById('ptsSavingsLabel');
                     if (toggle && savingsLabel) {
@@ -6082,7 +6095,7 @@ function silentPointsRefresh() {
                     console.log(`Points updated: ${oldPoints} → ${newPoints}`);
                 }
                 
-                // সময় সেভ করো (একই ট্যাবে পুনরায় কল রোধ করতে)
+                // সফল হোক বা ব্যর্থ হোক, নতুন সময় সেভ করে দিচ্ছি
                 try {
                     localStorage.setItem('lastPointsSyncTime', Date.now().toString());
                 } catch (e) {}
@@ -6275,11 +6288,38 @@ function logout() {
     
     navigateTo('#home'); 
 }
+// ==========================================
+// ULTIMATE FIX: EXACT SCROLL TO COUPON HEADER
+// ==========================================
+function goToCoupons() {
+    // প্রথমে কার্ট পেজে নিয়ে যাও
+    navigateTo('#cart');
+    
+    setTimeout(() => {
+        const couponHeader = document.querySelector('#cartCouponsSection .cart-section-header');
+        if (couponHeader) {
+            // ১. হেডলাইনটি বর্তমানে ডকুমেন্টের ঠিক কোন পজিশনে আছে তা পিক্সেলে বের করা হচ্ছে
+            const elementPosition = couponHeader.getBoundingClientRect().top + window.scrollY;
+            
+            // ২. স্টিকি হেডারের উচ্চতা (৬৪px) + একটু গ্যাপ (১০px) = ৭৪ পিক্সেল বাদ দেওয়া হচ্ছে
+            // যাতে হেডলাইনটি হেডারের ঠিক নিচে দেখা যায়
+            const offsetPosition = elementPosition - 74;
+            
+            // ৩. ব্রাউজারকে বাধ্য করে আমাদের ক্যালকুলেটেড পজিশনে স্ক্রল করানো হচ্ছে
+            window.scrollTo({
+                top: offsetPosition,
+                behavior: 'smooth'
+            });
+        }
+    }, 600); // ডম লোড হতে একটু বেশি সময় দেওয়া হচ্ছে (৫০০ থেকে বাড়িয়ে ৬০০ করা হয়েছে)
+}
 function changeLanguage() {
     const newLang = appData.language === 'en' ? 'bn' : 'en';
     appData.language = newLang;
     localStorage.setItem('language', newLang);
-    if(appData.user) google.script.run.updateUserProfile(appData.user.userid, { language: newLang });
+    
+    // ❌ নিচের সার্ভার কলের লাইনটি সম্পূর্ণ মুছে দেওয়া হয়েছে
+    // if(appData.user) google.script.run.updateUserProfile(appData.user.userid, { language: newLang });
     
     // ✅ ফিক্স: এলিমেন্ট থাকলেই টেক্সট চেঞ্জ হবে
     const currentLangEl = document.getElementById('currentLanguage');
