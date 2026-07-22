@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
 <!-- এই কোডগুলো <head> ট্যাগের নিচেই সবার প্রথমে বসাবেন -->
 <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
@@ -1808,7 +1808,7 @@ function instantScrollFix() {
             const cachedDataStr = localStorage.getItem('cached_app_data');
             const localVersion = localStorage.getItem('local_data_version');
 
-            // ১. পেজ দ্রুত লোড করার জন্য প্রথমে ক্যাশ থেকে রেন্ডার করা
+            // ১. ক্যাশ থাকলে দ্রুত দেখাও (স্কেলেটন সরাও)
             if (cachedDataStr) {
                 try {
                     const data = JSON.parse(cachedDataStr);
@@ -1842,60 +1842,68 @@ function instantScrollFix() {
                 }
             }
 
-            // ২. একটি মাত্র রিকোয়েস্টে ডাটা + ভার্সন দুটোই আনা হচ্ছে
+            // ২. ব্যাকগ্রাউন্ডে নতুন ডাটা চেক করো
             const timestamp = new Date().getTime();
-            fetch(`${GAS_WEB_APP_URL}?action=getInitialData&t=${timestamp}`, { cache: "no-store" })
-                .then(response => response.json())
-                .then(res => {
-                    if (res.success) {
-                        const serverVersion = res.serverVersion;
+            fetch(`${GAS_WEB_APP_URL}?action=getInitialData&t=${timestamp}`, { 
+                cache: "no-store" 
+            })
+            .then(response => response.json())
+            .then(res => {
+                if (!res.success) return;
+                
+                const serverVersion = res.serverVersion || '';
+                const needUpdate = !localVersion || localVersion !== serverVersion || !cachedDataStr;
+                
+                if (!needUpdate) return;
 
-                        // ভার্সন মিললে কিছু করবে না (ব্যান্ডউইথ বাঁচাবে)
-                        if (localVersion && localVersion === serverVersion && cachedDataStr) {
-                            return;
-                        }
+                console.log("New data loaded from server");
+                
+                localStorage.setItem('cached_app_data', JSON.stringify(res.data));
+                localStorage.setItem('local_data_version', serverVersion);
 
-                        // নতুন ডাটা এবং ভার্সন লোকাল স্টোরেজে সেভ করা
-                        localStorage.setItem('cached_app_data', JSON.stringify(res.data));
-                        localStorage.setItem('local_data_version', serverVersion);
+                appData.settings = res.data.settings;
+                appData.categories = res.data.categories;
+                appData.products = res.data.products;
+                appData.banners = res.data.banners;
+                appData.locations = res.data.locations;
+                appData.socialMedia = res.data.socialMedia;
+                appData.policies = res.data.policies;
+                appData.popups = res.data.popups;
+                appData.coupons = res.data.coupons || [];
+                appData.reviews = res.data.reviews;
 
-                        // অ্যাপের ডাটা আপডেট করা
-                        appData.settings = res.data.settings;
-                        appData.categories = res.data.categories;
-                        appData.products = res.data.products;
-                        appData.banners = res.data.banners;
-                        appData.locations = res.data.locations;
-                        appData.socialMedia = res.data.socialMedia;
-                        appData.policies = res.data.policies;
-                        appData.popups = res.data.popups;
-                        appData.coupons = res.data.coupons || [];
-                        appData.reviews = res.data.reviews;
+                updateDOMWithSettings(appData.settings);
 
-                        updateDOMWithSettings(appData.settings);
-
-                        if (!cachedDataStr) {
-                            document.getElementById('skeletonLoader').classList.add('hidden');
-                            document.getElementById('app').classList.remove('hidden');
-                            document.getElementById('app').classList.add('flex');
-                        }
-
-                        appData.computedPages = null;
-                        loadRoute(window.location.hash || '#home');
-                        updateCartBadge();
-                        updateOrderSummary();
-                        updateUIText();
-                        syncCartWithLivePrices();
-                        initFilterOptions();
-                        initPopupSystem();
-                    }
-                })
-                .catch(err => {
-                    console.error(err);
-                    if (!cachedDataStr) Swal.fire('Connection Error', 'Could not load data.', 'error');
-                });
+                if (!cachedDataStr) {
+                    document.getElementById('skeletonLoader').classList.add('hidden');
+                    document.getElementById('app').classList.remove('hidden');
+                    document.getElementById('app').classList.add('flex');
+                    
+                    loadRoute(window.location.hash || '#home');
+                    updateCartBadge();
+                    updateOrderSummary();
+                    updateUIText();
+                    syncCartWithLivePrices();
+                    initFilterOptions();
+                    initPopupSystem();
+                } else {
+                    appData.computedPages = null;
+                    loadRoute(window.location.hash || '#home');
+                    updateCartBadge();
+                    updateOrderSummary();
+                    updateUIText();
+                    syncCartWithLivePrices();
+                    initFilterOptions();
+                    initPopupSystem();
+                }
+            })
+            .catch(err => {
+                console.error("Fetch error:", err);
+                if (!cachedDataStr) {
+                    Swal.fire('Connection Error', 'Could not load data.', 'error');
+                }
+            });
         }
-
-
         // ==========================================
         // NEW HELPER: UPDATE DOM ELEMENTS DYNAMICALLY
         // ==========================================
