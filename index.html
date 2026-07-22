@@ -1,6 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
+<!-- এই কোডগুলো <head> ট্যাগের নিচেই সবার প্রথমে বসাবেন -->
+<link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
+<link rel="preconnect" href="https://script.google.com" crossorigin>
 <meta name="google-site-verification" content="yHp-0_G2el853pU5DenVxHAp743vJTPdicmY2CnbHqA" />
 <!-- Meta Pixel Code -->
 <script>
@@ -19,286 +25,285 @@ fbq('track', 'PageView');
 src="https://www.facebook.com/tr?id=1526489362525698&ev=PageView&noscript=1"
 /></noscript>
 <!-- End Meta Pixel Code -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-N74T65FH7X"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-N74T65FH7X');
-    </script>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MixBoxbd | A Budget Friendly Variety Store</title> <!-- Default Title, will be updated by JS -->
-    
-    <!-- ========================================== -->
-    <!-- নতুন ফেভিকন ও ডেসক্রিপশন -->
-    <!-- ========================================== -->
-    
-    <link rel="icon" type="image/webp" href="https://res.cloudinary.com/dkowkawiq/image/upload/v1783075015/20260703_163558_tmym5q.webp">
-    
-    <meta name="description" content="একটি আধুনিক ও ট্রেন্ডি ভ্যারাইটি শপ, আমরা ইনসাফ ভিত্তিক ব্যবসা পরিচালনায় সচেষ্ট। সাশ্রয়ী মূল্য এবং গুণগত মানের নিশ্চয়তায় সেরা অনলাইন শপিং অভিজ্ঞতা প্রদানে দৃঢ় প্রতিজ্ঞাবদ্ধ">
-
-    <!-- ========================================== -->
-
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#006a4e">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-N74T65FH7X"></script>
 <script>
-  if ('serviceWorker' in navigator) {
-    let refreshing = false; // ইনফিনিট লুপ রোধ করার জন্য
-    
-    // যখন ব্যাকগ্রাউন্ডে নতুন SW আপডেট হবে, তখন এই ইভেন্ট ফায়ার হবে
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      if (refreshing) return; 
-      refreshing = true;
-      console.log("New Service Worker detected. Reloading...");
-      window.location.reload(); // ইউজারের অজান্তেই পেজ রিফ্রেশ হয়ে যাবে
-    });
-
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js')
-        .then(reg => {
-            console.log('Service Worker Registered!', reg);
-            
-            // ✅ এই লাইনটি যোগ করুন (পুরোনো SW থাকলে আপডেট হওয়ে যাওয়ার জন্য)
-            reg.update(); 
-        })
-        .catch(err => console.log('Service Worker Error', err));
-    });
-  }
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-N74T65FH7X');
 </script>
-    
-    <!-- Bungee & Poppins Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Bungee&display=swap" rel="stylesheet">
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        // ডায়নামিক কালারের জন্য CSS ভেরিয়েবল ব্যবহার করা হয়েছে
-                        primary: 'var(--primary-color)', 
-                        background: 'var(--bg-color)'
-                    },
-                    animation: {
-                        'fade-in': 'fadeIn 0.4s ease-out',
-                        'fade-in-up': 'fadeInUp 0.5s ease-out',
-                        'spin-slow': 'spin 1s linear infinite',
-                    },
-                    keyframes: {
-                        fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
-                        fadeInUp: { '0%': { opacity: '0', transform: 'translateY(20px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } }
-                    }
+
+<!-- ========== SEO META TAGS (Updated) ========== -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>SafaBoxbd | সাশ্রয়ী মূল্যে ট্রেন্ডি ভ্যারাইটি পণ্যের অনলাইন শপ</title>
+<link rel="icon" type="image/png" sizes="128x128" href="https://res.cloudinary.com/dkowkawiq/image/upload/q_auto,w_128,h_128,c_fill,g_auto/v1784559589/20260720_202236_kyexpx.png">
+<meta name="description" content="আমরা ইনসাফ ভিত্তিক ব্যবসা পরিচালনায় সদা সচেষ্ট। সাশ্রয়ী মূল্যে মানসম্মত ট্রেন্ডি ভ্যারাইটি পণ্য পেতে এখনই ভিজিট করুন আমাদের ওয়েব অ্যাপ।">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+<link rel="canonical" href="https://safaboxbd.web.app/">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="SafaBoxbd">
+<meta property="og:locale" content="bn_BD">
+<meta property="og:title" content="SafaBoxbd | সাশ্রয়ী মূল্যে ট্রেন্ডি ভ্যারাইটি পণ্যের অনলাইন শপ">
+<meta property="og:description" content="আমরা ইনসাফ ভিত্তিক ব্যবসা পরিচালনায় সদা সচেষ্ট। সাশ্রয়ী মূল্যে মানসম্মত ট্রেন্ডি ভ্যারাইটি পণ্য পেতে এখনই ভিজিট করুন আমাদের ওয়েব অ্যাপ।">
+<meta property="og:url" content="https://safaboxbd.web.app/">
+<meta property="og:image" content="https://res.cloudinary.com/dkowkawiq/image/upload/q_auto,w_1280,h_1280,c_fill,g_auto/v1784559589/20260720_202236_kyexpx.png">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="SafaBoxbd | সাশ্রয়ী মূল্যে ট্রেন্ডি ভ্যারাইটি পণ্যের অনলাইন শপ">
+<meta name="twitter:description" content="সাশ্রয়ী মূল্যে মানসম্মত ট্রেন্ডি ভ্যারাইটি পণ্য পেতে ভিজিট করুন SafaBoxbd।">
+<meta name="twitter:image" content="https://res.cloudinary.com/dkowkawiq/image/upload/q_auto,w_1280,h_1280,c_fill,g_auto/v1784559589/20260720_202236_kyexpx.png">
+
+<!-- Hreflang -->
+<link rel="alternate" hreflang="bn-BD" href="https://safaboxbd.web.app/">
+<link rel="alternate" hreflang="x-default" href="https://safaboxbd.web.app/">
+
+<!-- ========== SCHEMA: Organization (NEW) ========== -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "SafaBoxbd",
+  "url": "https://safaboxbd.web.app/",
+  "logo": "https://res.cloudinary.com/dkowkawiq/image/upload/q_auto,w_128,h_128,c_fill,g_auto/v1784559589/20260720_202236_kyexpx.png",
+  "description": "সাশ্রয়ী মূল্যে মানসম্পন্ন ট্রেন্ডি ভ্যারাইটি পণ্যের অনলাইন শপ। ইনসাফ ভিত্তিক ব্যবসা পরিচালনায় সদা সচেষ্ট।",
+  "sameAs": [
+    "https://facebook.com/safaboxbd",
+    "https://instagram.com/safaboxbd"
+  ]
+}
+</script>
+
+<!-- ========== SCHEMA: WebSite ========== -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "SafaBoxbd",
+  "url": "https://safaboxbd.web.app/",
+  "description": "সাশ্রয়ী মূল্যে মানসম্পন্ন ট্রেন্ডি ভ্যারাইটি পণ্য পেতে এখনই ভিজিট করুন আমাদের ওয়েব অ্যাপ।",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "https://safaboxbd.web.app/?q={search_term_string}",
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#006a4e">
+<script>
+if ('serviceWorker' in navigator) {
+let refreshing = false;
+navigator.serviceWorker.addEventListener('controllerchange', () => {
+  if (refreshing) return;
+  refreshing = true;
+  console.log("New Service Worker detected. Reloading...");
+  window.location.reload();
+});
+
+window.addEventListener('load', () => {
+  navigator.serviceWorker.register('./sw.js')
+    .then(reg => {
+        console.log('Service Worker Registered!', reg);
+        reg.update();
+    })
+    .catch(err => console.log('Service Worker Error', err));
+});
+
+}
+</script>
+
+<!-- Bungee & Poppins Font -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Bungee&display=swap" rel="stylesheet">
+
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    primary: 'var(--primary-color)',
+                    background: 'var(--bg-color)'
+                },
+                animation: {
+                    'fade-in': 'fadeIn 0.4s ease-out',
+                    'fade-in-up': 'fadeInUp 0.5s ease-out',
+                    'spin-slow': 'spin 1s linear infinite',
+                },
+                keyframes: {
+                    fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
+                    fadeInUp: { '0%': { opacity: '0', transform: 'translateY(20px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } }
                 }
             }
         }
-    </script>
-    
-    <!-- SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
-    <!-- FontAwesome (For existing UI icons) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Bootstrap Icons (For Social Media Footer Icons) -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    
-    <style>
-    /* ==========================================
-   PREMIUM SKELETON: YouTube/Facebook Style
-   ঢেউ দিয়ে দিয়ে আলো চলে যাওয়ার ইফেক্ট
-   ========================================== */
+    }
+</script>
+
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- FontAwesome (For existing UI icons) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<!-- Bootstrap Icons (For Social Media Footer Icons) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+<style>
+/* ==========================================
+PREMIUM SKELETON: YouTube/Facebook Style
+========================================== */
 @keyframes sweep {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
+0% { background-position: -200% 0; }
+100% { background-position: 200% 0; }
 }
 .style-sweep {
-    background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
-    background-size: 200% 100%;
-    animation: sweep 1.5s ease-in-out infinite;
+background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+background-size: 200% 100%;
+animation: sweep 1.5s ease-in-out infinite;
 }
-        /* ডিফল্ট কালার সেট করা হয়েছে, JS এসার পরিবর্তন হবে */
-        :root { 
-            --primary-color: #2563eb; 
-            --bg-color: #f8fafc; 
-        }
-        
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .nav-active { color: var(--primary-color); }
-        .hero-container { scroll-snap-type: x mandatory; }
-        .hero-slide { scroll-snap-align: start;
-        scroll-snap-stop: always;}
-        .gallery-container { scroll-snap-type: x mandatory; }
-        .gallery-slide { scroll-snap-align: start; }
-        .line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
-        
-        /* ==========================================
-   CSS: ২ লাইন সীমা (2 Line Clamp)
-   ========================================== */
-.line-clamp-2 {
-    display: -webkit-box;
-    -webkit-line-clamp: 2; /* ম্যাক্সিমাম ২ লাইন */
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    line-height: 1.4; /* সুন্দর পড়ার জন্য লাইন হাইট */
+:root {
+--primary-color: #2563eb;
+--bg-color: #f8fafc;
 }
-        
-        /* FIX: Changed global img background to transparent for transparent PNG support */
-        img { background-color: transparent; }
 
-        /* ==========================================
-           NEW POPUP STYLES (Updated as requested)
-           ========================================== */
-        #popup-overlay {
-            transition: opacity 0.3s ease;
-        }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .nav-active { color: var(--primary-color); }
+    .hero-container { scroll-snap-type: x mandatory; }
+    .hero-slide { scroll-snap-align: start;
+    scroll-snap-stop: always;}
+    .gallery-container { scroll-snap-type: x mandatory; }
+    .gallery-slide { scroll-snap-align: start; }
+    .line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
 
-        /* CHANGED: Removed aspect-ratio and background-color. Added specific transparent settings. */
-        .popup-image-container {
-            position: relative;
-            background-color: transparent; /* Explicitly Transparent */
-            box-shadow: none;        /* Explicitly No Shadow */
-            border: none;             /* Explicitly No Border */
-            padding: 0;               /* Explicitly No Padding */
-        }
-
-        /* ADJUSTMENT: Changed slider to relative so it adapts to image height */
-        #popup-slider {
-            transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
-            position: relative; /* Changed from absolute */
-            width: 100%;
-        }
-        
-        .popup-dot {
-            transition: all 0.3s ease;
-        }
-        .popup-dot.active {
-            transform: scale(1.3);
-            background-color: var(--primary-color);
-        }
-
-        /* ==========================================
-           NEW: REWARD POINTS STYLES
-           ========================================== */
-        #rewardBox {
-            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
-            border-left: 4px solid #f59e0b;
-        }
-        
-        /* Toggle Switch Checkbox */
-        .toggle-checkbox:checked {
-            right: 0;
-            border-color: var(--primary-color);
-        }
-        .toggle-checkbox:checked + .toggle-label {
-            background-color: var(--primary-color);
-        }
-        .toggle-checkbox:checked + .toggle-label:before {
-            transform: translateX(100%);
-        }
-
-        /* ==========================================
-           NEW: LOADING SPINNER FOR TOGGLE SWITCH (FIXED)
-           ========================================== */
-        .toggle-spinner {
-            position: absolute;
-            right: 6px;
-            top: 50%;
-            width: 14px;
-            height: 14px;
-            border: 2px solid #ffffff;
-            border-top-color: transparent;
-            border-radius: 50%;
-            animation: spinner-spin 0.8s linear infinite;
-            z-index: 10;
-        }
-
-        /* FIX: Defined the animation keyframes explicitly */
-        @keyframes spinner-spin {
-            0% { transform: translateY(-50%) rotate(0deg); }
-            100% { transform: translateY(-50%) rotate(360deg); }
-        }
-        
-        /* ==========================================
-           NEW: VARIANT BUTTON STYLES
-           ========================================== */
-        .variant-btn {
-            border: 1px solid #e5e7eb;
-            background-color: white;
-            color: #374151;
-            transition: all 0.2s;
-        }
-        .variant-btn:hover:not(:disabled) {
-            border-color: var(--primary-color);
-            color: var(--primary-color);
-        }
-/* ==========================================
-   NEW: VARIANT BUTTON STYLES (FIXED TEXT COLOR)
-   ========================================== */
-.variant-btn {
-    border: 1px solid #e5e7eb;
-    background-color: white;
-    color: #374151; /* ডিফল্ট ডার্ক কালার */
-    transition: all 0.2s;
-}
-.variant-btn:hover:not(:disabled) {
-    border-color: var(--primary-color);
-    color: var(--primary-color);
-}
-.variant-btn.active {
-    background-color: var(--primary-color);
-    
     /* ==========================================
-       FIX: FORCE TEXT COLOR TO WHITE
-       !important ব্যবহার করা হয়েছে যাতে অন্য কোনো স্টাইল 
-       এই কালারকে ওভাররাইড করতে না পারে।
+CSS: ২ লাইন সীমা (2 Line Clamp)
+========================================== */
+.line-clamp-2 {
+display: -webkit-box;
+-webkit-line-clamp: 2;
+-webkit-box-orient: vertical;
+overflow: hidden;
+line-height: 1.4;
+}
+
+    img { background-color: transparent; }
+
+    /* ==========================================
+       NEW POPUP STYLES
        ========================================== */
-    color: white !important; 
-    
-    border-color: var(--primary-color);
-}
-.variant-btn:disabled {
-    background-color: #f3f4f6;
-    color: #9ca3af;
-    cursor: not-allowed;
-    border-color: #e5e7eb;
-    opacity: 0.7;
-}
-        .variant-btn:disabled {
-            background-color: #f3f4f6;
-            color: #9ca3af;
-            cursor: not-allowed;
-            border-color: #e5e7eb;
-            opacity: 0.7;
-        }
+    #popup-overlay {
+        transition: opacity 0.3s ease;
+    }
 
-        /* ==========================================
-           NEW: PAGE RELOAD FLASH EFFECT (For Requirement 3)
-           ========================================== */
-        @keyframes flashWhite {
-            0% { opacity: 1; background-color: transparent; }
-            50% { opacity: 0.6; background-color: #f3f4f6; } /* Flash effect */
-            100% { opacity: 1; background-color: transparent; }
-        }
-        .flash-active {
-            animation: flashWhite 0.4s ease-out;
-        }
-/* কন্টেইনার: উপর থেকে নিচে সাজানোর জন্য */
+    .popup-image-container {
+        position: relative;
+        background-color: transparent;
+        box-shadow: none;
+        border: none;
+        padding: 0;
+    }
+
+    #popup-slider {
+        transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+        position: relative;
+        width: 100%;
+    }
+
+    .popup-dot {
+        transition: all 0.3s ease;
+    }
+    .popup-dot.active {
+        transform: scale(1.3);
+        background-color: var(--primary-color);
+    }
+
+    /* ==========================================
+       NEW: REWARD POINTS STYLES
+       ========================================== */
+    #rewardBox {
+        background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+        border-left: 4px solid #f59e0b;
+    }
+
+    .toggle-checkbox:checked {
+        right: 0;
+        border-color: var(--primary-color);
+    }
+    .toggle-checkbox:checked + .toggle-label {
+        background-color: var(--primary-color);
+    }
+    .toggle-checkbox:checked + .toggle-label:before {
+        transform: translateX(100%);
+    }
+
+    .toggle-spinner {
+        position: absolute;
+        right: 6px;
+        top: 50%;
+        width: 14px;
+        height: 14px;
+        border: 2px solid #ffffff;
+        border-top-color: transparent;
+        border-radius: 50%;
+        animation: spinner-spin 0.8s linear infinite;
+        z-index: 10;
+    }
+
+    @keyframes spinner-spin {
+        0% { transform: translateY(-50%) rotate(0deg); }
+        100% { transform: translateY(-50%) rotate(360deg); }
+    }
+
+    .variant-btn {
+        border: 1px solid #e5e7eb;
+        background-color: white;
+        color: #374151;
+        transition: all 0.2s;
+    }
+    .variant-btn:hover:not(:disabled) {
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+    }
+    .variant-btn.active {
+        background-color: var(--primary-color);
+        color: white !important;
+        border-color: var(--primary-color);
+    }
+    .variant-btn:disabled {
+        background-color: #f3f4f6;
+        color: #9ca3af;
+        cursor: not-allowed;
+        border-color: #e5e7eb;
+        opacity: 0.7;
+    }
+
+    @keyframes flashWhite {
+        0% { opacity: 1; background-color: transparent; }
+        50% { opacity: 0.6; background-color: #f3f4f6; }
+        100% { opacity: 1; background-color: transparent; }
+    }
+    .flash-active {
+        animation: flashWhite 0.4s ease-out;
+    }
+
 .smart-truncate {
-    display: flex;
-    flex-direction: column; /* নাম উপরে, ভ্যারিয়েন্ট নিচে */
-    width: 100%;
+display: flex;
+flex-direction: column;
+width: 100%;
 }
 
-/* নামের স্টাইল: এক লাইনে এবং শেষে ... হবে */
 .cart-name-text {
-    white-space: nowrap;      /* এক লাইনে বাধ্য করা */
-    overflow: hidden;         /* বাকি অংশ লুকানো */
-    text-overflow: ellipsis;  /* শেষে ... দেখাবে */
-    width: 100%;             /* পুরো জায়গা নেবে */
-    line-height: 1.4;
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
+width: 100%;
+line-height: 1.4;
 }
 .cart-section-header{display:flex;align-items:center;gap:8px;margin-bottom:12px;padding:0 2px}
 .cart-section-header i{font-size:14px;color:#6b7280}
@@ -313,78 +318,66 @@ src="https://www.facebook.com/tr?id=1526489362525698&ev=PageView&noscript=1"
 .cart-btn-start{background:#111827;color:#fff;border:none;border-radius:10px;padding:11px 28px;font-size:13px;font-weight:600;cursor:pointer;transition:.2s}
 .cart-btn-start:hover{background:#000;transform:translateY(-1px)}
 .cart-btn-start:active{transform:scale(.97)}
-/* ==========================================
-   PERCENTAGE (%) INSIDE TICKET ICON
-   (কার্ট পেজ এবং হেডার উভয় জায়গার জন্য)
-   ========================================== */
+
 .cart-section-header i,
 #headerCouponBtn i {
-    position: relative; 
+position: relative;
 }
 
 .cart-section-header i::after,
 #headerCouponBtn i::after {
-    content: '%'; 
-    position: absolute;
-    left: 50%;         
-    top: 50%;          
-    transform: translate(-50%, -50%); /* একদম মাঝখানে */
-    font-weight: 900;  
-    color: #374151;    /* গাঢ় ধূসর */
-    font-family: sans-serif; 
-    line-height: 1;
+content: '%';
+position: absolute;
+left: 50%;
+top: 50%;
+transform: translate(-50%, -50%);
+font-weight: 900;
+color: #ffffff;
+font-family: sans-serif;
+line-height: 1;
 }
 
-/* হেডারের আইকনটি একটু ছোট হবে */
 #headerCouponBtn i::after {
-    font-size: 7px;    
+font-size: 7px;
 }
 
-/* কার্ট পেজের আইকনটি একটু বড় হবে */
 .cart-section-header i::after {
-    font-size: 9px;    
+font-size: 9px;
 }
-/* ==========================================
-   UPDATED: COUPON CARD - Locked Left & Right
-   ========================================== */
+
 .coupon-new-card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:11px 13px;box-shadow:0 2px 8px rgba(0,0,0,.04);margin-bottom:10px;transition:box-shadow .2s}
-/* ==========================================
-   VIP / SPECIAL COUPON STYLE
-   ========================================== */
+
 .coupon-vip-card {
-    border: 2px solid #f59e0b !important; /* Golden Border */
-    background: linear-gradient(135deg, #fffbeb 0%, #fff 100%) !important;
-    position: relative;
-    overflow: hidden;
+border: 2px solid #f59e0b !important;
+background: linear-gradient(135deg, #fffbeb 0%, #fff 100%) !important;
+position: relative;
+overflow: hidden;
 }
 .coupon-vip-card::before {
-    content: 'for you';
-    position: absolute;
-    top: 10px;
-    right: -25px;
-    background: #f59e0b;
-    color: white;
-    font-size: 10px;
-    font-weight: 800;
-    padding: 2px 30px;
-    transform: rotate(45deg);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+content: 'for you';
+position: absolute;
+top: 10px;
+right: -25px;
+background: #f59e0b;
+color: white;
+font-size: 10px;
+font-weight: 800;
+padding: 2px 30px;
+transform: rotate(45deg);
+box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 .coupon-new-card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}
 
-/* Row 1: Absolute alignment (Code Left, Button Right) */
 .coupon-new-row1{display:flex;align-items:center;justify-content:space-between;width:100%}
 .coupon-new-code{min-width:100px;background:#ecfff1;border:1px solid #bfe8c9;border-radius:6px;text-align:center;font-size:14px;font-weight:700;color:#111;padding:5px 8px;letter-spacing:.5px;flex-shrink:0;margin-right:auto}
-.coupon-new-spacer{display:none} 
+.coupon-new-spacer{display:none}
 .coupon-new-apply{background:#111827;color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:11px;font-weight:600;cursor:pointer;transition:.2s;flex-shrink:0;white-space:nowrap;margin-left:auto}
 .coupon-new-apply:hover{background:#000}
 
-/* Row 2: Offer Badges (Centered, Smaller) */
 .coupon-new-offers{display:flex;flex-wrap:wrap;justify-content:center;gap:4px;margin-top:8px}
 .coupon-new-badge{display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:600;padding:2px 6px;border-radius:4px;white-space:nowrap;line-height:1.3}
 
-/* কন্টেন্ট না থাকলে ব্যাজটি পুরোপুরি গায়েব হয়ে যাবে */
-.coupon-new-badge:empty{display:none !important} 
+.coupon-new-badge:empty{display:none !important}
 
 .coupon-new-badge.disc{background:#e8f8ea;color:#16803c}
 .coupon-new-badge.del-partial{background:#ebf3ff;color:#2563eb}
@@ -396,16 +389,12 @@ src="https://www.facebook.com/tr?id=1526489362525698&ev=PageView&noscript=1"
 .coupon-new-row3{margin-top:7px;padding-top:7px;border-top:1px solid #f3f4f6;font-size:12px;color:#6b7280;text-align:center;line-height:1.7}
 .coupon-new-row3 strong{color:#374151}
 
-/* Applied State */
 .coupon-new-card.applied{border-color:#86efac;background:#f0fdf4}
 .coupon-new-card.applied .coupon-new-code{background:#bbf7d0;border-color:#86efac}
 .coupon-new-card.applied .coupon-new-apply{display:none}
 .coupon-new-applied-badge{display:none;align-items:center;gap:4px;background:#16a34a;color:#fff;font-size:11px;font-weight:600;padding:7px 11px;border-radius:8px;flex-shrink:0;margin-left:auto}
 .coupon-new-card.applied .coupon-new-applied-badge{display:flex}
 
-/* ==========================================
-   RECOMMENDATION CARDS
-   ========================================== */
 .rec-new-card{background:#fff;border:1px solid #d1fae5;border-radius:12px;padding:11px;display:flex;gap:10px;align-items:center;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.04);transition:.2s}
 .rec-new-card:hover{box-shadow:0 3px 10px rgba(0,0,0,.08)}
 .rec-new-img{width:54px;height:54px;border-radius:8px;object-fit:cover;border:1px solid #e5e7eb;flex-shrink:0;background:#f9fafb}
@@ -422,162 +411,151 @@ src="https://www.facebook.com/tr?id=1526489362525698&ev=PageView&noscript=1"
 .rec-new-btn.added{background:#16a34a;pointer-events:none}
 
 @media(max-width:380px){
-    .coupon-new-code{min-width:88px;font-size:12px;padding:4px 6px}
-    .coupon-new-badge{font-size:8px;padding:1px 5px;gap:2px}
-    .coupon-new-badge i{font-size:6px}
-    .coupon-new-apply{padding:6px 9px;font-size:10px}
-    .coupon-new-row2{gap:8px;font-size:10px}
+.coupon-new-code{min-width:88px;font-size:12px;padding:4px 6px}
+.coupon-new-badge{font-size:8px;padding:1px 5px;gap:2px}
+.coupon-new-badge i{font-size:6px}
+.coupon-new-apply{padding:6px 9px;font-size:10px}
+.coupon-new-row2{gap:8px;font-size:10px}
 }
 
-/* ভ্যারিয়েন্টের স্টাইল: নিচের লাইনে */
 .cart-variant-text {
-    margin-top: 2px;         /* নাম থেকে সামান্য দূরত্ব */
-    white-space: nowrap;      /* ভ্যারিয়েন্টও এক লাইনে */
-    color: var(--primary);   /* প্রাইমারি কালার */
-    font-weight: bold;
+margin-top: 2px;
+white-space: nowrap;
+color: var(--primary-color);
+font-weight: bold;
 }
-    </style>
-    
+</style>
 
 </head>
 <body class="bg-background text-gray-800 font-sans antialiased">
 
-    <!-- Skeleton Loader -->
-    <div id="skeletonLoader" class="fixed inset-0 bg-white z-50 flex flex-col h-screen overflow-y-auto no-scrollbar">
-        
-<!-- ১. হেডার (আপডেটেড: মাঝখানে লোগো, দুইপাশে ২টি করে আইকন) -->
-<div class="h-16 border-b border-gray-100 flex items-center px-4 shrink-0 bg-white relative">
-    
-    <!-- বাম পাশের ২টি আইকনের জায়গা -->
-    <div class="absolute left-4 flex items-center space-x-2">
-        <div class="w-8 h-8 bg-gray-200 rounded-full style-sweep"></div>
-        <div class="w-12 h-8 bg-gray-200 rounded-full style-sweep"></div>
-    </div>
-    
-    <!-- মাঝখানে লোগোর জায়গা -->
-    <div class="w-32 h-10 bg-gray-200 rounded-lg mx-auto style-sweep"></div>
-    
-    <!-- ডান পাশের ২টি আইকনের জায়গা -->
-    <div class="absolute right-4 flex items-center space-x-4">
-        <div class="w-8 h-8 bg-gray-200 rounded-full style-sweep"></div>
-        <div class="w-8 h-8 bg-gray-200 rounded-full style-sweep"></div>
-    </div>
-</div>
-        
-        <!-- ২. হিরো স্লাইডার -->
-        <div class="w-full h-64 bg-gray-200 shrink-0 style-sweep"></div>
-        
-        <!-- ৩. টপ ক্যাটাগরি (৪টি বড় বর্গাকার) -->
-        <div class="px-4 py-6 bg-white mt-4">
-            <div class="w-40 h-7 bg-gray-200 rounded-lg mb-6 mx-auto style-sweep"></div>
-            <div class="grid grid-cols-4 gap-3">
-                <div class="aspect-square bg-gray-200 rounded-2xl style-sweep"></div>
-                <div class="aspect-square bg-gray-200 rounded-2xl style-sweep"></div>
-                <div class="aspect-square bg-gray-200 rounded-2xl style-sweep"></div>
-                <div class="aspect-square bg-gray-200 rounded-2xl style-sweep"></div>
-            </div>
-        </div>
-        
-        <!-- ৪. ফিচার্ড প্রোডাক্ট (২টি কার্ড) -->
-        <div class="px-4 py-6 bg-white mt-4">
-            <div class="w-32 h-7 bg-gray-200 rounded-lg mb-6 mx-auto style-sweep"></div>
-            <div class="grid grid-cols-2 gap-3">
-                <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
-                    <div class="aspect-square bg-gray-200 rounded-xl mb-3 style-sweep"></div>
-                    <div class="h-4 bg-gray-200 rounded-md w-3/4 mb-3 style-sweep"></div>
-                    <div class="h-3 bg-gray-200 rounded-md w-1/2 mb-4 style-sweep"></div>
-                    <div class="h-10 bg-gray-200 rounded-lg w-full style-sweep"></div>
-                </div>
-                <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
-                    <div class="aspect-square bg-gray-200 rounded-xl mb-3 style-sweep"></div>
-                    <div class="h-4 bg-gray-200 rounded-md w-3/4 mb-3 style-sweep"></div>
-                    <div class="h-3 bg-gray-200 rounded-md w-1/2 mb-4 style-sweep"></div>
-                    <div class="h-10 bg-gray-200 rounded-lg w-full style-sweep"></div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- ৫. অল প্রোডাক্ট (৪টি কার্ড) -->
-        <div class="px-4 py-6 bg-white mt-4 mb-24">
-            <div class="w-40 h-7 bg-gray-200 rounded-lg mb-6 mx-auto style-sweep"></div>
-            <div class="grid grid-cols-2 gap-3">
-                <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
-                    <div class="aspect-square bg-gray-200 rounded-xl mb-3 style-sweep"></div>
-                    <div class="h-4 bg-gray-200 rounded-md w-3/4 mb-3 style-sweep"></div>
-                    <div class="h-3 bg-gray-200 rounded-md w-1/2 mb-4 style-sweep"></div>
-                    <div class="h-10 bg-gray-200 rounded-lg w-full style-sweep"></div>
-                </div>
-                <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
-                    <div class="aspect-square bg-gray-200 rounded-xl mb-3 style-sweep"></div>
-                    <div class="h-4 bg-gray-200 rounded-md w-3/4 mb-3 style-sweep"></div>
-                    <div class="h-3 bg-gray-200 rounded-md w-1/2 mb-4 style-sweep"></div>
-                    <div class="h-10 bg-gray-200 rounded-lg w-full style-sweep"></div>
-                </div>
-                <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
-                    <div class="aspect-square bg-gray-200 rounded-xl mb-3 style-sweep"></div>
-                    <div class="h-4 bg-gray-200 rounded-md w-3/4 mb-3 style-sweep"></div>
-                    <div class="h-3 bg-gray-200 rounded-md w-1/2 mb-4 style-sweep"></div>
-                    <div class="h-10 bg-gray-200 rounded-lg w-full style-sweep"></div>
-                </div>
-                <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
-                    <div class="aspect-square bg-gray-200 rounded-xl mb-3 style-sweep"></div>
-                    <div class="h-4 bg-gray-200 rounded-md w-3/4 mb-3 style-sweep"></div>
-                    <div class="h-3 bg-gray-200 rounded-md w-1/2 mb-4 style-sweep"></div>
-                    <div class="h-10 bg-gray-200 rounded-lg w-full style-sweep"></div>
-                </div>
-            </div>
-        </div>
-        
-    </div>
-    
-    <!-- Main App -->
-    <div id="app" class="hidden min-h-screen flex flex-col relative">
-        
-        <!-- Header -->
-<header class="sticky top-0 z-40 bg-white shadow-sm shrink-0">
-<div class="container mx-auto px-4 py-2 relative flex items-center justify-center">
-    
-    <!-- ========================================== -->
-    <!-- বাম পাশের আইকন (z-10 যোগ করা হয়েছে) -->
-    <!-- ========================================== -->
-    <div class="absolute left-4 z-10 flex items-center space-x-2">
-<!-- কুপন আইকন (ট্র্যাক অর্ডারের বদলে) -->
-<button onclick="goToCoupons()" id="headerCouponBtn" class="text-gray-600 hover:text-primary transition" title="View Offers">
-    <i class="fas fa-ticket-alt text-lg"></i>
-</button>
-        
-        <!-- ল্যাঙ্গুয়েজ টগল বাটন -->
-<button onclick="changeLanguage()" id="headerLangBtn" class="flex items-center gap-1 rounded-full px-2.5 py-1 transition text-gray-700 hover:text-primary">
-    <i class="fas fa-globe text-sm text-gray-500"></i>
-    <span id="headerLangText" class="text-[12px] font-bold">EN</span>
-</button>
-    </div>
-    <!-- ========================================== -->
+<!-- Skeleton Loader -->
+<div id="skeletonLoader" class="fixed inset-0 bg-white z-50 flex flex-col h-screen overflow-y-auto no-scrollbar" aria-hidden="true">
 
-    <!-- লোগো (মাঝখানে) -->
-    <div onclick="navigateTo('#home')" class="flex items-center cursor-pointer max-w-[60%]">
-        <img id="siteLogo" src="https://via.placeholder.com/150" alt="Logo" class="h-12 w-auto object-contain shrink-0 mx-auto" style="mix-blend-mode: multiply;">
-    </div>
-    
-    <!-- ডান পাশের আইকন (z-10 যোগ করা হয়েছে) -->
-    <div class="absolute right-4 z-10 flex items-center space-x-4">
-        <button onclick="toggleFilter()" class="text-gray-600 hover:text-primary transition"><i class="fas fa-filter text-lg"></i></button>
-        <button onclick="toggleSearch()" class="text-gray-600 hover:text-primary transition"><i class="fas fa-search text-lg"></i></button>
-    </div>
+<!-- ১. হেডার -->
+<div class="h-16 border-b border-gray-100 flex items-center px-4 shrink-0 bg-white relative">
+<div class="absolute left-4 flex items-center space-x-2">
+    <div class="w-8 h-8 bg-gray-200 rounded-full style-sweep"></div>
+    <div class="w-12 h-8 bg-gray-200 rounded-full style-sweep"></div>
 </div>
-            
-            <!-- NEW SEARCH BAR SNIPPET -->
-            <div id="searchBar" class="hidden border-t bg-white px-4 py-2 animate-fade-in absolute top-14 left-0 right-0 shadow-lg z-50">
-                <div class="relative">
-                    <input type="text" id="searchInput" placeholder="Search products..." class="w-full pl-10 pr-10 py-2 bg-gray-100 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary">
-                    <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
-                    <!-- FIXED: Changed onclick to toggleSearch to close bar -->
-                    <button onclick="toggleSearch()" class="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
-                </div>
-                <div id="searchResults" class="mt-2 max-h-64 overflow-y-auto bg-white rounded-lg hidden"></div>
+
+<div class="w-32 h-10 bg-gray-200 rounded-lg mx-auto style-sweep"></div>
+
+<div class="absolute right-4 flex items-center space-x-4">
+    <div class="w-8 h-8 bg-gray-200 rounded-full style-sweep"></div>
+    <div class="w-8 h-8 bg-gray-200 rounded-full style-sweep"></div>
+</div>
+
+</div>
+    <!-- ২. হিরো স্লাইডার -->
+    <div class="w-full h-64 bg-gray-200 shrink-0 style-sweep"></div>
+
+    <!-- ৩. টপ ক্যাটাগরি -->
+    <div class="px-4 py-6 bg-white mt-4">
+        <div class="w-40 h-7 bg-gray-200 rounded-lg mb-6 mx-auto style-sweep"></div>
+        <div class="grid grid-cols-4 gap-3">
+            <div class="aspect-square bg-gray-200 rounded-2xl style-sweep"></div>
+            <div class="aspect-square bg-gray-200 rounded-2xl style-sweep"></div>
+            <div class="aspect-square bg-gray-200 rounded-2xl style-sweep"></div>
+            <div class="aspect-square bg-gray-200 rounded-2xl style-sweep"></div>
+        </div>
+    </div>
+
+    <!-- ৪. ফিচার্ড প্রোডাক্ট -->
+    <div class="px-4 py-6 bg-white mt-4">
+        <div class="w-32 h-7 bg-gray-200 rounded-lg mb-6 mx-auto style-sweep"></div>
+        <div class="grid grid-cols-2 gap-3">
+            <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                <div class="aspect-square bg-gray-200 rounded-xl mb-3 style-sweep"></div>
+                <div class="h-4 bg-gray-200 rounded-md w-3/4 mb-3 style-sweep"></div>
+                <div class="h-3 bg-gray-200 rounded-md w-1/2 mb-4 style-sweep"></div>
+                <div class="h-10 bg-gray-200 rounded-lg w-full style-sweep"></div>
             </div>
-        </header>
-        
+            <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                <div class="aspect-square bg-gray-200 rounded-xl mb-3 style-sweep"></div>
+                <div class="h-4 bg-gray-200 rounded-md w-3/4 mb-3 style-sweep"></div>
+                <div class="h-3 bg-gray-200 rounded-md w-1/2 mb-4 style-sweep"></div>
+                <div class="h-10 bg-gray-200 rounded-lg w-full style-sweep"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ৫. অল প্রোডাক্ট -->
+    <div class="px-4 py-6 bg-white mt-4 mb-24">
+        <div class="w-40 h-7 bg-gray-200 rounded-lg mb-6 mx-auto style-sweep"></div>
+        <div class="grid grid-cols-2 gap-3">
+            <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                <div class="aspect-square bg-gray-200 rounded-xl mb-3 style-sweep"></div>
+                <div class="h-4 bg-gray-200 rounded-md w-3/4 mb-3 style-sweep"></div>
+                <div class="h-3 bg-gray-200 rounded-md w-1/2 mb-4 style-sweep"></div>
+                <div class="h-10 bg-gray-200 rounded-lg w-full style-sweep"></div>
+            </div>
+            <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                <div class="aspect-square bg-gray-200 rounded-xl mb-3 style-sweep"></div>
+                <div class="h-4 bg-gray-200 rounded-md w-3/4 mb-3 style-sweep"></div>
+                <div class="h-3 bg-gray-200 rounded-md w-1/2 mb-4 style-sweep"></div>
+                <div class="h-10 bg-gray-200 rounded-lg w-full style-sweep"></div>
+            </div>
+            <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                <div class="aspect-square bg-gray-200 rounded-xl mb-3 style-sweep"></div>
+                <div class="h-4 bg-gray-200 rounded-md w-3/4 mb-3 style-sweep"></div>
+                <div class="h-3 bg-gray-200 rounded-md w-1/2 mb-4 style-sweep"></div>
+                <div class="h-10 bg-gray-200 rounded-lg w-full style-sweep"></div>
+            </div>
+            <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                <div class="aspect-square bg-gray-200 rounded-xl mb-3 style-sweep"></div>
+                <div class="h-4 bg-gray-200 rounded-md w-3/4 mb-3 style-sweep"></div>
+                <div class="h-3 bg-gray-200 rounded-md w-1/2 mb-4 style-sweep"></div>
+                <div class="h-10 bg-gray-200 rounded-lg w-full style-sweep"></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Main App -->
+<div id="app" class="hidden min-h-screen flex flex-col relative" aria-live="polite">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-40 bg-white shadow-sm shrink-0">
+        <div class="container mx-auto px-4 py-2 relative flex items-center justify-center">
+
+            <!-- বাম পাশের আইকন -->
+            <div class="absolute left-4 z-10 flex items-center space-x-2">
+                <!-- কুপন আইকন -->
+                <button onclick="goToCoupons()" id="headerCouponBtn" class="text-gray-600 hover:text-primary transition" title="View Offers">
+                    <i class="fas fa-ticket-alt text-lg"></i>
+                </button>
+
+                <!-- ল্যাঙ্গুয়েজ টগল বাটন -->
+                <button onclick="changeLanguage()" id="headerLangBtn" class="flex items-center gap-1 rounded-full px-2.5 py-1 transition text-gray-700 hover:text-primary">
+                    <i class="fas fa-globe text-sm text-gray-500"></i>
+                    <span id="headerLangText" class="text-[12px] font-bold">EN</span>
+                </button>
+            </div>
+
+            <!-- লোগো (মাঝখানে) -->
+            <div onclick="navigateTo('#home')" class="flex items-center cursor-pointer max-w-[60%]">
+                <img id="siteLogo" src="https://via.placeholder.com/150" alt="SafaBoxbd Logo" class="h-12 w-auto object-contain shrink-0 mx-auto" style="mix-blend-mode: multiply;">
+            </div>
+
+            <!-- ডান পাশের আইকন -->
+            <div class="absolute right-4 z-10 flex items-center space-x-4">
+                <button onclick="toggleFilter()" class="text-gray-600 hover:text-primary transition"><i class="fas fa-filter text-lg"></i></button>
+                <button onclick="toggleSearch()" class="text-gray-600 hover:text-primary transition"><i class="fas fa-search text-lg"></i></button>
+            </div>
+        </div>
+
+        <!-- SEARCH BAR -->
+        <div id="searchBar" class="hidden border-t bg-white px-4 py-2 animate-fade-in absolute top-14 left-0 right-0 shadow-lg z-50">
+            <div class="relative">
+                <input type="text" id="searchInput" placeholder="Search products..." class="w-full pl-10 pr-10 py-2 bg-gray-100 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary">
+                <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                <button onclick="toggleSearch()" class="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="searchResults" class="mt-2 max-h-64 overflow-y-auto bg-white rounded-lg hidden"></div>
+        </div>
+    </header>
         <!-- Main Content -->
         <main id="content" class="flex-1 container mx-auto px-4 py-4"></main>
         
@@ -1368,7 +1346,7 @@ src="https://www.facebook.com/tr?id=1526489362525698&ev=PageView&noscript=1"
     // VERCEL/NETLIFY HOSTING HELPER (POLYFILL FOR GOOGLE.SCRIPT.RUN)
     // ============================================================
     // নিচে আপনার Google Apps Script-এর বর্তমান Web App URL-টি বসিয়ে দিন:
-    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwSg9Q2QubArS5xY2b00pZKgsIEBJ-DiVZxk88pYj94vdUgVr8pr5VxSBHj63BwdnlVAg/exec"; 
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxLYBY47zdC7iEqBq4c5wvH-vqVq3TTuMBCM3aZptxUWFUz_9MA-jxf1E3v-HrHR6Nb/exec"; 
 
 // ✅ সঠিক পলিফিল (Proxy Chain ভাঙে না, Handler আলাদা থাকে)
 if (typeof google === 'undefined' || !google.script) {
@@ -6695,9 +6673,9 @@ function searchProducts(query) {
             <footer class="bg-black text-white mt-8 pt-10 rounded-none -mx-4 mb-[-64px] pb-20 w-[calc(100%+32px)]">
                 <div class="container mx-auto px-5">
                     <div class="flex flex-col items-center justify-center text-center mb-8">
-   <img src="${s.sitelogo}" alt="Logo" class="h-16 mb-2 object-contain" style="filter: brightness(0) invert(1);"> 
-                       <!-- <h2 class="text-2xl font-bold mb-1 tracking-wide text-white" style="font-family: 'Bungee', cursive;">${s.sitename}</h2>-->
-                        <p class="text-gray-400 text-sm mb-4 max-w-md font-bold">${s.slogan || ''}</p>
+<img src="${s.sitelogo}" alt="Logo" class="h-14 mb-0 object-contain" style="filter: brightness(0) invert(1);"> 
+<!-- <h2>...</h2>-->
+<p class="text-gray-400 text-xs mb-3 max-w-sm font-bold leading-tight -mt-5">${s.slogan || ''}</p>
                         <div class="flex space-x-3">${socialIcons}</div>
                     </div>
                     
