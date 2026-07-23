@@ -6451,7 +6451,7 @@ function confirmLogout() {
         }
 
 // ==========================================
-// UPDATED FEATURE: Product Inquiry via WhatsApp (Format Matched)
+// UPDATED FEATURE: Product Inquiry via WhatsApp (Link Instead of Image)
 // ==========================================
 function openProductInquiry() {
     const pName = document.getElementById('productName').textContent;
@@ -6460,7 +6460,13 @@ function openProductInquiry() {
     const pDiscountPriceText = document.getElementById('productPrice').textContent; 
     
     const pStatus = document.getElementById('stockStatus').innerText;
-    const pImage = document.querySelector('#galleryContainer img')?.src || '';
+    
+    // ==========================================
+    // আপডেট: ইমেজের বদলে প্রোডাক্টের ওয়েবসাইট লিংক নেওয়া হচ্ছে
+    // ==========================================
+    const productLink = window.location.origin + window.location.pathname + window.location.hash;
+    // ==========================================
+
     const selectedVariant = appData.currentSelectedVariant;
 
     // ==========================================
@@ -6471,7 +6477,7 @@ function openProductInquiry() {
     let hasDiscount = false;
     let pSaveAmount = '';
 
-    // যদি রেগুলার প্রাইস এলিমেন্টটি দৃশ্যমান হয় (মানে ডিসকাউন্ট আছে)
+    // যদি রেগুলার প্রাইস এলিমেন্টটি দৃশ্যমান হয় (মানে ডিসকাউন্ট আছে)
     if (originalPriceEl && originalPriceEl.style.display !== 'none' && originalPriceEl.textContent.trim() !== '') {
         pRegularPriceText = originalPriceEl.textContent;
         hasDiscount = true;
@@ -6490,7 +6496,7 @@ function openProductInquiry() {
     // ==========================================
     // LABELS SETTING (BANGLA & ENGLISH)
     // ==========================================
-    let introText, nameText, regText, discText, saveText, statusText;
+    let introText, nameText, regText, discText, saveText, statusText, linkText;
 
     if (appData.language === 'bn') {
         introText = 'আমি এই পণ্যটি কিনতে চাই / পণ্যটি সম্পর্কে জিজ্ঞাসা করতে চাই';
@@ -6499,6 +6505,7 @@ function openProductInquiry() {
         discText = 'ডিসকাউন্ট মূল্য';
         saveText = 'আপনার সেভ হলো';
         statusText = 'স্ট্যাটাস';
+        linkText = 'পণ্যের লিংক';
     } else {
         introText = 'I WANT TO BUY THIS PRODUCT / ASK ABOUT THIS';
         nameText = 'Product Name';
@@ -6506,6 +6513,7 @@ function openProductInquiry() {
         discText = 'Discount Price';
         saveText = 'You Save';
         statusText = 'Status';
+        linkText = 'Product Link';
     }
     // ==========================================
 
@@ -6514,7 +6522,7 @@ function openProductInquiry() {
     msg += `*${nameText}* 👇\n${pName} ${selectedVariant ? `[${selectedVariant}]` : ''}\n`;
     msg += `━━━━━━━━━━━━━\n`;
     
-    // ১. সবসময় রেগুলার প্রাইস দেখাবে
+    // ১. সবসময় রেগুলার প্রাইস দেখাবে
     msg += `*${regText}:* ${pRegularPriceText}\n`;
     
     // ২. যদি ডিসকাউন্ট থাকে, তবে ডিসকাউন্ট প্রাইস এবং সেভিংস দেখাবে
@@ -6527,10 +6535,14 @@ function openProductInquiry() {
     
     msg += `*${statusText}:* ${pStatus} 📦\n`;
     
-    if(pImage) {
+    // ==========================================
+    // আপডেট: ইমেজের বদলে ক্লিকযোগ্য ওয়েবসাইট লিংক পাঠানো হচ্ছে
+    // ==========================================
+    if(productLink && productLink.includes('#product')) {
          msg += `━━━━━━━━━━━━━\n`;
-         msg += `🖼️ *Product Image:* \n${pImage}\n`;
+         msg += `🔗 *${linkText}:* \n${productLink}\n`;
     }
+    // ==========================================
     
     msg += `━━━━━━━━━━━━━\n`;
 
