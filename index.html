@@ -1808,13 +1808,16 @@ function instantScrollFix() {
             const cachedDataStr = localStorage.getItem('cached_app_data');
             const localVersion = localStorage.getItem('local_data_version');
 
-            // ১. ক্যাশ থাকলে দ্রুত দেখাও (স্কেলেটন সরাও)
+            // ১. পেজ দ্রুত লোড করার জন্য প্রথমে ক্যাশ থেকে রেন্ডার করা
             if (cachedDataStr) {
                 try {
                     const data = JSON.parse(cachedDataStr);
                     appData.settings = data.settings;
                     appData.categories = data.categories;
                     appData.products = data.products;
+                    // হোমপেজের জন্য ভারী ডাটা আলাদা করা হচ্ছে (localStorage-এ পুরো ডাটা আছে)
+                    const _hf1 = ['image2','image3','image4','image5','videourl','description'];
+                    appData.products = appData.products.map(p => { const l = {...p}; _hf1.forEach(f => delete l[f]); return l; });
                     appData.banners = data.banners;
                     appData.locations = data.locations;
                     appData.socialMedia = data.socialMedia;
@@ -1842,68 +1845,63 @@ function instantScrollFix() {
                 }
             }
 
-            // ২. ব্যাকগ্রাউন্ডে নতুন ডাটা চেক করো
+            // ২. একটি মাত্র রিকোয়েস্টে ডাটা + ভার্সন দুটোই আনা হচ্ছে
             const timestamp = new Date().getTime();
-            fetch(`${GAS_WEB_APP_URL}?action=getInitialData&t=${timestamp}`, { 
-                cache: "no-store" 
-            })
-            .then(response => response.json())
-            .then(res => {
-                if (!res.success) return;
-                
-                const serverVersion = res.serverVersion || '';
-                const needUpdate = !localVersion || localVersion !== serverVersion || !cachedDataStr;
-                
-                if (!needUpdate) return;
+            fetch(`${GAS_WEB_APP_URL}?action=getInitialData&t=${timestamp}`, { cache: "no-store" })
+                .then(response => response.json())
+                .then(res => {
+                    if (res.success) {
+                        const serverVersion = res.serverVersion;
 
-                console.log("New data loaded from server");
-                
-                localStorage.setItem('cached_app_data', JSON.stringify(res.data));
-                localStorage.setItem('local_data_version', serverVersion);
+                        // ভার্সন মিললে কিছু করবে না (ব্যান্ডউইথ বাঁচাবে)
+                        if (localVersion && localVersion === serverVersion && cachedDataStr) {
+                            return;
+                        }
 
-                appData.settings = res.data.settings;
-                appData.categories = res.data.categories;
-                appData.products = res.data.products;
-                appData.banners = res.data.banners;
-                appData.locations = res.data.locations;
-                appData.socialMedia = res.data.socialMedia;
-                appData.policies = res.data.policies;
-                appData.popups = res.data.popups;
-                appData.coupons = res.data.coupons || [];
-                appData.reviews = res.data.reviews;
+                        // নতুন ডাটা এবং ভার্সন লোকাল স্টোরেজে সেভ করা
+                        localStorage.setItem('cached_app_data', JSON.stringify(res.data));
+                        localStorage.setItem('local_data_version', serverVersion);
 
-                updateDOMWithSettings(appData.settings);
+                        // অ্যাপের ডাটা আপডেট করা
+                        appData.settings = res.data.settings;
+                        appData.categories = res.data.categories;
+                        appData.products = res.data.products;
+                        // হোমপেজের জন্য ভারী ডাটা আলাদা করা হচ্ছে (localStorage-এ পুরো ডাটা সেভ হয়েছে উপরে)
+                        const _hf2 = ['image2','image3','image4','image5','videourl','description'];
+                        appData.products = appData.products.map(p => { const l = {...p}; _hf2.forEach(f => delete l[f]); return l; });
+                        appData.banners = res.data.banners;
+                        appData.locations = res.data.locations;
+                        appData.socialMedia = res.data.socialMedia;
+                        appData.policies = res.data.policies;
+                        appData.popups = res.data.popups;
+                        appData.coupons = res.data.coupons || [];
+                        appData.reviews = res.data.reviews;
 
-                if (!cachedDataStr) {
-                    document.getElementById('skeletonLoader').classList.add('hidden');
-                    document.getElementById('app').classList.remove('hidden');
-                    document.getElementById('app').classList.add('flex');
-                    
-                    loadRoute(window.location.hash || '#home');
-                    updateCartBadge();
-                    updateOrderSummary();
-                    updateUIText();
-                    syncCartWithLivePrices();
-                    initFilterOptions();
-                    initPopupSystem();
-                } else {
-                    appData.computedPages = null;
-                    loadRoute(window.location.hash || '#home');
-                    updateCartBadge();
-                    updateOrderSummary();
-                    updateUIText();
-                    syncCartWithLivePrices();
-                    initFilterOptions();
-                    initPopupSystem();
-                }
-            })
-            .catch(err => {
-                console.error("Fetch error:", err);
-                if (!cachedDataStr) {
-                    Swal.fire('Connection Error', 'Could not load data.', 'error');
-                }
-            });
+                        updateDOMWithSettings(appData.settings);
+
+                        if (!cachedDataStr) {
+                            document.getElementById('skeletonLoader').classList.add('hidden');
+                            document.getElementById('app').classList.remove('hidden');
+                            document.getElementById('app').classList.add('flex');
+                        }
+
+                        appData.computedPages = null;
+                        loadRoute(window.location.hash || '#home');
+                        updateCartBadge();
+                        updateOrderSummary();
+                        updateUIText();
+                        syncCartWithLivePrices();
+                        initFilterOptions();
+                        initPopupSystem();
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    if (!cachedDataStr) Swal.fire('Connection Error', 'Could not load data.', 'error');
+                });
         }
+
+
         // ==========================================
         // NEW HELPER: UPDATE DOM ELEMENTS DYNAMICALLY
         // ==========================================
@@ -4935,7 +4933,16 @@ function loadProductDetails(id) {
     // OPTIMIZED LOGIC: LOCAL DATA FINDING (NO SERVER CALL)
     // ==========================================
     // সার্ভারে না গিয়ে appData থেকেই প্রোডাক্ট খুঁজে বের করা হচ্ছে
-    const p = appData.products.find(product => product.id == id);
+    let p = appData.products.find(product => product.id == id);
+    
+    // গোপন ক্যাশ (localStorage) থেকে পূর্ণ ডাটা এনে মার্জ করা হচ্ছে
+    try {
+        const _cd = localStorage.getItem('cached_app_data');
+        if (_cd && p) {
+            const _fp = JSON.parse(_cd).products.find(x => x.id == id);
+            if (_fp) p = {...p, ..._fp};
+        }
+    } catch(e) {}
 
     if (!p) {
         // যদি ডাটা না পাওয়া যায় (খুবই বিরল ক্ষেত্রে)
@@ -6680,7 +6687,7 @@ function searchProducts(query) {
                     
                     <div class="border-t border-gray-800 pt-6 text-center text-sm text-white font-bold">
                         &copy; ${year} ${s.sitename}. All rights reserved.
-                        <br>Developed by safabd team
+                        <br>Developed by safa team
                     </div>
                 </div>
             </footer>`;
